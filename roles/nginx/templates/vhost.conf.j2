@@ -2,7 +2,7 @@ server {
         server_name {{ ansible_fqdn }} www.{{ ansible_fqdn }};
 
         listen {{ ansible_default_ipv4.address }}:80;
-        listen {{ ansible_default_ipv6.address }}:80;
+        listen {{ ansible_all_ipv6_addresses }}:80;
 
         charset off;
         index index.php index.html;

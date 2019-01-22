@@ -7,7 +7,7 @@
   loop:
     - nginx
   when:
-      - ansible_facts['distribution'] == "Debian"
+      - ansible_facts['distribution'] == "Debian" or ansible_facts['distribution'] == "Ubuntu"
 
 - name: Install nginx and trivia on CentOS
   yum:
@@ -45,5 +45,8 @@
   file: state=directory path=/etc/nginx/vhosts/ mode=0755
 
 - name: Add nginx vhost config
-  template: src=nginx.demovhost.conf.j2 dest=/etc/nginx/vhosts/{{ vhost}}.conf mode=0644
+  template:
+    src=vhost.conf.j2
+    dest="/etc/nginx/vhosts/{{ ansible_fqdn }}.conf"
+    mode=0644
   notify: reload nginx
