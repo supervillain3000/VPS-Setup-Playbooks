@@ -20,12 +20,12 @@
 - name: add app db
   mysql_db:
     state: present
-    name: {{ ansible_hostname }}
+    name: "{{ ansible_hostname }}"
 
 - name: add db user
   mysql_user:
     state: present
-    name: {{ ansible_hostname }}
+    name: "{{ ansible_hostname }}"
     host: localhost
-    password: {{ ansible_hostname }}
+    password: "{{ ansible_hostname }}"
     priv: '{{ ansible_hostname }}.*:ALL'
