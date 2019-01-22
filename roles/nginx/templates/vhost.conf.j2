@@ -7,17 +7,14 @@ server {
         index index.php index.html;
 
         disable_symlinks if_not_owner from=$root_path;
-        include /etc/nginx/vhosts-includes/*.conf;
+
         access_log /var/log/nginx/{{ ansible_fqdn }}.access.log;
         error_log /var/log/nginx/{{ ansible_fqdn }}.error.log notice;
-        ssi on;
+
         set $root_path /var/www/{{ ansible_fqdn }};
         root $root_path;
 
-        if (!-e $request_filename ) {
-                rewrite ^(.*)$ /index.php?q=$1;
-        }
-
+        ## handler ##
         location ~ \.php$ {
                 fastcgi_index index.php;
                 fastcgi_param PHP_ADMIN_VALUE "sendmail_path = /usr/sbin/sendmail -t -i -f webmaster@{{ ansible_fqdn }}";
@@ -32,7 +29,7 @@ server {
         }
 
         location ~* \.(jpg|jpeg|gif|png|ico|css|zip|tgz|gz|rar|bz2|doc|xls|exe|pdf|ppt|txt|tar|mid|midi|wav|bmp|rtf|js|swf|flv|avi|djvu|mp3|mp4|ogv|3gp)$ {
-                root /var/www/www-root/data/www/{{ ansible_fqdn }}/;
+                root /var/www/{{ ansible_fqdn }}/;
                 expires 30d;
         }
 }
