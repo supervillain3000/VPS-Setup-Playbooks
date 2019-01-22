@@ -4,15 +4,14 @@ server {
         listen {{ ansible_default_ipv4.address }}:80;
         listen {{ ansible_all_ipv6_addresses }}:80;
 
-        charset off;
         index index.php index.html;
+
         disable_symlinks if_not_owner from=$root_path;
         include /etc/nginx/vhosts-includes/*.conf;
-        include /etc/nginx/vhosts-resources/{{ ansible_fqdn }}/*.conf;
-        access_log /var/www/httpd-logs/{{ ansible_fqdn }}.access.log;
-        error_log /var/www/httpd-logs/{{ ansible_fqdn }}.error.log notice;
+        access_log /var/log/nginx/{{ ansible_fqdn }}.access.log;
+        error_log /var/log/nginx/{{ ansible_fqdn }}.error.log notice;
         ssi on;
-        set $root_path /var/www/www-root/data/www/{{ ansible_fqdn }};
+        set $root_path /var/www/{{ ansible_fqdn }};
         root $root_path;
 
         if (!-e $request_filename ) {
