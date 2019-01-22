@@ -3,6 +3,7 @@
   apt: name={{ item }} state=latest update_cache=yes
   loop:
     - mysql-server
+    - python-mysqldb
 
 - name: change mysql bind-address
   lineinfile: path=/etc/mysql/mysql.conf.d/mysqld.cnf regexp='127\.0\.0\.1'
