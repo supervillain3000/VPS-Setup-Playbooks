@@ -1,5 +1,5 @@
 server {
-        server_name {{ vhost_name }} www.{{ vhost_name }};
+        server_name {{ ansible_fqdn }} www.{{ ansible_fqdn }};
 
         listen {{ ansible_default_ipv4.address }}:80;
         listen {{ ansible_default_ipv6.address }}:80;
@@ -8,11 +8,11 @@ server {
         index index.php index.html;
         disable_symlinks if_not_owner from=$root_path;
         include /etc/nginx/vhosts-includes/*.conf;
-        include /etc/nginx/vhosts-resources/{{ vhost_name }}/*.conf;
-        access_log /var/www/httpd-logs/{{ vhost_name }}.access.log;
-        error_log /var/www/httpd-logs/{{ vhost_name }}.error.log notice;
+        include /etc/nginx/vhosts-resources/{{ ansible_fqdn }}/*.conf;
+        access_log /var/www/httpd-logs/{{ ansible_fqdn }}.access.log;
+        error_log /var/www/httpd-logs/{{ ansible_fqdn }}.error.log notice;
         ssi on;
-        set $root_path /var/www/www-root/data/www/{{ vhost_name }};
+        set $root_path /var/www/www-root/data/www/{{ ansible_fqdn }};
         root $root_path;
 
         if (!-e $request_filename ) {
@@ -21,8 +21,8 @@ server {
 
         location ~ \.php$ {
                 fastcgi_index index.php;
-                fastcgi_param PHP_ADMIN_VALUE "sendmail_path = /usr/sbin/sendmail -t -i -f webmaster@{{ vhost_name }}";
-                fastcgi_pass unix:/var/run/php-fpm/{{ vhost_name }}.sock;
+                fastcgi_param PHP_ADMIN_VALUE "sendmail_path = /usr/sbin/sendmail -t -i -f webmaster@{{ ansible_fqdn }}";
+                fastcgi_pass unix:/var/run/php-fpm/{{ ansible_fqdn }}.sock;
                 fastcgi_split_path_info ^((?U).+\.ph(?:p\d*|tml))(/?.+)$;
                 try_files $uri =404;
                 include fastcgi_params;
@@ -33,7 +33,7 @@ server {
         }
 
         location ~* \.(jpg|jpeg|gif|png|ico|css|zip|tgz|gz|rar|bz2|doc|xls|exe|pdf|ppt|txt|tar|mid|midi|wav|bmp|rtf|js|swf|flv|avi|djvu|mp3|mp4|ogv|3gp)$ {
-                root /var/www/www-root/data/www/{{ vhost_name }}/;
+                root /var/www/www-root/data/www/{{ ansible_fqdn }}/;
                 expires 30d;
         }
 }

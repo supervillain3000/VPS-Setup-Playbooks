@@ -12,7 +12,7 @@
   service: name=mysql state=started enabled=yes
 
 - name: add app db
-  mysql_db: state=present name={{ db_name }}
+  mysql_db: state=present name={{ ansible_hostname }}
 
 - name: add db user
-  mysql_user: state=present name={{ db_user }} host={{ db_user_host }} password={{ db_user_pass }} priv='{{ db_name }}.*:ALL'
+  mysql_user: state=present name={{ ansible_hostname }} host=localhost password={{ ansible_hostname }} priv='{{ ansible_hostname }}.*:ALL'

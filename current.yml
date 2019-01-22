@@ -1,5 +1,5 @@
 ---
-- hosts: target
+- hosts: vps
   roles:
     - nginx
     - php-fpm

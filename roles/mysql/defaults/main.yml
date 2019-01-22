@@ -1,6 +1,2 @@
 ---
-vhost_name = mydomain.tld
-db_name = database1
-db_user = user1
-db_user_pass = password
-db_user_host = localhost
+#

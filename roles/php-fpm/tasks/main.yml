@@ -24,7 +24,7 @@
 
 - name: create pool for a virtual host
   template:
-    dest: /etc/php/{{ php_version }}/fpm/pool.d/{{ vhost_name }}.conf
+    dest: /etc/php/{{ php_version }}/fpm/pool.d/{{ ansible_fqdn }}.conf
     src: php-fpm_pool.j2
   notify: reload php-fpm
 
