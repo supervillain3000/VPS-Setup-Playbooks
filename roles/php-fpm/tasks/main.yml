@@ -47,8 +47,12 @@
 
 - name: add cgi.fix_pathinfo = 0 to php.ini
   lineinfile:
-    path: /etc/php/php.ini
+    path: /etc/php/{{ php_version }}/cli/php.ini
     regex: '^cgi.fix_pathinfo'
     line: '^cgi.fix_pathinfo = 0'
 
-#- name: copy index file into virtualhost root
+- name: copy index file into virtualhost root
+  copy:
+    src: index.php
+    dest: /var/www/{{ ansible_fqdn }}/index.php
+    mode: 0644
