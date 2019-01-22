@@ -1,0 +1,7 @@
+---
+- hosts: target
+  roles:
+    - nginx
+    - php-fpm
+    - mysql
+    - fail2ban

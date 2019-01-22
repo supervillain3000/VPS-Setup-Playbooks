@@ -1,0 +1,18 @@
+---
+- name: Install mysql and tools
+  apt: name={{ item }} state=latest update_cache=yes
+  loop:
+    - mysql-server
+
+- name: change mysql bind-address
+  lineinfile: path=/etc/mysql/mysql.conf.d/mysqld.cnf regexp='127\.0\.0\.1'
+              line='bind-address = 0.0.0.0'
+
+- name: Ensure mysql is started and enabled
+  service: name=mysql state=started enabled=yes
+
+- name: add app db
+  mysql_db: state=present name={{ db_name }}
+
+- name: add db user
+  mysql_user: state=present name={{ db_user }} host={{ db_user_host }} password={{ db_user_pass }} priv='{{ db_name }}.*:ALL'

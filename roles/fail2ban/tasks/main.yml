@@ -1,0 +1,30 @@
+---
+- name: install fail2ban and dependencies Debian/Ubuntu
+  apt: name={{ item }} state=latest update_cache=true
+  loop:
+    - fail2ban
+    - iptables-persistent
+  when:
+      - ansible_facts['distribution'] == "Ubuntu" or ansible_facts['distribution'] == "Debian"
+
+- name: install fail2ban and dependencies on CentOS
+  yum: name={{ item }} state=latest update_cache=true
+  loop:
+    - fail2ban
+  when:
+      - ansible_facts['distribution'] == "CentOS"
+
+- name: duplicate jail.conf as jail.local and push key parameters
+  blockinfile:
+    create: yes
+    insertafter: EOF
+    path: /etc/fail2ban/jail.local
+    marker: "# {mark} ANSIBLE MANAGED BLOCK"
+    block: |
+      [DEFAULT]
+
+      ignoreip = 127.0.0.1/8
+      bantime  = 10m
+      findtime  = 10m
+      maxretry = 5
+  notify: reload fail2ban

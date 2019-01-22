@@ -1,0 +1,4 @@
+---
+vhost_name = mydomain.tld
+php_version = 7.3
+php_modules = [curl, dom, dev, gd, mbstring, mysql, xml, zip]

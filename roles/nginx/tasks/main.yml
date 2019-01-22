@@ -1,0 +1,49 @@
+---
+- name: Install nginx and trivia on Debian/Ubuntu
+  apt:
+    name: "{{ item }}"
+    state: latest
+    update_cache: yes
+  loop:
+    - nginx
+  when:
+      - ansible_facts['distribution'] == "Debian"
+
+- name: Install nginx and trivia on CentOS
+  yum:
+    name: "{{ item }}"
+    state: latest
+    update_cache: yes
+    disable_gpg_check: yes
+  loop:
+    - epel-release
+    - nginx
+  when:
+      - ansible_facts['distribution'] == "CentOS"
+
+- name: Make sure nginx is started and enabled
+  service: name="{{ item }}" state=started enabled=yes
+  loop:
+    - nginx
+
+- name: Change nginx.conf file
+  copy: dest=/etc/nginx/nginx.conf src=nginx.conf owner=root group=root
+  notify: reload nginx
+
+- name: Add nginx conf.d configs
+  copy: dest=/etc/nginx/conf.d/{{ item }}.conf src=conf.d/{{ item }}.conf owner=root group=root
+  loop:
+    - 00-conn
+    - 01-gzip
+    - 02-proxy
+    - 03-timeout
+    - 04-ssl
+    - 05-open_file
+  notify: reload nginx
+
+- name: Create /etc/nginx/vhosts/
+  file: state=directory path=/etc/nginx/vhosts/ mode=0755
+
+- name: Add nginx vhost config
+  template: src=nginx.demovhost.conf.j2 dest=/etc/nginx/vhosts/{{ vhost}}.conf mode=0644
+  notify: reload nginx

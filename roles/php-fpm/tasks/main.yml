@@ -1,0 +1,35 @@
+---
+- name: install php-fpm
+  apt:
+    name: "php{{ php_version }}-fpm"
+    update_cache: yes
+    state: latest
+
+- name: ensure fpm is started and enabled
+  service:
+    name: "php{{ php_version }}-fpm"
+    state: started
+
+- name: install php modules
+  apt:
+    name: "php{{ php_version }}-{{ php_modules }}"
+    state: latest
+  notify: reload php-fpm
+
+- name: delete default pool file
+  file:
+    state: absent
+    path: /etc/php/{{ php_version }}/fpm/pool.d/www.conf
+  notify: reload php-fpm
+
+- name: create pool for a virtual host
+  template:
+    dest: /etc/php/{{ php_version }}/fpm/pool.d/{{ vhost_name }}.conf
+    src: php-fpm_pool.j2
+  notify: reload php-fpm
+
+- name: add cgi.fix_pathinfo = 0 to php.ini
+  lineinfile:
+    path: /etc/php/php.ini
+    regex: '^cgi.fix_pathinfo'
+    line: '^cgi.fix_pathinfo = 0'
