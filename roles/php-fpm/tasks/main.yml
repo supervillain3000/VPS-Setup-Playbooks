@@ -6,9 +6,12 @@
 
 - name: install php-fpm
   apt:
-    name: "php{{ php_version }}-fpm"
+    name: "{{ item }}"
     update_cache: yes
     state: latest
+  loop:
+    - php{{ php_version }}-fpm
+    - software-properties-common
 
 - name: ensure fpm is started and enabled
   service:
@@ -38,3 +41,5 @@
     path: /etc/php/php.ini
     regex: '^cgi.fix_pathinfo'
     line: '^cgi.fix_pathinfo = 0'
+
+#- name: copy index file into virtualhost root
