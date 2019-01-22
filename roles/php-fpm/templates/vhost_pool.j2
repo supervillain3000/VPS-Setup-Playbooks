@@ -1,4 +1,4 @@
-listen = /var/run/{{ vhost_name }}.sock
+listen = /var/run/{{ ansible_fqdn }}.sock
 
 listen.allowed_clients = 127.0.0.1
 
@@ -16,7 +16,7 @@ pm.min_spare_servers = 5
 pm.max_spare_servers = 7
 pm.max_requests = 300
 
-slowlog = /var/log/php-fpm/{{ vhost_name }}-slow.log
+slowlog = /var/log/php-fpm/{{ ansible_fqdn }}-slow.log
 
 catch_workers_output = yes
 
@@ -27,9 +27,9 @@ security.limit_extensions = .php .php3 .php4 .php5
 ;env[TMP] = /tmp
 ;env[TMPDIR] = /tmp
 ;env[TEMP] = /tmp
-;php_admin_value[sendmail_path] = /usr/sbin/sendmail -t -i -f admin@{{ vhost_name }}
+;php_admin_value[sendmail_path] = /usr/sbin/sendmail -t -i -f admin@{{ ansible_fqdn }}
 ;php_flag[display_errors] = off
-php_admin_value[error_log] = /var/log/php-fpm/{{ vhost_name }}-error.log
+php_admin_value[error_log] = /var/log/php-fpm/{{ ansible_fqdn }}-error.log
 php_admin_flag[log_errors] = on
 ;php_admin_value[memory_limit] = 128M
 php_value[session.save_handler] = files
