@@ -9,6 +9,8 @@
 # metadata_end
 #
 
+set -x
+
 LOG_PIPE=/tmp/log.pipe.$$
 mkfifo ${LOG_PIPE}
 LOG_FILE=/root/recipe.log
