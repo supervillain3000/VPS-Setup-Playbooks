@@ -8,7 +8,7 @@
 - name: install php-fpm
   yum:
     name: php-fpm
-    enablerepo: remi-php73
+    enablerepo: remi-php72
     update_cache: yes
     state: latest
 
@@ -21,7 +21,7 @@
   yum:
     name: php-{{ item }}
     state: latest
-    enablerepo: remi-php73
+    enablerepo: remi-php72
   loop:
     - curl
     - dom
