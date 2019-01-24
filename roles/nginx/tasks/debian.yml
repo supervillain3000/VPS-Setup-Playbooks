@@ -32,9 +32,9 @@
 - name: Add nginx vhost config
   template:
     src=vhost.conf.j2
-    dest="/etc/nginx/vhosts/{{ ansible_nodename }}.conf"
+    dest="/etc/nginx/vhosts/{{ vhost }}.conf"
     mode=0644
   notify: reload nginx
 
 - name: Create /var/www/ vhost subdir
-  file: state=directory path=/var/www/{{ ansible_nodename }}/ mode=0755
+  file: state=directory path=/var/www/{{ vhost }}/ mode=0755

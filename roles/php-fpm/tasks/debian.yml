@@ -37,7 +37,7 @@
 
 - name: create pool for a virtual host
   template:
-    dest: /etc/php/{{ php_version }}/fpm/pool.d/{{ ansible_nodename }}.conf
+    dest: /etc/php/{{ php_version }}/fpm/pool.d/{{ vhost }}.conf
     src: vhost_pool_debian.j2
   notify: reload debian php-fpm
 
@@ -51,5 +51,5 @@
 - name: copy index file into virtualhost root
   copy:
     src: index.php
-    dest: /var/www/{{ ansible_nodename }}/index.php
+    dest: /var/www/{{ vhost }}/index.php
     mode: 0644

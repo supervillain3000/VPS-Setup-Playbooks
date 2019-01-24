@@ -31,7 +31,7 @@
 
 - name: create pool for a virtual host
   template:
-    dest: /etc/php-fpm.d/{{ ansible_nodename }}.conf
+    dest: /etc/php-fpm.d/{{ vhost }}.conf
     src: vhost_pool_centos.j2
   notify: reload centos php-fpm
 
@@ -50,5 +50,5 @@
 - name: copy index file into virtualhost root
   copy:
     src: index.php
-    dest: /var/www/{{ ansible_nodename }}/index.php
+    dest: /var/www/{{ vhost }}/index.php
     mode: 0644

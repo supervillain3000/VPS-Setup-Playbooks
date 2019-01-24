@@ -1,15 +1,15 @@
 <VirtualHost 127.0.0.1:8080 >
-	ServerName "{{ ansible_nodename }}"
-	ServerAlias "www.{{ ansible_nodename }}"
-	ServerAdmin "admin@{{ ansible_nodename }}"
+	ServerName "{{ vhost }}"
+	ServerAlias "www.{{ vhost }}"
+	ServerAdmin "admin@{{ vhost }}"
 	UseCanonicalName Off
 
-	DocumentRoot "/var/www/{{ ansible_nodename }}"
-	ErrorLog "/var/log/httpd/{{ ansible_nodename }}_error.log"
+	DocumentRoot "/var/www/{{ vhost }}"
+	ErrorLog "/var/log/httpd/{{ vhost }}_error.log"
 
 	DirectoryIndex "index.html" "index.php" "index.xhtml" "index.htm" "index.shtml"
 
-	<Directory /var/www/{{ ansible_nodename }}>
+	<Directory /var/www/{{ vhost }}>
 		AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,FollowSymLinks,ExecCGI,Includes,IncludesNOEXEC
 	</Directory>
 
