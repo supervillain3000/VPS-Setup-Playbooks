@@ -1,3 +1,3 @@
 ---
 php_version: 7.3
-php_modules: [php-dom, php-devel, php-gd, php-mbstring, php-mysql, php-xml, php-zip, php-soap, php-pecl-imagick, php-pdo, php-mcrypt, php-opcache]
+php_modules: ['php-dom', 'php-devel', 'php-gd', 'php-mbstring', 'php-mysql', 'php-xml', 'php-zip', 'php-soap', 'php-pecl-imagick', 'php-pdo', 'php-mcrypt', 'php-opcache']
