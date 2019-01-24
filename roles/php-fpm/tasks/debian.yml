@@ -19,27 +19,27 @@
   apt:
     name: php7.3-{{ php_modules_u }}
     state: latest
-  notify: reload php-fpm
+  notify: reload debian php-fpm
   when: php_version == '7.3'
 
 - name: install php modules 5.6
   apt:
     name: php5.6-{{ php_modules_u }}
     state: latest
-  notify: reload php-fpm
+  notify: reload debian php-fpm
   when: php_version == '5.6'
 
 - name: delete default pool file
   file:
     state: absent
     path: /etc/php/{{ php_version }}/fpm/pool.d/www.conf
-  notify: reload php-fpm
+  notify: reload debian php-fpm
 
 - name: create pool for a virtual host
   template:
     dest: /etc/php/{{ php_version }}/fpm/pool.d/{{ ansible_nodename }}.conf
     src: vhost_pool_debian.j2
-  notify: reload php-fpm
+  notify: reload debian php-fpm
 
 - name: add cgi.fix_pathinfo = 0 to php.ini
   lineinfile:
