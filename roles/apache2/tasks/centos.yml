@@ -1,0 +1,18 @@
+---
+- name: install httpd
+  yum:
+    name: httpd
+    state: latest
+    update_cache: yes
+
+- name: ensure httpd is started and enabled
+  service:
+    name: httpd
+    state: started
+    enabled: yes
+
+- name: delete default config file symlink
+  copy:
+    content: '; disabled, use separate vhost configs'
+    dest: /etc/httpd/sites-enabled/000-default.conf
+  notify: restart httpd
