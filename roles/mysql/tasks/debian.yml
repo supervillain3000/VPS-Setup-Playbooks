@@ -1,15 +1,19 @@
 ---
 - name: Install mysql and tools
-  apt: name={{ item }} state=latest update_cache=yes
-  loop:
-    - mysql-server
-    - python-mysqldb
+  apt:
+    state: latest
+    update_cache: yes
+    name: "{{ mysql_packages }}"
+    vars:
+      mysql_packages:
+      - mysql-server
+      - python-mysqldb
 
 - name: change mysql bind-address
   lineinfile:
     path: /etc/mysql/mysql.conf.d/mysqld.cnf
     regexp: '127\.0\.0\.1'
-    line: 'bind-address = 0.0.0.0'
+    line: 'bind-address = 127.0.0.1'
 
 - name: Ensure mysql is started and enabled
   service:
