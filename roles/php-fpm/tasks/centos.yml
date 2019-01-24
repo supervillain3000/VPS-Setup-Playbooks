@@ -18,7 +18,7 @@
 
 - name: install php modules
   yum:
-    name: php-{{ php_modules }}
+    name: {{ php_modules }}
     state: latest
     enablerepo: remi-php72
 
