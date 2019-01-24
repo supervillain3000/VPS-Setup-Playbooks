@@ -16,7 +16,7 @@
 
 - name: change mysql bind-address
   lineinfile:
-    path: /etc/mysql/mysql.conf.d/mysqld.cnf
+    path: /etc/my.cnf.d/server.cnf
     regexp: '^#bind-address'
     line: 'bind-address = 0.0.0.0'
 
