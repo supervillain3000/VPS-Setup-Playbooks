@@ -1,10 +1,14 @@
 ---
 - name: add remi repository
-  yum_repository:
-    name: remi
-    description: Remi RPM repository
-    #baseurl: https://rpms.remirepo.net/enterprise/remi.repo
-    baseurl: http://rpms.remirepo.net/enterprise/remi-release-7.rpm
+  yum:
+    name: http://rpms.remirepo.net/enterprise/remi-release-7.rpm
+    state: present
+
+#- name: add remi repository
+#  yum_repository:
+#    name: remi
+#    description: Remi RPM repository
+#    baseurl: http://rpms.remirepo.net/enterprise/remi-release-7.rpm
 
 - name: install php-fpm
   yum:
