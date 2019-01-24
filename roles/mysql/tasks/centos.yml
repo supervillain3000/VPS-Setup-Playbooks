@@ -11,7 +11,7 @@
   vars:
     mysql_packages:
     - mariadb
-    - python-mysqldb
+    - MySQL-python
 
 - name: change mysql bind-address
   lineinfile:
