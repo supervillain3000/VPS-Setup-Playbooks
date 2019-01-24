@@ -4,7 +4,6 @@
     name: nginx
     state: latest
     update_cache: yes
-    disable_gpg_check: yes
 
 - name: Make sure nginx is started and enabled
   service:
