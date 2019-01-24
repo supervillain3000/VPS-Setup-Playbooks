@@ -20,17 +20,8 @@
 
 - name: install php modules
   apt:
-    name: php{{ php_version }}-{{ item }}
+    name: php{{ php_version }}-{{ php_modules_u }}
     state: latest
-  loop:
-    - curl
-    - dom
-    - dev
-    - gd
-    - mbstring
-    - mysql
-    - xml
-    - zip
   notify: reload php-fpm
 
 - name: delete default pool file
