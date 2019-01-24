@@ -16,3 +16,15 @@
     content: '; disabled, use separate vhost configs'
     dest: /etc/httpd/sites-enabled/000-default.conf
   notify: restart httpd
+
+- name: add vhost config
+  template:
+    src: vhost.j2
+    dest: /etc/httpd/conf.d/{{ vhost }}.conf
+  notify: restart httpd
+
+- name: copy index file into virtualhost root
+  copy:
+    src: index.php
+    dest: /var/www/{{ vhost }}/index.php
+    mode: 0644

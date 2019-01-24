@@ -1,15 +1,30 @@
 ---
-- name: Install apache2
-  apt:
+- name: install apache2
+  yum:
     name: apache2
     state: latest
     update_cache: yes
 
-- name: Ensure apache2 is started and enabled
-  service: name=apache2 state=started enabled=yes
+- name: ensure apache2 is started and enabled
+  service:
+    name: apache2
+    state: started
+    enabled: yes
 
-- name: Delete default config file symlink
+- name: delete default config file symlink
   copy:
     content: '; disabled, use separate vhost configs'
     dest: /etc/apache2/sites-enabled/000-default.conf
   notify: restart apache2
+
+- name: add vhost config
+  template:
+    src: vhost.j2
+    dest: /etc/apache2/conf.d/{{ vhost }}.conf
+  notify: restart apache2
+
+- name: copy index file into virtualhost root
+  copy:
+    src: index.php
+    dest: /var/www/{{ vhost }}/index.php
+    mode: 0644

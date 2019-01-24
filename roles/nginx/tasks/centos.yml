@@ -39,3 +39,13 @@
 
 - name: Create /var/www/ vhost subdir
   file: state=directory path=/var/www/{{ vhost }}/ mode=0755
+
+- name: Enable http(s) on firewall-cmd
+  firewalld:
+    service: "{{ item }}"
+    state: enabled
+    permanent: yes
+    zone: public
+  loop:
+    - http
+    - https
