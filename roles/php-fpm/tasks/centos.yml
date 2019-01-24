@@ -18,23 +18,10 @@
 
 - name: install php modules
   yum:
-    name: php-{{ item }}
+    name: php-{{ php_modules }}
     state: latest
     enablerepo: remi-php72
-  loop:
-    - curl
-    - dom
-    - devel
-    - gd
-    - mbstring
-    - mysql
-    - xml
-    - zip
-    - soap
-    - pecl-imagick
-    - pdo
-    - mcrypt
-    - opcache
+
   notify: reload php-fpm
 
 - name: clear default pool file
@@ -50,10 +37,16 @@
   notify: reload php-fpm
 
 - name: add cgi.fix_pathinfo = 0 to php.ini
-  lineinfile:
-    path: /etc/php/{{ php_version }}/cli/php.ini
-    regex: '^cgi.fix_pathinfo'
-    line: '^cgi.fix_pathinfo = 0'
+  ini_file:
+    path: /etc/php.ini
+    section: PHP
+    option: cgi.fix_pathinfo
+    value: 0
+
+  #lineinfile:
+  #  path: /etc/php.ini
+  #  regex: '^cgi.fix_pathinfo'
+  #  line: '^cgi.fix_pathinfo = 0'
 
 - name: copy index file into virtualhost root
   copy:
