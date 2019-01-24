@@ -1,12 +1,16 @@
 ---
-- name: Install mysql and tools
+- name: add mariadb repo
+  yum_repository:
+    name: MariaDB
+    description: MariaDB 10.3 CentOS
+    baseurl: http://yum.mariadb.org/10.3/centos7-amd64
+
+- name: install mariadb and trivia
   yum:
     name: "{{ mysql_packages }}"
-    state: latest
-    update_cache: yes
   vars:
     mysql_packages:
-    - mysql-server
+    - mariadb
     - python-mysqldb
 
 - name: change mysql bind-address
