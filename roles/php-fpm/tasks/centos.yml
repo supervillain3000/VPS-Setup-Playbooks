@@ -30,6 +30,12 @@
     - mysql
     - xml
     - zip
+    - soap
+    - pecl-imagick
+    - pdo
+    - mcrypt
+    - mysqlnd
+    - opcache
   notify: reload php-fpm
 
 - name: clear default pool file
