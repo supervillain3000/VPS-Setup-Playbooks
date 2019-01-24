@@ -4,6 +4,7 @@
     name: MariaDB
     description: MariaDB 10.3 CentOS
     baseurl: http://yum.mariadb.org/10.3/centos7-amd64
+    gpgkey: https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
 
 - name: install mariadb and trivia
   yum:
