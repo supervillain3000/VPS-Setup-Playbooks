@@ -17,7 +17,7 @@
 - name: change mysql bind-address
   lineinfile:
     path: /etc/mysql/mysql.conf.d/mysqld.cnf
-    regexp: '127\.0\.0\.1'
+    regexp: '^#bind-address'
     line: 'bind-address = 0.0.0.0'
 
 - name: Ensure mysql is started and enabled
