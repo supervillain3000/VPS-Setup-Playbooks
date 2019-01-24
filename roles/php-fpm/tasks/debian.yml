@@ -6,12 +6,9 @@
 
 - name: install php-fpm
   apt:
-    name: "{{ item }}"
+    name: php{{ php_version }}-fpm
     update_cache: yes
     state: latest
-  loop:
-    - php{{ php_version }}-fpm
-    - software-properties-common
 
 - name: ensure fpm is started and enabled
   service:
