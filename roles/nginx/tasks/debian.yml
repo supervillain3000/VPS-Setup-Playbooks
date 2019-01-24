@@ -1,16 +1,15 @@
 ---
-- name: Install nginx and trivia on Debian/Ubuntu
+- name: Install nginx and trivia
   apt:
-    name: "{{ item }}"
+    name: nginx
     state: latest
     update_cache: yes
-  loop:
-    - nginx
 
 - name: Make sure nginx is started and enabled
-  service: name="{{ item }}" state=started enabled=yes
-  loop:
-    - nginx
+  service:
+    name: nginx
+    state: started
+    enabled: yes
 
 - name: Change nginx.conf file
   copy: dest=/etc/nginx/nginx.conf src=nginx_debian.conf owner=root group=root

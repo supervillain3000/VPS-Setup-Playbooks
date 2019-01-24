@@ -1,18 +1,16 @@
 ---
-- name: Install nginx and trivia on CentOS
+- name: Install nginx and trivia
   yum:
-    name: "{{ item }}"
+    name: nginx
     state: latest
     update_cache: yes
     disable_gpg_check: yes
-  loop:
-    - epel-release
-    - nginx
 
 - name: Make sure nginx is started and enabled
-  service: name="{{ item }}" state=started enabled=yes
-  loop:
-    - nginx
+  service:
+    name: nginx
+    state: started
+    enabled: yes
 
 - name: Change nginx.conf file
   copy: dest=/etc/nginx/nginx.conf src=nginx_centos.conf owner=root group=root
