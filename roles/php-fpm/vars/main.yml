@@ -1,2 +1,2 @@
 ---
-php_modules: [mysql, curl, gd, intl, pear, imagick, imap, mcrypt, memcache, memcache, recode, sqlite3, tidy, xmlrpc, xsl, mbstring]
+#php_modules: [mysql, curl, gd, intl, pear, imagick, imap, mcrypt, memcache, memcache, recode, sqlite3, tidy, xmlrpc, xsl, mbstring]
