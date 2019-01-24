@@ -1,7 +1,11 @@
 ---
 - name: Install mysql and tools
-  yum: name={{ item }} state=latest update_cache=yes
-  loop:
+  yum:
+    name: "{{ mysql_packages }}"
+    state: latest
+    update_cache: yes
+  vars:
+    mysql_packages:
     - mysql-server
     - python-mysqldb
 
