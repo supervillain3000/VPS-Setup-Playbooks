@@ -1,0 +1,41 @@
+---
+- name: Install nginx and trivia on Debian/Ubuntu
+  apt:
+    name: "{{ item }}"
+    state: latest
+    update_cache: yes
+  loop:
+    - nginx
+
+- name: Make sure nginx is started and enabled
+  service: name="{{ item }}" state=started enabled=yes
+  loop:
+    - nginx
+
+- name: Change nginx.conf file
+  copy: dest=/etc/nginx/nginx.conf src=nginx_debian.conf owner=root group=root
+  notify: reload nginx
+
+- name: Add nginx conf.d configs
+  copy: dest=/etc/nginx/conf.d/{{ item }}.conf src=conf.d/{{ item }}.conf owner=root group=root
+  loop:
+    - 00-conn
+    - 01-gzip
+    - 02-proxy
+    - 03-timeout
+    - 04-ssl
+    - 05-open_file
+  notify: reload nginx
+
+- name: Create /etc/nginx/vhosts/
+  file: state=directory path=/etc/nginx/vhosts/ mode=0755
+
+- name: Add nginx vhost config
+  template:
+    src=vhost.conf.j2
+    dest="/etc/nginx/vhosts/{{ ansible_nodename }}.conf"
+    mode=0644
+  notify: reload nginx
+
+- name: Create /var/www/ vhost subdir
+  file: state=directory path=/var/www/{{ ansible_nodename }}/ mode=0755

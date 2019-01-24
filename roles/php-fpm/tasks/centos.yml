@@ -1,27 +1,27 @@
 ---
-- name: add ppa:ondrej/php
-  apt_repository:
-    update_cache: yes
-    repo: ppa:ondrej/php
+- name: add remi repository
+  yum_repository:
+    name: remi
+    description: Remi RPM repository
+    baseurl: https://rpms.remirepo.net/enterprise/remi.repo
 
 - name: install php-fpm
-  apt:
-    name: "{{ item }}"
+  yum:
+    name: php-fpm
+    enablerepo: remi-php73
     update_cache: yes
     state: latest
-  loop:
-    - php{{ php_version }}-fpm
-    - software-properties-common
 
 - name: ensure fpm is started and enabled
   service:
-    name: "php{{ php_version }}-fpm"
+    name: "php-fpm"
     state: started
 
 - name: install php modules
-  apt:
-    name: php{{ php_version }}-{{ item }}
+  yum:
+    name: php-{{ item }}
     state: latest
+    enablerepo: remi-php73
   loop:
     - curl
     - dom
@@ -35,14 +35,13 @@
 
 - name: delete default pool file
   file:
-    state: absent
-    path: /etc/php/{{ php_version }}/fpm/pool.d/www.conf
+    shell: > /etc/php-fpm.d/www.conf
   notify: reload php-fpm
 
 - name: create pool for a virtual host
   template:
-    dest: /etc/php/{{ php_version }}/fpm/pool.d/{{ ansible_nodename }}.conf
-    src: vhost_pool_debian.j2
+    dest: /etc/php-fpm.d/{{ ansible_nodename }}.conf
+    src: vhost_pool_centos.j2
   notify: reload php-fpm
 
 - name: add cgi.fix_pathinfo = 0 to php.ini
