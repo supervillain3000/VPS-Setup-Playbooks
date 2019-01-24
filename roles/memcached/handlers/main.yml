@@ -1,2 +1,5 @@
 ---
-# handlers file for playbooks/roles/memcached
+- name: restart memcached
+  service:
+    name: memcached
+    state: restarted

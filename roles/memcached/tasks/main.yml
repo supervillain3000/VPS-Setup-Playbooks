@@ -15,3 +15,12 @@
 
 - name: additional check
   shell: echo "stats settings" | nc localhost 11211
+
+- name: Start daemon on 127.0.0.1 only
+  lineinfile: dest=/etc/sysconfig/memcached regexp='^OPTIONS=' line='OPTIONS="-l 127.0.0.1"' state=present
+  notify: restart memcached
+
+- name: Set memcached memory
+  lineinfile: dest=/etc/sysconfig/memcached regexp='^CACHESIZE=' line='CACHESIZE="{{ memcached_memory }}"' state=present
+  notify: restart memcached
+  when: memcached_memory is defined
