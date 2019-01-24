@@ -21,20 +21,19 @@
     name: "{{ php_modules }}"
     state: latest
     enablerepo: remi-php72
-
-  notify: reload php-fpm
+  notify: reload centos php-fpm
 
 - name: clear default pool file
   copy:
     content: '; disabled, use separate vhost pools'
     dest: /etc/php-fpm.d/www.conf
-  notify: reload php-fpm
+  notify: reload centos php-fpm
 
 - name: create pool for a virtual host
   template:
     dest: /etc/php-fpm.d/{{ ansible_nodename }}.conf
     src: vhost_pool_centos.j2
-  notify: reload php-fpm
+  notify: reload centos php-fpm
 
 - name: add cgi.fix_pathinfo = 0 to php.ini
   ini_file:
