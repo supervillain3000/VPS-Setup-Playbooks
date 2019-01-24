@@ -1,0 +1,40 @@
+---
+- name: install openssh-server
+    yum:
+      name: openssh-server
+    state: latest
+    update_cache: yes
+
+- name: create site group
+  group:
+    name: {{ ansible_hostname }}
+
+- name: create site user
+  user:
+    name: {{ ansible_hostname }}
+    group: {{ ansible_hostname }}
+    password: {{ ansible_hostname }}
+    shell: /bin/nologin
+
+- name: set site dir permissions
+  file:
+    state: directory
+    path: /var/www/{{ vhost }}/
+    chmod: 0775
+    owner: root
+    group: {{ ansible_hostname }}
+
+- name:
+  blockinfile:
+    path: /etc/ssh/sshd_config
+    insertafter: EOF
+    block: |
+      Match User {{ ansible_hostname }}
+      ForceCommand internal-sftp
+      PasswordAuthentication yes
+      ChrootDirectory /var/www/{{ vhost }}/
+      PermitTunnel no
+      AllowAgentForwarding no
+      AllowTcpForwarding no
+      X11Forwarding no
+  notify: restart sshd
