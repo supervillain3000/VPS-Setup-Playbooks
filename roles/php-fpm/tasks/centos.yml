@@ -34,15 +34,13 @@
     - pecl-imagick
     - pdo
     - mcrypt
-    - mysqlnd
     - opcache
   notify: reload php-fpm
 
 - name: clear default pool file
-  lineinfile:
-    state: absent
-    regexp: '*'
-    path: /etc/php-fpm.d/www.conf
+  copy:
+    content: '; disabled, use separate vhost pools'
+    dest: /etc/php-fpm.d/www.conf
   notify: reload php-fpm
 
 - name: create pool for a virtual host
