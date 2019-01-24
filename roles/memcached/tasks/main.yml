@@ -1,0 +1,17 @@
+---
+- name: install memcached
+  apt:
+    name: "{{ items }}"
+    update_cache: yes
+  loop:
+    - php{{ php_version }}-memcached
+    - memcached
+
+- name: check if memcached is started and enabled
+  service:
+    name: memcached
+    state: started
+    enabled: yes
+
+- name: additional check
+  shell: echo "stats settings" | nc localhost 11211
