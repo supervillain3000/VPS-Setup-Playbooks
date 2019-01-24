@@ -1,0 +1,54 @@
+---
+- name: install proftpd and trivia
+    apt:
+      name: proftpd
+    state: latest
+    update_cache: yes
+
+- name: check if proftpd is started and enabled
+  service:
+    name: proftpd
+    state: started
+    enabled: yes
+
+- name: enable ftp on ufw
+  ufw:
+    rule: allow
+    port: ftp
+    proto: tcp
+
+- name: create site group
+  group:
+    name: {{ ansible_hostname }}
+
+- name: create site user
+  user:
+    name: {{ ansible_hostname }}
+    group: {{ ansible_hostname }}
+    password: {{ ansible_hostname }}
+    shell: /bin/bash
+
+- name: change ftp server name
+  lineinfile:
+    path: /etc/proftpd/proftpd.conf
+    regexp: '^ServerName'
+    line: 'ServerName        FTP_{{ ansible_hostname }}'
+  notify: restart proftpd
+
+- name: change chroot to vhost dir
+  lineinfile:
+    path: /etc/proftpd/proftpd.conf
+    regexp: '^# DefaultRoot'
+    line: 'DefaultRoot    /var/www/{{ vhost }}    {{ ansible_hostname }}'
+  notify: restart proftpd
+
+- name: change chroot to vhost dir
+  lineinfile:
+    path: /etc/proftpd/proftpd.conf
+    regexp: '^# RequireValidShell'
+    line: 'RequireValidShell        off'
+  notify: restart proftpd
+  
+# TODO
+# Generate secure password for user
+# randopass mkpasswd --method=sha-512
