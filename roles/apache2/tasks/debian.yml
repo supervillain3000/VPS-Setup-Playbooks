@@ -1,4 +1,9 @@
 ---
+- name: add ppa:ondrej/php
+  apt_repository:
+    update_cache: yes
+    repo: ppa:ondrej/php
+
 - name: install apache2
   yum:
     name: apache2
