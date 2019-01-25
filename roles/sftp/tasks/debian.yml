@@ -17,6 +17,7 @@
     non_unique: yes
     password: "{{ lookup('password', '/root/password.sftp chars=ascii_letters,digits,hexdigits length=15') | password_hash('sha512') }}"
     shell: /usr/sbin/nologin
+    home: /var/www/{{ vhost }}/
 
 #- name: set site dir permissions
 #  file:
