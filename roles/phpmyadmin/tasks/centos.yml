@@ -37,7 +37,7 @@
   template:
     src: pma_centos_nginx.conf
     dest: /etc/nginx/conf.d/phpmyadmin.conf
-  notify: reload nginx
+  notify: restart nginx
   when: php_fpm_status.stat.exists
 
 - name: add http auth for pma
