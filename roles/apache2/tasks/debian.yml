@@ -12,13 +12,14 @@
 
 - name: clear default config file
   copy:
-    content: '; disabled, use separate vhost configs'
+    content: '# disabled, use separate vhost configs'
     dest: /etc/apache2/sites-enabled/000-default.conf
+    follow: yes
   notify: restart apache2
 
 - name: add vhost config
   template:
-    src: vhost.j2
+    src: vhost_debian.j2
     dest: /etc/apache2/sites-available/{{ vhost }}.conf
   notify: restart apache2
 

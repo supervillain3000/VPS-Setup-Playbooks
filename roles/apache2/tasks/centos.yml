@@ -19,7 +19,7 @@
 
 - name: add vhost config
   template:
-    src: vhost.j2
+    src: vhost_centos.j2
     dest: /etc/httpd/conf.d/{{ vhost }}.conf
   notify: restart httpd
 
