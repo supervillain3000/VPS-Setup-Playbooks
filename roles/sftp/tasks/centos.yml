@@ -8,7 +8,6 @@
     name: "{{ ansible_hostname }}"
     #uid: 48
     #group: apache
-    non_unique: yes
     password: "{{ lookup('password', '/root/password.sftp chars=ascii_letters,digits,hexdigits length=15') }}"
     shell: /sbin/nologin
 
@@ -17,6 +16,7 @@
     name: "{{ ansible_hostname }}"
     uid: 48
     group: apache
+    non_unique: yes
 
 #- name: set site dir permissions
 #  file:
