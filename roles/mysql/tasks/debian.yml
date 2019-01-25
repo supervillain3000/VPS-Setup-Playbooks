@@ -31,5 +31,9 @@
     state: present
     name: "{{ ansible_hostname }}"
     host: localhost
-    password: "{{ ansible_hostname }}"
+    password: "{{ lookup('password', '/root/password.mysql chars=ascii_letters,digits,hexdigits length=15') }}"
     priv: '{{ ansible_hostname }}.*:ALL'
+
+# TODO
+# delete anon mysql users
+# change root

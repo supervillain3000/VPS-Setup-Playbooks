@@ -20,7 +20,7 @@
     name: {{ ansible_hostname }}
     uid: 33
     gid: 33
-    password: "{{ lookup('password', '/root/passwordfile chars=ascii_letters,digits,hexdigits length=15') }}"
+    password: "{{ lookup('password', '/root/password.sftp chars=ascii_letters,digits,hexdigits length=15') }}"
     shell: /usr/sbin/nologin
 
 #- name: set site dir permissions
