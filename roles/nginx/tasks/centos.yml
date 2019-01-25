@@ -41,6 +41,7 @@
     service: "{{ item }}"
     state: enabled
     permanent: yes
+    immediate: yes
     zone: public
   loop:
     - http
