@@ -1,0 +1,9 @@
+---
+- hosts: vps
+  roles:
+    - nginx
+    - apache
+    - mysql
+    - phpmyadmin
+    - sftp
+    - fail2ban
