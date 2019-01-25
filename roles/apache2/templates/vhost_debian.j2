@@ -10,7 +10,8 @@
 	DirectoryIndex "index.html" "index.php" "index.xhtml" "index.htm" "index.shtml"
 
 	<Directory /var/www/{{ vhost }}>
-		AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,FollowSymLinks,ExecCGI,Includes,IncludesNOEXEC
+			Options -Indexes Includes FollowSymLinks MultiViews
+			AllowOverride All
 	</Directory>
 
 </VirtualHost>
