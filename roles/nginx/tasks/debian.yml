@@ -40,6 +40,6 @@
   file:
     state: directory
     path: /var/www/{{ vhost }}/
-    owner: apache
-    group: apache
+    owner: www-data
+    group: www-data
     mode: 0755
