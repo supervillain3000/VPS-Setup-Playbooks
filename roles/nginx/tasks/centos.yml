@@ -31,13 +31,18 @@
 
 - name: Add nginx vhost config
   template:
-    src=vhost_centos.conf.j2
-    dest="/etc/nginx/vhosts/{{ vhost }}.conf"
-    mode=0644
+    src: vhost_centos.conf.j2
+    dest: "/etc/nginx/vhosts/{{ vhost }}.conf"
+    mode: 0644
   notify: reload nginx
 
 - name: Create /var/www/ vhost subdir
-  file: state=directory path=/var/www/{{ vhost }}/ mode=0755
+  file:
+    state: directory
+    path: /var/www/{{ vhost }}/
+    owner: apache
+    group: apache
+    mode: 0755
 
 - name: Enable http(s) on firewall-cmd
   firewalld:
