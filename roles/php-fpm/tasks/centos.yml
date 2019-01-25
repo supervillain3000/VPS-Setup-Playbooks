@@ -47,6 +47,14 @@
   #  regex: '^cgi.fix_pathinfo'
   #  line: '^cgi.fix_pathinfo = 0'
 
+- name: Create /var/www/ vhost subdir
+  file:
+    state: directory
+    path: /var/www/{{ vhost }}/
+    owner: apache
+    group: apache
+    mode: 0755
+
 - name: copy index file into virtualhost root
   copy:
     src: index.php

@@ -35,11 +35,3 @@
     dest: "/etc/nginx/vhosts/{{ vhost }}.conf"
     mode: 0644
   notify: reload nginx
-
-- name: Create /var/www/ vhost subdir
-  file:
-    state: directory
-    path: /var/www/{{ vhost }}/
-    owner: www-data
-    group: www-data
-    mode: 0755
