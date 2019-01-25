@@ -10,6 +10,7 @@
     #group: apache
     password: "{{ lookup('password', '/root/password.sftp chars=ascii_letters,digits,hexdigits length=15') | password_hash('sha512') }}"
     shell: /sbin/nologin
+    home: /var/www/{{ vhost }}/
 
 - name: create user uid
   user:
@@ -34,7 +35,7 @@
       Match User {{ ansible_hostname }}
       ForceCommand internal-sftp
       PasswordAuthentication yes
-      ChrootDirectory /var/www/{{ vhost }}/
+      #ChrootDirectory /var/www/{{ vhost }}/
       PermitTunnel no
       AllowAgentForwarding no
       AllowTcpForwarding no
