@@ -1,10 +1,4 @@
 ---
-- name: install openssh-server
-  yum:
-    name: openssh-server
-    state: latest
-    update_cache: yes
-
 #- name: create site group
 #     group:
 #    name: {{ ansible_hostname }}
