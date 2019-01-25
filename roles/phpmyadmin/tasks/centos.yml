@@ -4,6 +4,7 @@
     name: phpmyadmin
     state: latest
     update_cache: yes
+    enablerepo: remi-php72
 
 - name: check if there is apache
   stat:
