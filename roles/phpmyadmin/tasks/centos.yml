@@ -21,14 +21,14 @@
     src: pma_centos_fpm.conf
     dest: /etc/php-fpm.d/phpmyadmin.conf
   notify: restart php-fpm centos
-  when: php_fpm_status.exists
+  when: php_fpm_status.stat.exists
 
 - name: copy phpmyadmin nginx conf block
   template:
     src: pma_centos_nginx.conf
     dest: /etc/nginx/conf.d/phpmyadmin.conf
   notify: reload nginx
-  when: php_fpm_status.exists
+  when: php_fpm_status.stat.exists
 
 - name: add http auth for pma
   htpasswd:
