@@ -1,14 +1,18 @@
 ---
 - name: install pma and trivia
   yum:
-    name: phpmyadmin
+    name: "{{ pma_packages }}"
     state: latest
     update_cache: yes
+  vars:
+    pma_packages:
+    - phpmyadmin
+    - python-passlib
 
 - name: check if there is apache
   stat:
-    path: /usr/sbin/httpd
-  register: httpd_status
+    path: /usr/sbin/apache2
+  register: apache2_status
 
 - name: check if there is php-fpm
   stat:
@@ -20,12 +24,14 @@
     src: pma_centos_fpm.conf
     dest: /etc/php-fpm.d/phpmyadmin.conf
   notify: restart php-fpm centos
+  when: php_fpm_status.stat.exists
 
 - name: copy phpmyadmin nginx conf block
   template:
-    src: pma_centos_nginx.conf
+    src: pma_debian_nginx.conf
     dest: /etc/nginx/conf.d/phpmyadmin.conf
   notify: reload nginx
+  when: php_fpm_status.stat.exists
 
 - name: add http auth for pma
   htpasswd:
