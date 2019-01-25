@@ -32,7 +32,7 @@
 - name: change listened port
   lineinfile:
     path: /etc/apache2/ports.conf
-    regexp: '^Listen 80'
+    regexp: '^Listen'
     line: 'Listen 127.0.0.1:8080'
 
 - name: Create /var/www/ vhost subdir
