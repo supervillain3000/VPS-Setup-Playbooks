@@ -4,4 +4,5 @@
     - nginx
     - php-fpm
     - mysql
+    - sftp
     - fail2ban
