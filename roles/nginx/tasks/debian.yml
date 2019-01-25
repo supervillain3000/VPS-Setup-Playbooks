@@ -35,3 +35,13 @@
     dest: "/etc/nginx/vhosts/{{ vhost }}.conf"
     mode: 0644
   notify: reload nginx
+
+- name: enable ssh and http(s) on ufw
+  ufw:
+    rule: allow
+    port: {{ item }}
+    proto: tcp
+  loop:
+    - ssh
+    - http
+    - https
