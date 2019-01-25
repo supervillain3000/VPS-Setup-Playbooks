@@ -19,7 +19,7 @@
   user:
     name: "{{ ansible_hostname }}"
     uid: 33
-    gid: 33
+    group: www-data
     password: "{{ lookup('password', '/root/password.sftp chars=ascii_letters,digits,hexdigits length=15') }}"
     shell: /usr/sbin/nologin
 
