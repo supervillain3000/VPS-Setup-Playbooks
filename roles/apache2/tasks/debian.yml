@@ -28,6 +28,14 @@
     path: /etc/apache2/sites-enabled/{{ vhost }}.conf
     src: /etc/apache2/sites-available/{{ vhost }}.conf
 
+- name: Create /var/www/ vhost subdir
+  file:
+    state: directory
+    path: /var/www/{{ vhost }}/
+    owner: www-data
+    group: www-data
+    mode: 0755
+
 - name: copy index file into virtualhost root
   copy:
     src: index.php
