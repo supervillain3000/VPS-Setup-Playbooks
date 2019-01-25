@@ -1,1 +1,36 @@
 ---
+- name: install pma and trivia
+  yum:
+    name: phpmyadmin
+    state: latest
+    update_cache: yes
+
+- name: check if there is apache
+  stat:
+    path: /usr/sbin/httpd
+  register: httpd_status
+
+- name: check if there is php-fpm
+  stat:
+    path: /usr/sbin/php-fpm
+  register: php_fpm_status
+
+- name: copy phpmyadmin fpm pool
+  copy:
+    src: pma_centos_fpm.conf
+    dest: /etc/php-fpm.d/phpmyadmin.conf
+  notify: restart php-fpm centos
+  when: php_fpm_status.exist
+
+- name: copy phpmyadmin nginx conf block
+  template:
+    src: pma_centos_nginx.conf
+    dest: /etc/nginx/conf.d/phpmyadmin.conf
+  notify: reload nginx
+  when: php_fpm_status.exist
+
+- name: add http auth for pma
+  htpasswd:
+    path: /etc/nginx/conf.d/htpasswd
+    name: pma_admin
+    password: "{{ lookup('password', '/root/password.pma chars=ascii_letters,digits,hexdigits length=15') }}"

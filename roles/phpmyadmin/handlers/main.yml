@@ -1,2 +1,15 @@
 ---
-# handlers file for phpmyadmin
+- name: restart php-fpm centos
+  service:
+    name: php-fpm
+    state: restarted
+
+- name: restart php-fpm debian
+  service:
+    name: php{{ php_version }}-fpm
+    state: restarted
+
+- name: reload nginx
+  service:
+    name: nginx
+    state: reloaded
