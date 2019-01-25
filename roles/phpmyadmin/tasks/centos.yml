@@ -10,6 +10,12 @@
     - phpmyadmin
     - python-passlib
 
+- name: create symlink info phpmyadmin folder
+  file:
+    state: link
+    src: /usr/share/phpMyAdmin
+    path: /usr/share/phpmyadmin
+
 - name: check if there is apache
   stat:
     path: /usr/sbin/httpd
