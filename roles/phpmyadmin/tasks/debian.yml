@@ -1,6 +1,6 @@
 ---
 - name: install pma and trivia
-  yum:
+  apt:
     name: "{{ pma_packages }}"
     state: latest
     update_cache: yes
