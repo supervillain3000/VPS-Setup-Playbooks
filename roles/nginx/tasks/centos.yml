@@ -31,7 +31,7 @@
 
 - name: Add nginx vhost config
   template:
-    src=vhost.conf.j2
+    src=vhost_centos.conf.j2
     dest="/etc/nginx/vhosts/{{ vhost }}.conf"
     mode=0644
   notify: reload nginx
