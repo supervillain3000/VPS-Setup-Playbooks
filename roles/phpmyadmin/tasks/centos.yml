@@ -1,10 +1,14 @@
 ---
 - name: install pma and trivia
   yum:
-    name: phpmyadmin
+    name: "{{ pma_packages }}"
     state: latest
     update_cache: yes
     enablerepo: remi-php72
+  vars:
+    pma_packages:
+    - phpmyadmin
+    - python-passlib
 
 - name: check if there is apache
   stat:
