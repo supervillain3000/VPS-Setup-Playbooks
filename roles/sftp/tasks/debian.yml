@@ -1,9 +1,9 @@
 ---
 - name: install openssh
-    apt:
-      name: openssh-server
-    state: latest
-    update_cache: yes
+  apt:
+    name: openssh-server
+  state: latest
+  update_cache: yes
 
 - name: enable ssh on ufw
   ufw:
