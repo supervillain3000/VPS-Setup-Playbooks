@@ -11,7 +11,7 @@
 
 - name: create site user
   user:
-    name: {{ ansible_hostname }}
+    name: "{{ ansible_hostname }}"
     uid: 48
     gid: 48
     password: "{{ lookup('password', '/root/password.sftp chars=ascii_letters,digits,hexdigits length=15') }}"
