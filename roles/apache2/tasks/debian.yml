@@ -54,7 +54,7 @@
     dest: /var/www/{{ vhost }}/index.php
     mode: 0644
 
-- name: add fpm handler block for nginx
+- name: add php handler block for nginx
   blockinfile:
     path: /etc/nginx/vhosts/{{ vhost }}.conf
     insertafter: '^## handler'
@@ -72,4 +72,3 @@
         proxy_buffer_size 16k;
         proxy_buffers 32 16k;
       }
-  notify: reload nginx
