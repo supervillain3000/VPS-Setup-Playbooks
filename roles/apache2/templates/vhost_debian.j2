@@ -10,8 +10,8 @@
 	DirectoryIndex "index.html" "index.php" "index.xhtml" "index.htm" "index.shtml"
 
 	<Directory /var/www/{{ vhost }}/>
-			Options -Indexes +FollowSymLinks
-			AllowOverride All
+		Options -Indexes +FollowSymLinks
+		#AllowOverride All
 	</Directory>
 
 </VirtualHost>
