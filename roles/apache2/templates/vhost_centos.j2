@@ -9,9 +9,9 @@
 
 	DirectoryIndex "index.html" "index.php" "index.xhtml" "index.htm" "index.shtml"
 
-	<Directory /var/www/{{ vhost }}>
-			Options -Indexes Includes FollowSymLinks MultiViews
-      AllowOverride All
+	<Directory /var/www/{{ vhost }}/>
+		Options -Indexes +FollowSymLinks
+		#AllowOverride All
 	</Directory>
 
 </VirtualHost>
