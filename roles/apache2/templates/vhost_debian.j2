@@ -4,13 +4,13 @@
 	ServerAdmin "admin@{{ vhost }}"
 	UseCanonicalName Off
 
-	DocumentRoot "/var/www/{{ vhost }}"
+	DocumentRoot "/var/www/{{ vhost }}/"
 	ErrorLog "/var/log/apache2/{{ vhost }}_error.log"
 
 	DirectoryIndex "index.html" "index.php" "index.xhtml" "index.htm" "index.shtml"
 
-	<Directory /var/www/{{ vhost }}>
-			Options -Indexes Includes FollowSymLinks MultiViews
+	<Directory /var/www/{{ vhost }}/>
+			Options -Indexes +FollowSymLinks
 			AllowOverride All
 	</Directory>
 
