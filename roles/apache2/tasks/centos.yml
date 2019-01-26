@@ -19,15 +19,15 @@
   yum:
     name: "{{ php_modules }}"
     state: latest
-    enablerepo: remi-php72
+    enablerepo: remi-php73
   notify: restart httpd
 
-  - name: install php modules
-    yum:
-      name: php73-php
-      state: latest
-      enablerepo: remi-php72
-    notify: restart httpd
+- name: install mod_php
+  yum:
+    name: php73-php
+    state: latest
+    enablerepo: remi-php73
+  notify: restart httpd
 
 #- name: clear default config file
 #  copy:
