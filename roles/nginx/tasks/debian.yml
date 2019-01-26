@@ -40,7 +40,7 @@
   ufw:
     state: enabled
     rule: allow
-    port: {{ item }}
+    port: "{{ item }}"
     proto: tcp
   loop:
     - ssh
