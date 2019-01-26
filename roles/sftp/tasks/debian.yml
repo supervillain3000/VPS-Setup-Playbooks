@@ -27,7 +27,7 @@
 #    owner: root
 #    group: {{ ansible_hostname }}
 
-- name:
+- name: add sshd user part
   blockinfile:
     path: /etc/ssh/sshd_config
     insertafter: EOF
@@ -35,9 +35,14 @@
       Match User {{ ansible_hostname }}
       ForceCommand internal-sftp
       PasswordAuthentication yes
-      ChrootDirectory /var/www/{{ vhost }}/
       PermitTunnel no
       AllowAgentForwarding no
       AllowTcpForwarding no
       X11Forwarding no
   notify: restart sshd
+
+- name: change ftp-subsystem
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^Subsystem'
+    line: 'Subsystem       sftp    internal-sftp'
