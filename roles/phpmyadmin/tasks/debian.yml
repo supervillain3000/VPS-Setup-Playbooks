@@ -31,21 +31,21 @@
     src: pma_debian_nginx.conf
     dest: /etc/nginx/conf.d/phpmyadmin.conf
   when: php_fpm_status.stat.exists
-  notify: reload nginx
+  notify: restart nginx
 
 - name: copy phpmyadmin nginx php handler conf block
   template:
     src: pma_nginx_modphp.conf
     dest: /etc/nginx/conf.d/phpmyadmin.conf
   when: apache2_status.stat.exists
-  notify: reload nginx
+  notify: restart nginx
 
 - name: copy apache pma vhost config
   template:
     src: pma_debian_apache.conf
     dest: /etc/apache2/sites-available/phpmyadmin.conf
   when: apache2_status.stat.exists
-  notify: reload nginx
+  notify: restart nginx
 
 - name: create vhost file symlink
   file:

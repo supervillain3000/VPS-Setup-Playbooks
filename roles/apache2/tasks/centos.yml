@@ -5,16 +5,16 @@
     state: latest
     update_cache: yes
 
-- name: ensure httpd is started and enabled
+- name: ensure httpd is enabled
   service:
     name: httpd
-    state: started
     enabled: yes
 
-- name: delete default config file symlink
+- name: clear default config file
   copy:
-    content: '; disabled, use separate vhost configs'
+    content: '# disabled, use separate vhost configs'
     dest: /etc/httpd/sites-enabled/000-default.conf
+    follow: yes
   notify: restart httpd
 
 - name: add vhost config
@@ -29,7 +29,7 @@
     dest: /var/www/{{ vhost }}/index.php
     mode: 0644
 
-- name: add fpm handler block for nginx
+- name: add php handler block for nginx
   blockinfile:
     path: /etc/nginx/vhosts/{{ vhost }}.conf
     insertafter: '^## handler'
@@ -47,4 +47,3 @@
         proxy_buffer_size 16k;
         proxy_buffers 32 16k;
       }
-  notify: reload nginx

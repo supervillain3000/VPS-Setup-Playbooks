@@ -9,7 +9,7 @@
     name: php-fpm
     state: reloaded
 
-- name: reload nginx
+- name: restart nginx
   service:
     name: nginx
     state: reloaded
