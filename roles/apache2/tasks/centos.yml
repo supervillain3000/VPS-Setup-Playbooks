@@ -19,7 +19,7 @@
 
 - name: change listened port
   lineinfile:
-    path: /etc/httpd/httpd.conf
+    path: /etc/httpd/conf/httpd.conf
     regexp: '^Listen'
     line: 'Listen 127.0.0.1:8080'
   notify: restart httpd
