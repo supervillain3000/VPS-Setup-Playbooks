@@ -1,4 +1,9 @@
 ---
+- name: add remi repository
+  yum:
+    name: http://rpms.remirepo.net/enterprise/remi-release-7.rpm
+    state: present
+
 - name: install httpd
   yum:
     name: httpd
@@ -9,6 +14,13 @@
   service:
     name: httpd
     enabled: yes
+
+- name: install php modules
+  yum:
+    name: "{{ php_modules }}"
+    state: latest
+    enablerepo: remi-php72
+  notify: restart httpd
 
 #- name: clear default config file
 #  copy:
