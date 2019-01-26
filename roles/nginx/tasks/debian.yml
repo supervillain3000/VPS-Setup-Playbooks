@@ -38,6 +38,7 @@
 
 - name: enable ssh and http(s) on ufw
   ufw:
+    state: enabled
     rule: allow
     port: {{ item }}
     proto: tcp
