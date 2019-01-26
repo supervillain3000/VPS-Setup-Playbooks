@@ -74,4 +74,4 @@
               fastcgi_busy_buffers_size 16k;
               fastcgi_buffers 32 16k;
       }
-    notify: restart nginx
+  notify: restart nginx
