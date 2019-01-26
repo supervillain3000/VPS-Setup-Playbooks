@@ -33,19 +33,25 @@
   when: php_fpm_status.stat.exists
   notify: reload nginx
 
-- name: copy phpmyadmin nginx conf block
+- name: copy phpmyadmin nginx php handler conf block
   template:
     src: pma_nginx_modphp.conf
     dest: /etc/nginx/conf.d/phpmyadmin.conf
   when: apache2_status.stat.exists
   notify: reload nginx
 
-- name: copy phpmyadmin apache conf block
+- name: copy apache pma vhost config
   template:
     src: pma_debian_apache.conf
-    dest: /etc/apache2/sites-enabled/phpmyadmin.conf
+    dest: /etc/apache2/sites-available/phpmyadmin.conf
   when: apache2_status.stat.exists
   notify: reload nginx
+
+- name: create vhost file symlink
+  file:
+    state: link
+    path: /etc/apache2/sites-enabled/phpmyadmin.conf
+    src: /etc/apache2/sites-available/phpmyadmin.conf
 
 - name: add http auth for pma
   htpasswd:
