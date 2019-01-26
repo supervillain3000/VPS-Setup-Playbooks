@@ -15,6 +15,12 @@
     name: apache2
     enabled: yes
 
+- name: install php modules
+  apt:
+    name: php7.3-{{ php_modules_u }}
+    state: latest
+  notify: restart apache2
+
 - name: clear default config file
   copy:
     content: '# disabled, use separate vhost configs'
