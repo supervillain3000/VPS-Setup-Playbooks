@@ -17,6 +17,21 @@
     follow: yes
   notify: restart httpd
 
+- name: change listened port
+  lineinfile:
+    path: /etc/httpd/ports.conf
+    regexp: '^Listen'
+    line: 'Listen 127.0.0.1:8080'
+  notify: restart httpd
+
+- name: Create /var/www/ vhost subdir
+  file:
+    state: directory
+    path: /var/www/{{ vhost }}/
+    owner: apache
+    group: apache
+    mode: 0755
+
 - name: add vhost config
   template:
     src: vhost_centos.j2
@@ -27,6 +42,8 @@
   copy:
     src: index.php
     dest: /var/www/{{ vhost }}/index.php
+    owner: apache
+    group: apache
     mode: 0644
 
 - name: add php handler block for nginx
@@ -47,3 +64,4 @@
         proxy_buffer_size 16k;
         proxy_buffers 32 16k;
       }
+  notify: restart nginx

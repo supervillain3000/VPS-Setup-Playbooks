@@ -33,12 +33,14 @@
     state: link
     path: /etc/apache2/sites-enabled/{{ vhost }}.conf
     src: /etc/apache2/sites-available/{{ vhost }}.conf
+  notify: restart apache2
 
 - name: change listened port
   lineinfile:
     path: /etc/apache2/ports.conf
     regexp: '^Listen'
     line: 'Listen 127.0.0.1:8080'
+  notify: restart apache2
 
 - name: Create /var/www/ vhost subdir
   file:
@@ -52,6 +54,8 @@
   copy:
     src: index.php
     dest: /var/www/{{ vhost }}/index.php
+    owner: www-data
+    group: www-data
     mode: 0644
 
 - name: add php handler block for nginx
@@ -72,3 +76,4 @@
         proxy_buffer_size 16k;
         proxy_buffers 32 16k;
       }
+  notify: restart nginx
