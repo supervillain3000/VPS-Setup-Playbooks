@@ -45,17 +45,17 @@
     name: ''
     host_all: yes
 
+- name: remove test db
+  mysql_db:
+    state: absent
+    name: test
+
 - name: change root password
   mysql_user:
     state: present
     name: root
     host: localhost
     password: "{{ lookup('password', '/root/password_root.mysql chars=ascii_letters,digits,hexdigits length=15') }}"
-
-- name: remove test db
-  mysql_db:
-    state: absent
-    name: test
 
 # TODO
 # delete anon mysql users
