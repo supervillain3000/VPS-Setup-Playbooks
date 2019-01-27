@@ -1,5 +1,5 @@
 ---
-php_version: 73
-php_version_u: 7.3
-php_modules: ['php73-php-dom', 'php73-php-devel', 'php73-php-intl', 'php73-php-gd', 'php73-php-mbstring', 'php73-php-mysql', 'php73-php-xml', 'php73-php-zip', 'php73-php-soap', 'php73-php-pecl-imagick', 'php73-php-pdo', 'php73-php-mcrypt', 'php73-php-opcache']
+php_version: 72
+php_version_u: 7.2
+php_modules: ['php72-php-dom', 'php72-php-devel', 'php72-php-intl', 'php72-php-gd', 'php72-php-mbstring', 'php72-php-mysql', 'php72-php-xml', 'php72-php-zip', 'php72-php-soap', 'php72-php-pecl-imagick', 'php72-php-pdo', 'php72-php-mcrypt', 'php72-php-opcache']
 php_modules_u: ['dom', 'devel', 'intl', 'gd', 'mbstring', 'mysql', 'xml', 'zip', 'soap', 'pecl-imagick', 'pdo', 'mcrypt', 'opcache']
