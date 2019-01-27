@@ -2,4 +2,4 @@
 php_version: 72
 php_version_u: 7.2
 php_modules: ['php72-php-dom', 'php72-php-devel', 'php72-php-intl', 'php72-php-gd', 'php72-php-mbstring', 'php72-php-mysql', 'php72-php-xml', 'php72-php-zip', 'php72-php-soap', 'php72-php-pecl-imagick', 'php72-php-pdo', 'php72-php-mcrypt', 'php72-php-opcache']
-php_modules_u: ['php7.2-dom', 'php7.2-devel', 'php7.2-intl', 'php7.2-gd', 'php7.2-mbstring', 'php7.2-mysql', 'php7.2-xml', 'php7.2-zip', 'php7.2-soap', 'php7.2-pecl-imagick', 'php7.2-pdo', 'php7.2-mcrypt', 'php7.2-opcache']
+php_modules_u: ['php7.2-dom', 'php7.2-dev', 'php7.2-intl', 'php7.2-gd', 'php7.2-mbstring', 'php7.2-mysql', 'php7.2-xml', 'php7.2-zip', 'php7.2-soap', 'php7.2-pecl-imagick', 'php7.2-pdo', 'php7.2-mcrypt', 'php7.2-opcache']
