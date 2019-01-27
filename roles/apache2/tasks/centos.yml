@@ -15,16 +15,16 @@
     name: httpd
     enabled: yes
 
-- name: install php modules
+- name: install mod_php
   yum:
-    name: "{{ php_modules }}"
+    name: php72-php
     state: latest
     enablerepo: remi-php72
   notify: restart httpd
 
-- name: install mod_php
+- name: install php modules
   yum:
-    name: php72-php
+    name: php72-{{ php_modules }}
     state: latest
     enablerepo: remi-php72
   notify: restart httpd
