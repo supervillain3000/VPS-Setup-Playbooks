@@ -1,7 +1,7 @@
 ---
 - name: add remi repository
   yum:
-    name: http://rpms.remirepo.net/enterprise/remi-release-7.rpm
+    name: http://mirror.neolabs.kz/remi/enterprise/remi-release-7.rp
     state: present
 
 - name: install php-fpm
