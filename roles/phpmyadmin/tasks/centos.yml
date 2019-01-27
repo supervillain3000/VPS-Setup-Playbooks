@@ -4,7 +4,7 @@
     name: "{{ pma_packages }}"
     state: latest
     update_cache: yes
-    enablerepo: remi-php72
+    enablerepo: remi
   vars:
     pma_packages:
     - phpmyadmin
@@ -26,7 +26,7 @@
     path: /usr/sbin/php-fpm
   register: php_fpm_status
 
-- name: copy phpmyadmin fpm pool
+- name: copy fpm nginx config
   copy:
     src: pma_centos_fpm.conf
     dest: /etc/php-fpm.d/phpmyadmin.conf
@@ -39,6 +39,13 @@
     dest: /etc/nginx/conf.d/phpmyadmin.conf
   notify: restart nginx
   when: php_fpm_status.stat.exists
+
+- name: copy modphp nginx handler confing
+  template:
+    src: pma_nginx_modphp.conf
+    dest: /etc/nginx/conf.d/phpmyadmin.conf
+  when: apache2_status.stat.exists
+  notify: restart nginx
 
 - name: add http auth for pma
   htpasswd:
