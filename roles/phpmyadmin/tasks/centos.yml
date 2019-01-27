@@ -44,7 +44,7 @@
   template:
     src: pma_nginx_modphp.conf
     dest: /etc/nginx/conf.d/phpmyadmin.conf
-  when: apache2_status.stat.exists
+  when: httpd_status.stat.exists
   notify: restart nginx
 
 - name: add http auth for pma
