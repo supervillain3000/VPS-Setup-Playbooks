@@ -4,7 +4,7 @@
     name: "{{ pma_packages }}"
     state: latest
     update_cache: yes
-    enablerepo: remi-php{{ php_version }}
+    enablerepo: remi-php72
   vars:
     pma_packages:
     - phpmyadmin
