@@ -39,6 +39,22 @@
     password: "{{ lookup('password', '/root/password.mysql chars=ascii_letters,digits,hexdigits length=15') }}"
     priv: '{{ ansible_hostname }}.*:ALL'
 
+- name: remove anonymous users
+  mysql_user:
+    state: absent
+    name: ''
+    host_all: yes
+    #password: "{{ lookup('password', '/root/password_root.mysql chars=ascii_letters,digits,hexdigits length=15') }}"
+    #priv: '{{ ansible_hostname }}.*:ALL'
+
+- name: change root password
+  mysql_user:
+    state: present
+    name: root
+    host: localhost
+    password: "{{ lookup('password', '/root/password_root.mysql chars=ascii_letters,digits,hexdigits length=15') }}"
+    #priv: '{{ ansible_hostname }}.*:ALL'
+
 # TODO
 # delete anon mysql users
 # change root
