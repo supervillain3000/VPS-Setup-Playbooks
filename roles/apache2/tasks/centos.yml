@@ -19,7 +19,7 @@
   yum:
     name: php72-php
     state: latest
-    enablerepo: remi-php72
+    enablerepo: remi
   notify: restart httpd
 
 - name: install php modules
