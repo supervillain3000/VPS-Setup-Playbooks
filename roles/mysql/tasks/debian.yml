@@ -34,6 +34,12 @@
     password: "{{ lookup('password', '/root/password.mysql chars=ascii_letters,digits,hexdigits length=15') }}"
     priv: '{{ ansible_hostname }}.*:ALL'
 
+- name: insert mysql user name into user password file
+  lineinfile:
+    dest: /root/password.mysql
+    insertbefore: BOF
+    line: "{{ ansible_hostname }}"
+
 - name: remove anonymous users
   mysql_user:
     state: absent
@@ -52,6 +58,8 @@
     host: localhost
     password: "{{ lookup('password', '/root/password_root.mysql chars=ascii_letters,digits,hexdigits length=15') }}"
 
-# TODO
-# delete anon mysql users
-# change root
+- name: insert root mysql user name into root password file
+  lineinfile:
+    dest: /root/password_root.mysql
+    insertbefore: BOF
+    line: 'root'
