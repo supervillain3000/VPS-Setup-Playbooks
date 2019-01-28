@@ -61,3 +61,9 @@
     name: pma_admin
     password: "{{ lookup('password', '/root/password.pma chars=ascii_letters,digits,hexdigits length=15') }}"
   notify: restart nginx
+
+- name: insert pmd_admin user name into password file
+  lineinfile:
+    dest: /root/password.pma
+    insertbefore: BOF
+    line: 'pma_admin'
