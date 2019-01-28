@@ -5,10 +5,6 @@
     port: ssh
     proto: tcp
 
-#- name: create site group
-#  group:
-#    name: {{ ansible_hostname }}
-
 - name: create site user
   user:
     name: "{{ ansible_hostname }}"
@@ -19,13 +15,11 @@
     shell: /usr/sbin/nologin
     home: /var/www/{{ vhost }}/
 
-#- name: set site dir permissions
-#  file:
-#    state: directory
-#    path: /var/www/{{ vhost }}/
-#    chmod: 0775
-#    owner: root
-#    group: {{ ansible_hostname }}
+- name: insert site user name into user password file
+  lineinfile:
+    dest: /root/password.sftp
+    insertbefore: BOF
+    line: "{{ ansible_hostname }}"
 
 - name: add sshd user part
   blockinfile:
