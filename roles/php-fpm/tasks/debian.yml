@@ -16,9 +16,11 @@
     state: started
 
 - name: install php modules 7.3
+  {% for items in php_modules_u %}
   apt:
-    name: php7.3-{{ php_modules_u }}
+    name: php{{ php_version_u }}-{{ item }}
     state: latest
+  {% endfor %}
   notify: restart debian php-fpm
   when: php_version_u == '7.3'
 
