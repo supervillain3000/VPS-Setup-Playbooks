@@ -6,44 +6,44 @@
 
 - name: install php-fpm
   apt:
-    name: php{{ php_version }}-fpm
+    name: php{{ php_version_u }}-fpm
     update_cache: yes
     state: latest
 
 - name: ensure fpm is started and enabled
   service:
-    name: "php{{ php_version }}-fpm"
+    name: "php{{ php_version_u }}-fpm"
     state: started
 
 - name: install php modules 7.3
   apt:
     name: php7.3-{{ php_modules_u }}
     state: latest
-  notify: reload debian php-fpm
-  when: php_version == '7.3'
+  notify: restart debian php-fpm
+  when: php_version_u == '7.3'
 
 - name: install php modules 5.6
   apt:
     name: php5.6-{{ php_modules_u }}
     state: latest
-  notify: reload debian php-fpm
-  when: php_version == '5.6'
+  notify: restart debian php-fpm
+  when: php_version_u == '5.6'
 
 - name: delete default pool file
   file:
     state: absent
-    path: /etc/php/{{ php_version }}/fpm/pool.d/www.conf
-  notify: reload debian php-fpm
+    path: /etc/php/{{ php_version_u }}/fpm/pool.d/www.conf
+  notify: restart debian php-fpm
 
 - name: create pool for a virtual host
   template:
-    dest: /etc/php/{{ php_version }}/fpm/pool.d/{{ vhost }}.conf
+    dest: /etc/php/{{ php_version_u }}/fpm/pool.d/{{ vhost }}.conf
     src: vhost_pool_debian.j2
-  notify: reload debian php-fpm
+  notify: restart debian php-fpm
 
 - name: add cgi.fix_pathinfo = 0 to php.ini
   ini_file:
-    path: /etc/php/{{ php_version }}/cli/php.ini
+    path: /etc/php/{{ php_version_u }}/cli/php.ini
     section: PHP
     option: cgi.fix_pathinfo
     value: 0

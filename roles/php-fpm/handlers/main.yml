@@ -1,15 +1,10 @@
 ---
-- name: reload debian php-fpm
+- name: restart debian php-fpm
   service:
-    name: php{{ php_version }}-fpm
-    state: reloaded
+    name: php{{ php_version_u }}-fpm
+    state: restarted
 
-- name: reload centos php-fpm
+- name: restart centos php-fpm
   service:
     name: php-fpm
-    state: reloaded
-
-- name: restart nginx
-  service:
-    name: nginx
-    state: reloaded
+    state: restarted
