@@ -1,9 +1,13 @@
 ---
 - name: Install nginx and trivia
   apt:
-    name: nginx
+    name: "{{ nginxeatall }}"
     state: latest
     update_cache: yes
+  vars:
+    nginxeatall:
+    - nginx
+    - ufw
 
 - name: Make sure nginx is started and enabled
   service:
