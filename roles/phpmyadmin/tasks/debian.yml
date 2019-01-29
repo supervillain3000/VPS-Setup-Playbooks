@@ -4,6 +4,7 @@
     name: "{{ pma_packages }}"
     state: latest
     update_cache: yes
+    install_recommends: no
   vars:
     pma_packages:
     - phpmyadmin
