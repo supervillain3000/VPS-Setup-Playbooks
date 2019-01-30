@@ -27,4 +27,9 @@
       bantime  = 1800
       findtime  = 600
       maxretry = 5
-  notify: reload fail2ban
+  notify: restart fail2ban
+
+- name: ensure f2b is enabled
+  service:
+    name: fail2ban
+    enabled: yes
