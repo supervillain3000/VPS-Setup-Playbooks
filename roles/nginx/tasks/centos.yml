@@ -49,8 +49,5 @@
 
 
 #TODO
-# /etc/systemd/system/multi-user.target.wants/nginx.service
-#replace
-#After=network.target remote-fs.target nss-lookup.target
-#with:
-#After=network-online.target remote-fs.target nss-lookup.target
+# add the following line in [Service] section in /etc/systemd/system/multi-user.target.wants/nginx.service file:
+#ExecStartPre=/bin/sleep 10
