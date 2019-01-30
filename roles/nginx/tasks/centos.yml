@@ -51,7 +51,4 @@
 #TODO
 # add the following line in [Service] section in /etc/systemd/system/multi-user.target.wants/nginx.service file:
 #ExecStartPre=/bin/sleep 10
-<<<<<<< HEAD
 # after PIDFile=/run/nginx.pid
-=======
->>>>>>> 643b4c44fd121c6138b3a7e0032c069bbf83b0c3
