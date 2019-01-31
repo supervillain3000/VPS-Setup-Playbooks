@@ -22,8 +22,8 @@
 
 - name: copy fpm pool
   copy:
-    src: pma_centos_fpm.conf
-    dest: /etc/php-fpm.d/phpmyadmin.conf
+    src: pma_debian_fpm.conf
+    dest: /etc/php/{{ php_version_u }}/fpm/pool.d/phpmyadmin.conf
   notify: restart php-fpm debian
   when: php_fpm_status.stat.exists
 
