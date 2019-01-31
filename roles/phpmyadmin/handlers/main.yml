@@ -6,7 +6,7 @@
 
 - name: restart php-fpm debian
   service:
-    name: php{{ php_version }}-fpm
+    name: php{{ php_version_u }}-fpm
     state: restarted
 
 - name: restart nginx
