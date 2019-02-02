@@ -1,2 +1,2 @@
 ---
-# defaults file for phpmyadmin
+#pma_php_modules: ['php-xml','php-phpseclib','php-pear','php-mbstring','php-gettext','php-mysql']
