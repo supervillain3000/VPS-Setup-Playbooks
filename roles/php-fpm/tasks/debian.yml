@@ -77,7 +77,7 @@
 
 - name: ensure both fpms are started and enabled
   service:
-    name: {{ item }}
+    name: "{{ item }}"
     enabled: yes
     state: started
   loop:
