@@ -10,16 +10,6 @@
     - phpmyadmin
     - python-passlib
 
-- name: install php7.2 modules
-  apt:
-    name: "{{ php72_modules }}"
-    state: latest
-  vars:
-    php72_modules:
-    - php7.2-common
-    - php7.2-mbstring
-    - php7.2-mysql
-
 - name: check if there is apache
   stat:
     path: /etc/apache2/apache2.conf
