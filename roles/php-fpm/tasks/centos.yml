@@ -11,11 +11,6 @@
     update_cache: yes
     state: latest
 
-- name: ensure fpm is started and enabled
-  service:
-    name: "php-fpm"
-    state: started
-
 - name: install php modules
   yum:
     name: "{{ php_modules }}"
@@ -76,3 +71,8 @@
               fastcgi_buffers 32 16k;
       }
   notify: restart nginx
+
+- name: ensure fpm is started and enabled
+  service:
+    name: "php-fpm"
+    state: started
