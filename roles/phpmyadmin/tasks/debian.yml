@@ -1,19 +1,4 @@
 ---
-- name: install pma php modules
-  apt:
-    name: "{{ pma_php_modules }}"
-    state: latest
-    update_cache: yes
-    install_recommends: no
-  vars:
-    pma_php_modules:
-    - php-xml
-    - php-phpseclib
-    - php-pear
-    - php-mbstring
-    - php-gettext
-    - php-mysql
-
 - name: install pma and trivia
   apt:
     name: "{{ pma_packages }}"
