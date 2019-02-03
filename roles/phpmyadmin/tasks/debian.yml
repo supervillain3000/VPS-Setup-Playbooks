@@ -10,6 +10,16 @@
     - phpmyadmin
     - python-passlib
 
+- name: install php7.2 modules
+  apt:
+    name: "{{ php7.2_modules }}"
+    state: latest
+    update_cache: yes
+    install_recommends: no
+  vars:
+    php7.2_modules:
+    - php7.2-mbstring
+
 - name: check if there is apache
   stat:
     path: /etc/apache2/apache2.conf
