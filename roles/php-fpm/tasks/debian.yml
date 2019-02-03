@@ -22,6 +22,13 @@
   notify: restart debian php-fpm
   when: php_version_u == '7.3'
 
+- name: install php modules for selected php version
+  apt:
+    name: php5.6-{{ php_modules_u }}
+    state: latest
+  notify: restart debian php-fpm
+  when: php_version_u == '5.6'
+
 - name: clear default pool file
   copy:
     content: '; disabled, use separate vhost pools'
