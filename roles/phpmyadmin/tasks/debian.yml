@@ -12,12 +12,10 @@
 
 - name: install php7.2 modules
   apt:
-    name: "{{ php7.2_modules }}"
+    name: "{{ php72_modules }}"
     state: latest
-    update_cache: yes
-    install_recommends: no
   vars:
-    php7.2_modules:
+    php72_modules:
     - php7.2-common
     - php7.2-mbstring
     - php7.2-mysql
