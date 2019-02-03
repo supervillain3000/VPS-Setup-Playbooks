@@ -12,7 +12,7 @@
 
 - name: check if there is apache
   stat:
-    path: /usr/sbin/apache2
+    path: /etc/apache2/apache2.conf
   register: apache2_status
 
 - name: check if there is php-fpm
