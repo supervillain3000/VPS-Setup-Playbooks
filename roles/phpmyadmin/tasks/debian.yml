@@ -18,7 +18,9 @@
     install_recommends: no
   vars:
     php7.2_modules:
+    - php7.2-common
     - php7.2-mbstring
+    - php7.2-mysql
 
 - name: check if there is apache
   stat:
