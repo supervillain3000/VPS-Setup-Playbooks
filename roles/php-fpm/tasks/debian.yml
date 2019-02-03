@@ -10,6 +10,11 @@
     update_cache: yes
     state: latest
 
+- name: install fpm 7.2 for pma
+  apt:
+    name: php7.2-fpm
+    state: latest
+
 - name: install php modules for selected php version
   apt:
     name: php7.3-{{ php_modules_u }}
@@ -70,7 +75,11 @@
       }
   notify: restart nginx
 
-- name: ensure fpm is enabled
+- name: ensure both fpms are started and enabled
   service:
-    name: "php{{ php_version_u }}-fpm"
+    name: {{ item }}
     enabled: yes
+    state: started
+  loop:
+    - php{{ php_version_u }}-fpm
+    - php7.2-fpm

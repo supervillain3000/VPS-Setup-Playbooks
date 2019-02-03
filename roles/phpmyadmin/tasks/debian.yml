@@ -23,9 +23,9 @@
 - name: copy fpm pool
   copy:
     src: pma_debian_fpm.conf
-    dest: /etc/php/{{ php_version_u }}/fpm/pool.d/phpmyadmin.conf
-  notify: restart php-fpm debian
+    dest: /etc/php/7.2/fpm/pool.d/phpmyadmin.conf
   when: php_fpm_status.stat.exists
+  notify: restart php-fpm72 debian
 
 - name: copy fpm nginx config
   template:
