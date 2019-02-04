@@ -1,9 +1,4 @@
 ---
-- name: add nijel/phpmyadmin repo
-  apt_repository:
-    repo: ppa:nijel/phpmyadmin
-    state: present
-
 - name: install pma and trivia
   apt:
     name: "{{ pma_packages }}"
