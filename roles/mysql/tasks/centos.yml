@@ -26,10 +26,11 @@
     state: started
     enabled: yes
 
-- name: add app db
+- name: add website db
   mysql_db:
     state: present
     name: "{{ ansible_hostname }}"
+    collation: utf8_unicode_ci
 
 - name: add db user
   mysql_user:
@@ -62,9 +63,11 @@
     name: root
     host: localhost
     password: "{{ lookup('password', '/root/password_root.mysql chars=ascii_letters,digits,hexdigits length=15') }}"
+  tag: website_stack
 
 - name: insert root mysql user name into root password file
   lineinfile:
     dest: /root/password_root.mysql
     insertbefore: BOF
     line: 'root'
+  tag: website_stack
