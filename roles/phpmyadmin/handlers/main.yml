@@ -4,9 +4,9 @@
     name: php-fpm
     state: restarted
 
-- name: restart php-fpm72 debian
+- name: restart php-fpm debian
   service:
-    name: php7.2-fpm
+    name: php{{ php_version_u }}-fpm
     state: restarted
 
 - name: restart nginx
