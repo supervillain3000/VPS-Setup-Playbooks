@@ -4,7 +4,7 @@
     name: "{{ pma_packages }}"
     state: latest
     update_cache: yes
-    enablerepo: remi-php72
+    enablerepo: remi-php{{ php_version }}
   vars:
     pma_packages:
     - phpmyadmin
@@ -51,11 +51,16 @@
   htpasswd:
     path: /etc/nginx/conf.d/htpasswd
     name: pma_admin
-    password: "{{ lookup('password', '/root/password.pma chars=ascii_letters,digits,hexdigits length=15') }}"
+    password: "{{ lookup('password', '/root/pma_password chars=ascii_letters,digits,hexdigits length=15') }}"
   notify: restart nginx
 
 - name: insert pmd_admin user name into password file
-  lineinfile:
-    dest: /root/password.pma
+  blockinfile:
+    dest: /root/pma_password
     insertbefore: BOF
-    line: 'pma_admin'
+    block: |
+
+      phpmyadmin
+      http://{{ ansible_default_ipv4.address }}/pma/
+      Данные для http авторизации:
+      Логин: pma_admin
