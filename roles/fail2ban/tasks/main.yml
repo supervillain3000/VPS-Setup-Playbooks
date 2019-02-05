@@ -19,7 +19,7 @@
     create: yes
     insertafter: EOF
     path: /etc/fail2ban/jail.local
-    marker: "# {mark} ANSIBLE MANAGED BLOCK"
+    marker: ''
     block: |
       [DEFAULT]
 

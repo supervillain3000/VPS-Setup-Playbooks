@@ -54,6 +54,7 @@
 
 - name: add fpm handler block for nginx
   blockinfile:
+    marker: ''
     path: /etc/nginx/vhosts/{{ vhost }}.conf
     insertafter: '^## handler'
     block: |
