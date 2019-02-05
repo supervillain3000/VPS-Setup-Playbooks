@@ -8,6 +8,7 @@
 
 - name: insert site user name into user password file
   blockinfile:
+    marker: ''
     dest: /root/01-sftp_password
     insertbefore: BOF
     block: |
@@ -27,6 +28,7 @@
 
 - name:
   blockinfile:
+    marker: ''
     path: /etc/ssh/sshd_config
     insertafter: EOF
     block: |
