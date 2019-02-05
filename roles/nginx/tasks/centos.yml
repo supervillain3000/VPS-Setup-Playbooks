@@ -36,6 +36,12 @@
     mode: 0644
   notify: restart nginx
 
+- name: fix nginx not starting with ipv6
+  lineinfile:
+    insertafter: '^[Service]'
+    path: /etc/systemd/system/multi-user.target.wants/nginx.service
+    line: 'ExecStartPre=/bin/sleep 10'
+
 - name: Enable http(s) on firewall-cmd
   firewalld:
     service: "{{ item }}"
@@ -46,7 +52,6 @@
   loop:
     - http
     - https
-
 
 #TODO
 # add the following line in [Service] section in /etc/systemd/system/multi-user.target.wants/nginx.service file:
