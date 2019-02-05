@@ -1,0 +1,6 @@
+---
+- hosts: vps
+  roles:
+    - mysql
+    - postfix
+    - fail2ban

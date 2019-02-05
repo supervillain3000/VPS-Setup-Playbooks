@@ -5,9 +5,9 @@
     update_cache: yes
     name: "{{ mysql_packages }}"
   vars:
-      mysql_packages:
-      - mysql-server
-      - python-mysqldb
+    mysql_packages:
+    - mysql-server
+    - python-mysqldb
 
 - name: change mysql bind-address
   lineinfile:
@@ -21,10 +21,12 @@
     state: started
     enabled: yes
 
-- name: add app db
+- name: add website db
   mysql_db:
     state: present
     name: "{{ ansible_hostname }}"
+    collation: utf8_unicode_ci
+  tag: website_stack
 
 - name: add db user
   mysql_user:
@@ -33,12 +35,14 @@
     host: localhost
     password: "{{ lookup('password', '/root/password.mysql chars=ascii_letters,digits,hexdigits length=15') }}"
     priv: '{{ ansible_hostname }}.*:ALL'
+  tag: website_stack
 
 - name: insert mysql user name into user password file
   lineinfile:
     dest: /root/password.mysql
     insertbefore: BOF
     line: "{{ ansible_hostname }}"
+  tag: website_stack
 
 - name: remove anonymous users
   mysql_user:
@@ -57,9 +61,11 @@
     name: root
     host: localhost
     password: "{{ lookup('password', '/root/password_root.mysql chars=ascii_letters,digits,hexdigits length=15') }}"
+  tag: website_stack
 
 - name: insert root mysql user name into root password file
   lineinfile:
     dest: /root/password_root.mysql
     insertbefore: BOF
     line: 'root'
+  tag: website_stack
