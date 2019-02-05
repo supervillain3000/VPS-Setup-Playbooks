@@ -60,12 +60,12 @@
   htpasswd:
     path: /etc/nginx/conf.d/htpasswd
     name: pma_admin
-    password: "{{ lookup('password', '/root/pma_password chars=ascii_letters,digits,hexdigits length=15') }}"
+    password: "{{ lookup('password', '/root/02-pma_password chars=ascii_letters,digits,hexdigits length=15') }}"
   notify: restart nginx
 
 - name: insert pmd_admin user name into password file
   blockinfile:
-    dest: /root/pma_password
+    dest: /root/02-pma_password
     insertbefore: BOF
     block: |
 

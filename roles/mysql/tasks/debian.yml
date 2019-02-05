@@ -38,10 +38,14 @@
   tags: website_stack
 
 - name: insert mysql user name into user password file
-  lineinfile:
-    dest: /root/password.mysql
+  blockinfile:
+    dest: /root/03-mysql_password
     insertbefore: BOF
-    line: "{{ ansible_hostname }}"
+    block: |
+
+      База данных
+      Имя БД: {{ ansible_hostname }}
+      Пользователь: {{ ansible_hostname }}
   tags: website_stack
 
 - name: remove anonymous users
@@ -64,8 +68,10 @@
   tags: website_stack
 
 - name: insert root mysql user name into root password file
-  lineinfile:
-    dest: /root/password_root.mysql
+  blockinfile:
+    dest: /root/04-mysqlr_password
     insertbefore: BOF
-    line: 'root'
+    block: |
+
+      Пароль от mysql root-пользователя:
   tags: website_stack
