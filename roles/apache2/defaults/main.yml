@@ -1,6 +1,6 @@
 ---
-php_version: 56
-php_version_u: 7.2
+php_version: 73
+php_version_u: 7.3
 #php_modules: ['php56-php-dom', 'php56-php-devel', 'php56-php-intl', 'php56-php-gd', 'php56-php-mbstring', 'php56-php-mysql', 'php56-php-xml', 'php56-php-zip', 'php56-php-soap', 'php56-php-pecl-imagick', 'php56-php-pdo', 'php56-php-mcrypt', 'php56-php-opcache']
 php_modules: '["php{{ php_version }}-php-dom", "php{{ php_version }}-php-devel", "php{{ php_version }}-php-intl", "php{{ php_version }}-php-gd", "php{{ php_version }}-php-mbstring", "php{{ php_version }}-php-mysql", "php{{ php_version }}-php-xml", "php{{ php_version }}-php-zip", "php{{ php_version }}-php-soap", "php{{ php_version }}-php-pecl-imagick", "php{{ php_version }}-php-pdo", "php{{ php_version }}-php-mcrypt", "php{{ php_version }}-php-opcache"]'
-php_modules_u: ['php7.2-dom', 'php7.2-dev', 'php7.2-intl', 'php7.2-gd', 'php7.2-mbstring', 'php7.2-mysql', 'php7.2-xml', 'php7.2-zip', 'php7.2-soap', 'php7.2-imagick', 'php7.2-pdo', 'php7.2-opcache']
+php_modules_u: '["php{{ php_version_u }}-dom", "php{{ php_version_u }}-dev", "php{{ php_version_u }}-intl", "php{{ php_version_u }}-gd", "php{{ php_version_u }}-mbstring", "php{{ php_version_u }}-mysql", "php{{ php_version_u }}-xml", "php{{ php_version_u }}-zip", "php{{ php_version_u }}-soap", "php{{ php_version_u }}-imagick", "php{{ php_version_u }}-pdo", "php{{ php_version_u }}-opcache"]'
