@@ -7,7 +7,7 @@
 - name: install php-fpm
   yum:
     name: php-fpm
-    enablerepo: remi-php72
+    enablerepo: remi-php{{ php_version }}
     update_cache: yes
     state: latest
 
@@ -15,7 +15,7 @@
   yum:
     name: "{{ php_modules }}"
     state: latest
-    enablerepo: remi-php72
+    enablerepo: remi-php{{ php_version }}
   notify: restart centos php-fpm
 
 - name: clear default pool file
