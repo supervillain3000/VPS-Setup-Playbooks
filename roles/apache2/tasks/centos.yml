@@ -17,16 +17,17 @@
 
 - name: install mod_php
   yum:
-    name: php56-php
+    name: php{{ php_version }}-php
     state: latest
-    enablerepo: remi-php56
+    enablerepo: remi-php{{ php_version }}
   notify: restart httpd
 
 - name: install php modules
   yum:
-    name: "{{ php_modules }}"
+    #name: "{{ php_modules }}"
+    name: php{{ php_version }}-{{ php_modules }}
     state: latest
-    enablerepo: remi
+    enablerepo: remi-php{{ php_version }}
   notify: restart httpd
 
 #- name: clear default config file
