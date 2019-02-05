@@ -24,8 +24,8 @@
 
 - name: install php modules
   yum:
-    #name: "{{ php_modules }}"
-    name: php{{ php_version }}-{{ php_modules }}
+    name: "{{ php_modules }}"
+    #name: php{{ php_version }}-{{ php_modules }}
     state: latest
     enablerepo: remi-php{{ php_version }}
   notify: restart httpd
