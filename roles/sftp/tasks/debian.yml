@@ -11,15 +11,21 @@
     uid: 33
     group: www-data
     non_unique: yes
-    password: "{{ lookup('password', '/root/password.sftp chars=ascii_letters,digits,hexdigits length=15') | password_hash('sha512') }}"
+    password: "{{ lookup('password', '/root/01-sftp_password chars=ascii_letters,digits,hexdigits length=15') | password_hash('sha512') }}"
     shell: /usr/sbin/nologin
     home: /var/www/{{ vhost }}/
 
 - name: insert site user name into user password file
-  lineinfile:
-    dest: /root/password.sftp
+  blockinfile:
+    dest: /root/01-sftp_password
     insertbefore: BOF
-    line: "{{ ansible_hostname }}"
+    block: |
+      FTP
+      ip-адрес: {{ ansible_default_ipv4.address }}
+      Тип подключений: SFTP
+      Порт: 22
+      Папка сайта: /var/www/{{ vhost }}
+      Пользователь: {{ ansible_hostname }}
 
 - name: add sshd user part
   blockinfile:
