@@ -1,14 +1,24 @@
 ---
-- name: install pma and trivia
+#- name: install pma and trivia
+#  apt:
+#    name: "{{ pma_packages }}"
+#    state: latest
+#    update_cache: yes
+#    install_recommends: no
+#  vars:
+#    pma_packages:
+#    - phpmyadmin
+#    - python-passlib
+
+- name: install python-passlib
   apt:
-    name: "{{ pma_packages }}"
+    name: python-passlib
     state: latest
     update_cache: yes
-    install_recommends: no
-  vars:
-    pma_packages:
-    - phpmyadmin
-    - python-passlib
+
+- name: install phpmyadmin
+  shell: |
+
 
 - name: check if there is apache
   stat:
