@@ -17,7 +17,6 @@
 
 - name: insert site user name into user password file
   blockinfile:
-    marker: ''
     dest: /root/01-sftp_password
     insertbefore: BOF
     block: |

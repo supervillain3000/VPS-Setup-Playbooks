@@ -56,7 +56,6 @@
 
 - name: insert pmd_admin user name into password file
   blockinfile:
-    marker: ''
     dest: /root/02-pma_password
     insertbefore: BOF
     block: |

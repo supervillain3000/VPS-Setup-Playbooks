@@ -39,7 +39,6 @@
 
 - name: insert mysql user name into user password file
   blockinfile:
-    marker: ''
     dest: /root/03-mysql_password
     insertbefore: BOF
     block: |
@@ -70,7 +69,6 @@
 
 - name: insert root mysql user name into root password file
   blockinfile:
-    marker: ''
     dest: /root/04-mysqlr_password
     insertbefore: BOF
     block: |
