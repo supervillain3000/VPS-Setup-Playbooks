@@ -33,7 +33,7 @@
     state: present
     name: "{{ ansible_hostname }}"
     host: localhost
-    password: "{{ lookup('password', '/root/password.mysql chars=ascii_letters,digits,hexdigits length=15') }}"
+    password: "{{ lookup('password', '/root/03-mysql_password chars=ascii_letters,digits,hexdigits length=15') }}"
     priv: '{{ ansible_hostname }}.*:ALL'
   tags: website_stack
 
