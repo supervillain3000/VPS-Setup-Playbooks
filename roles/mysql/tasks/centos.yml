@@ -48,7 +48,7 @@
     insertbefore: BOF
     block: |
 
-      База данных
+      Данные для доступа к базе данных:
       Имя БД: {{ ansible_hostname }}
       Пользователь: {{ ansible_hostname }}
   tags: website_stack
