@@ -60,7 +60,7 @@
     insertbefore: BOF
     block: |
 
-      phpmyadmin
+      Веб-интерфейс для работы с базой данных:
       http://{{ ansible_default_ipv4.address }}/pma/
       Данные для http авторизации:
       Логин: pma_admin
