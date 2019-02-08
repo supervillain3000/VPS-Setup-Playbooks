@@ -18,10 +18,10 @@
 
 - name: install phpmyadmin
   shell: |
-  wget -P /usr/share/ https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.zip
-  unzip /usr/share/phpMyAdmin-latest-all-languages.zip -d /usr/share/
-  mv /usr/share/phpMyAdmin-4.8.5-all-languages /usr/share/phpmyadmin
-  cp /usr/share/config.sample.inc.php /usr/share/config.inc.php
+    wget -P /usr/share/ https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.zip
+    unzip /usr/share/phpMyAdmin-latest-all-languages.zip -d /usr/share/
+    mv /usr/share/phpMyAdmin-4.8.5-all-languages /usr/share/phpmyadmin
+    cp /usr/share/config.sample.inc.php /usr/share/config.inc.php
 
 - name: generate pma secret
   lineinfile:
