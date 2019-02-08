@@ -20,7 +20,7 @@
     dest: /root/01-sftp_password
     insertbefore: BOF
     block: |
-      FTP
+      Доступ для загрузки файлов сайта (SFTP)
       ip-адрес: {{ ansible_default_ipv4.address }}
       Тип подключений: SFTP
       Порт: 22
