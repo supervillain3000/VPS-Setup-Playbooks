@@ -64,7 +64,7 @@
     state: present
     name: root
     host: localhost
-    password: "{{ lookup('password', '/root/password_root.mysql chars=ascii_letters,digits,hexdigits length=15') }}"
+    password: "{{ lookup('password', '/root/04-mysqlr_password chars=ascii_letters,digits,hexdigits length=15') }}"
   tags: website_stack
 
 - name: insert root mysql user name into root password file
