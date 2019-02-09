@@ -19,7 +19,7 @@
   apt:
     name: libapache2-mod-php{{ php_version_u }}
     state: latest
-  notify: restart httpd
+  notify: restart apache2
 
 - name: install php modules
   apt:
