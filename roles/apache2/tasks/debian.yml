@@ -15,6 +15,12 @@
     name: apache2
     enabled: yes
 
+- name: install mod_php
+  apt:
+    name: libapache2-mod-php{{ php_version_u }}
+    state: latest
+  notify: restart httpd
+
 - name: install php modules
   apt:
     name: "{{ php_modules_u }}"
