@@ -32,7 +32,7 @@
 
 - name: generate pma secret
   lineinfile:
-    path: /usr/share/config.inc.php
+    path: /usr/share/phpmyadmin/config.inc.php
     line: "$cfg['blowfish_secret'] = '{{ lookup('password', '/root/02-pma_password chars=ascii_letters,digits,hexdigits,punctuation length=32') }}';"
     regexp: '.*blowfish_secret.*'
 
