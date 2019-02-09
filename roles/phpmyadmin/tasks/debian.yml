@@ -36,6 +36,19 @@
     line: "$cfg['blowfish_secret'] = '{{ lookup('password', 'chars=ascii_letters,digits,hexdigits,punctuation length=32') }}';"
     regexp: '.*blowfish_secret.*'
 
+- name: add mysqli extension line into config
+  lineinfile:
+    path: /usr/share/phpmyadmin/config.inc.php
+    line: "$cfg['Servers'][$i]['extension'] = 'mysqli';"
+    insertafter: '.*auth_type.*'
+
+- name: create pma temp dir
+  file:
+    state: directory
+    path: /usr/share/phpmyadmin/tmp/
+    group: www-data
+    mode: 0770
+
 - name: check if there is apache
   stat:
     path: /etc/apache2/apache2.conf
