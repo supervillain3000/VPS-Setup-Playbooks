@@ -80,7 +80,7 @@
   blockinfile:
     marker: ''
     path: /etc/nginx/vhosts/{{ vhost }}.conf
-    insertafter: '.*begin handler.*'
+    insertafter: '^\t## handler'
     block: |
       location / {
         proxy_pass http://127.0.0.1:8080;
