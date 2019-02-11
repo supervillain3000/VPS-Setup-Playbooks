@@ -27,6 +27,12 @@
     state: latest
   notify: restart apache2
 
+- name: enable apache2 mod_rewrite
+  apache2_module:
+    state: present
+    name: rewrite
+  notify: restart apache2
+
 - name: clear default config file
   copy:
     content: '# disabled, use separate vhost configs'
