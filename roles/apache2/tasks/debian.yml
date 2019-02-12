@@ -64,7 +64,7 @@
   blockinfile:
     marker: ''
     path: /etc/apache2/apache2.conf
-    insertafter: '.*KeepAliveTimeout.*'
+    insertafter: '^.*KeepAliveTimeout'
     block: |
       MaxClients 256
       StartServers 3
