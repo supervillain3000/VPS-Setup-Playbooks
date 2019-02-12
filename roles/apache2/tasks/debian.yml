@@ -62,9 +62,9 @@
 
 - name: tune mpm_prefork
   blockinfile:
-    path: /etc/apache2/apache2.conf
-    insertafter: '^PidFile'
     marker: ''
+    path: /etc/apache2/apache2.conf
+    insertafter: '^MaxKeepAliveRequests'
     block: |
       MaxClients 256
       StartServers 3
