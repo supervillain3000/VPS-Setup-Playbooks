@@ -80,3 +80,7 @@
 
       Пароль от mysql root-пользователя:
   tags: website_stack
+
+
+#TODO
+# add log-error=/var/log/mariadb/mariadb.log to [mysqld]
