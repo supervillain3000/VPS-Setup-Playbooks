@@ -64,8 +64,8 @@
   blockinfile:
     path: /etc/httpd/conf/httpd.conf
     insertafter: '^Listen'
+    marker: ''
     block: |
-
       MaxClients 256
       StartServers 3
       MinSpareServers 3
