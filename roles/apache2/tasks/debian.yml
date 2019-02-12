@@ -62,8 +62,8 @@
 
 - name: tune mpm_prefork
   blockinfile:
-    path: /etc/httpd/conf/httpd.conf
-    insertafter: '^Listen'
+    path: /etc/apache2/apache2.conf
+    insertafter: '^PidFile'
     marker: ''
     block: |
       MaxClients 256
@@ -75,7 +75,7 @@
 
 - name: change upload size vars in php.ini
   ini_file:
-    path: /etc/php/{{ php_version_u }}/php.ini
+    path: /etc/php/{{ php_version_u }}/cli/php.ini
     section: PHP
     option: "{{ item.options }}"
     value: "{{ item.value }}"
