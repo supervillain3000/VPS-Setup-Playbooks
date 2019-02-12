@@ -60,6 +60,29 @@
     line: 'Listen 127.0.0.1:8080'
   notify: restart apache2
 
+- name: tune mpm_prefork
+  blockinfile:
+    path: /etc/httpd/conf/httpd.conf
+    insertafter: '^Listen'
+    block: |
+
+      MaxClients 256
+      StartServers 3
+      MinSpareServers 3
+      MaxSpareServers 16
+      MaxRequestsPerChild 4096
+  notify: restart httpd
+
+- name: change upload size vars in php.ini
+  ini_file:
+    path: /etc/php/{{ php_version_u }}/php.ini
+    section: PHP
+    option: "{{ item.options }}"
+    value: "{{ item.value }}"
+  loop:
+    - { options: 'post_max_size', value: '64M' }
+    - { options: 'upload_max_filesize', value: '64M' }
+
 - name: Create /var/www/ vhost subdir
   file:
     state: directory
