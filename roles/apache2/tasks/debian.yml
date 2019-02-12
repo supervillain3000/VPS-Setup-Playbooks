@@ -71,7 +71,7 @@
       MinSpareServers 3
       MaxSpareServers 16
       MaxRequestsPerChild 4096
-  notify: restart httpd
+  notify: restart apache2
 
 - name: change upload size vars in php.ini
   ini_file:
@@ -82,6 +82,7 @@
   loop:
     - { options: 'post_max_size', value: '64M' }
     - { options: 'upload_max_filesize', value: '64M' }
+  notify: restart apache2
 
 - name: Create /var/www/ vhost subdir
   file:
