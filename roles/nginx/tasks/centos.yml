@@ -57,3 +57,6 @@
 # add the following line in [Service] section in /etc/systemd/system/multi-user.target.wants/nginx.service file:
 #ExecStartPre=/bin/sleep 10
 # after PIDFile=/run/nginx.pid
+
+# revise error in conf.d/04-ssl.conf
+# nginx: [emerg] BIO_new_file("/etc/nginx/dhparam.pem") failed (SSL: error:02001002:system library:fopen:No such file or directory:fopen('/etc/nginx/dhparam.pem','r') error:2006D080:BIO routines:BIO_new_file:no such file)
