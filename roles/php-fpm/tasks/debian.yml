@@ -4,13 +4,13 @@
     update_cache: yes
     repo: ppa:ondrej/php
 
-- name: install fpm for client chosen php-version
+- name: install php-fpm
   apt:
     name: php{{ php_version_u }}-fpm
     update_cache: yes
     state: latest
 
-- name: install php modules for selected php version
+- name: install php modules
   apt:
     name: "{{ php_modules_u }}"
     state: latest
