@@ -47,6 +47,8 @@
   copy:
     src: index.php
     dest: /var/www/{{ vhost }}/index.php
+    owner: www-data
+    group: www-data
     mode: 0644
 
 - name: add fpm handler block for nginx
