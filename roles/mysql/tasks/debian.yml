@@ -75,3 +75,6 @@
 
       Пароль от mysql root-пользователя:
   tags: website_stack
+
+#TODO
+# 1. write root pass to /root/my.cnf

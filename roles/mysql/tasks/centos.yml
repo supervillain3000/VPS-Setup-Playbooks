@@ -83,4 +83,5 @@
 
 
 #TODO
-# add log-error=/var/log/mariadb/mariadb.log to [mysqld]
+# 1. add log-error=/var/log/mariadb/mariadb.log to [mysqld]
+# 2. write root pass to /root/my.cnf
