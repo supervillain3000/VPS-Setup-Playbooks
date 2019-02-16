@@ -35,9 +35,12 @@
 
 - name: Add nginx vhost config
   template:
-    src: vhost_debian.conf.j2
-    dest: "/etc/nginx/vhosts/{{ vhost }}.conf"
+    src: "{{ item.file }}"
+    dest: "{{ item.target }}"
     mode: 0644
+  loop:
+    - { file: 'vhost_debian.conf.j2', target: '/etc/nginx/vhosts/{{ vhost }}.conf' }
+    - { file: 'ipvhost.conf.j2', target: '/etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf' }
   notify: restart nginx
 
 - name: enable ssh and http(s) on ufw

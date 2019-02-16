@@ -67,16 +67,70 @@
   notify: restart php-fpm debian
 
 - name: copy fpm nginx config
-  template:
-    src: pma_debian_nginx.conf
-    dest: /etc/nginx/conf.d/phpmyadmin.conf
+  blockinfile:
+    marker: ''
+    regexp: '^\t## pma'
+    block: |
+      rewrite ^/phpMyAdmin/?(.*)$ /phpmyadmin/$1 redirect;
+      rewrite ^/pma/?(.*)$ /phpmyadmin/$1 redirect;
+
+      location /phpmyadmin/setup {
+          deny all;
+      }
+
+      location /phpmyadmin/ {
+        auth_basic "Speak, friend, and enter.";
+        auth_basic_user_file conf.d/htpasswd;
+
+        root /usr/share;
+        fastcgi_index index.php;
+        fastcgi_pass unix:/var/run/php-fpm/phpmyadmin.sock;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+      }
+
+      location ~* ^/phpmyadmin/.+\.(jpg|jpeg|gif|png|ico|css|zip|tgz|gz|rar|bz2|doc|xls|exe|pdf|ppt|txt|tar|mid|midi|wav|bmp|rtf|js|swf|flv|avi|djvu|mp3)$ {
+        root /usr/share;
+        allow all;
+      }
+    path: /etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf
   when: php_fpm_status.stat.exists
   notify: restart nginx
 
 - name: copy modphp nginx handler confing
-  template:
-    src: pma_nginx_modphp.conf
-    dest: /etc/nginx/conf.d/phpmyadmin.conf
+  blockinfile:
+    marker: ''
+    regexp: '^\t## pma'
+    block: |
+      rewrite ^/phpMyAdmin/?(.*)$ /phpmyadmin/$1 redirect;
+      rewrite ^/pma/?(.*)$ /phpmyadmin/$1 redirect;
+
+      location /phpmyadmin/setup {
+        deny all;
+      }
+
+      location /phpmyadmin/ {
+        auth_basic "Speak, friend, and enter.";
+        auth_basic_user_file conf.d/htpasswd;
+
+        proxy_pass http://127.0.0.1:8080;
+        proxy_redirect off;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+        proxy_read_timeout 300;
+        client_max_body_size 256m;
+
+        proxy_buffer_size 16k;
+        proxy_buffers 32 16k;
+      }
+
+      location ~* ^/phpmyadmin/.+\.(jpg|jpeg|gif|png|ico|css|zip|tgz|gz|rar|bz2|doc|xls|exe|pdf|ppt|txt|tar|mid|midi|wav|bmp|rtf|js|swf|flv|avi|djvu|mp3)$ {
+        root /usr/share;
+        allow all;
+      }
+    path: /etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf
   when: apache2_status.stat.exists
   notify: restart nginx
 
