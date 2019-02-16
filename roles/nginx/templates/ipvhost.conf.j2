@@ -1,0 +1,12 @@
+server {
+        server_name {{ ansible_default_ipv4.address }};
+        listen {{ ansible_default_ipv4.address }}:80;
+
+        access_log off;
+
+        try_files $uri $uri/ index.php;
+
+        ## pma
+
+        ## postadmin
+}

@@ -29,11 +29,14 @@
 - name: Create /etc/nginx/vhosts/
   file: state=directory path=/etc/nginx/vhosts/ mode=0755
 
-- name: Add nginx vhost config
+- name: Add nginx vhosts configs
   template:
-    src: vhost_centos.conf.j2
-    dest: "/etc/nginx/vhosts/{{ vhost }}.conf"
+    src: "{{ item.file }}"
+    dest: "{{ item.target }}"
     mode: 0644
+  loop:
+    - { file: 'vhost_centos.conf.j2', target: '/etc/nginx/vhosts/{{ vhost }}.conf' }
+    - { file: 'ipvhost.conf.j2', target: '/etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf' }
   notify: restart nginx
 
 - name: fix nginx not starting with ipv6
@@ -54,9 +57,5 @@
     - https
 
 #TODO
-# add the following line in [Service] section in /etc/systemd/system/multi-user.target.wants/nginx.service file:
-#ExecStartPre=/bin/sleep 10
-# after PIDFile=/run/nginx.pid
-
 # revise error in conf.d/04-ssl.conf
 # nginx: [emerg] BIO_new_file("/etc/nginx/dhparam.pem") failed (SSL: error:02001002:system library:fopen:No such file or directory:fopen('/etc/nginx/dhparam.pem','r') error:2006D080:BIO routines:BIO_new_file:no such file)
