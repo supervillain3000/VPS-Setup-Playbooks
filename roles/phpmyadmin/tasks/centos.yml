@@ -57,8 +57,8 @@
       }
 
       location ~* ^/phpmyadmin/.+\.(jpg|jpeg|gif|png|ico|css|zip|tgz|gz|rar|bz2|doc|xls|exe|pdf|ppt|txt|tar|mid|midi|wav|bmp|rtf|js|swf|flv|avi|djvu|mp3)$ {
-    	   root /usr/share;
-    	   allow all;
+        root /usr/share;
+        allow all;
       }
     path: /etc/nginx/conf.d/{{ ansible_default_ipv4.address }}.conf
   notify: restart nginx
@@ -94,8 +94,8 @@
       }
 
       location ~* ^/phpmyadmin/.+\.(jpg|jpeg|gif|png|ico|css|zip|tgz|gz|rar|bz2|doc|xls|exe|pdf|ppt|txt|tar|mid|midi|wav|bmp|rtf|js|swf|flv|avi|djvu|mp3)$ {
-    	   root /usr/share;
-    	   allow all;
+        root /usr/share;
+        allow all;
       }
     path: /etc/nginx/conf.d/{{ ansible_default_ipv4.address }}.conf
   when: httpd_status.stat.exists
