@@ -70,6 +70,8 @@
     name: root
     host: localhost
     password: "{{ lookup('password', '/root/04-mysqlr_password chars=ascii_letters,digits,hexdigits length=15') }}"
+  vars:
+    file_contents: "{{ lookup('file', '/root/04-mysqlr_password') }}"
   tags: website_stack
 
 - name: copy root mysql password file
@@ -84,7 +86,7 @@
   replace:
     path: /root/.my.cnf
     regexp: '^password'
-    replace: 'password="{{lookup('file', '/root/04-mysqlr_password')}}"'
+    replace: 'password="{{ file_contents }}"'
 
 - name: insert root mysql user name into root password file
   blockinfile:
