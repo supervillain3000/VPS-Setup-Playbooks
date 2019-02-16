@@ -60,7 +60,7 @@
         root /usr/share;
         allow all;
       }
-    path: /etc/nginx/conf.d/{{ ansible_default_ipv4.address }}.conf
+    path: /etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf
   notify: restart nginx
   when: php_fpm_status.stat.exists
 
@@ -97,7 +97,7 @@
         root /usr/share;
         allow all;
       }
-    path: /etc/nginx/conf.d/{{ ansible_default_ipv4.address }}.conf
+    path: /etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf
   when: httpd_status.stat.exists
   notify: restart nginx
 
