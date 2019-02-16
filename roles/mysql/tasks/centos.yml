@@ -79,7 +79,7 @@
     group: root
     mode: 0660
 
-- name: add root password to root homedir my.cnf
+- name: add root password to root homedir my.cnf file
   replace:
     path: /root/.my.cnf
     regexp: '^password'
@@ -95,7 +95,5 @@
 
       Пароль от mysql root-пользователя:
 
-
 #TODO
 # 1. add log-error=/var/log/mariadb/mariadb.log to [mysqld]
-# 2. write root pass to /root/my.cnf
