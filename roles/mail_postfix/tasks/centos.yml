@@ -6,3 +6,15 @@
   vars:
     main_packages:
       - postfix
+
+- name: Enable pop and imap on firewall-cmd
+  firewalld:
+    service: "{{ item }}"
+    state: enabled
+    permanent: yes
+    immediate: yes
+    zone: public
+  loop:
+    - smtp
+    - smtps
+    - smtp-submission
