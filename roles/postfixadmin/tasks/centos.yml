@@ -1,0 +1,139 @@
+---
+- name: install
+  yum:
+    name: "{{ main_packages }}"
+    update_cache: yes
+  vars:
+    main_packages:
+      - postfix
+      - dovecot
+      - dovecot-mysql
+
+- name: (if php-fpm) copy nginx config
+  blockinfile:
+    marker: ''
+    regexp: '^\t## postadmin'
+    block: |
+      rewrite ^/postadmin/?(.*)$ /postfixadmin/$1 redirect;
+
+      location /postfixadmin/ {
+        #auth_basic "Speak, friend, and enter.";
+        #auth_basic_user_file conf.d/htpasswd;
+
+        root /usr/share;
+        fastcgi_index index.php;
+        fastcgi_pass unix:/var/run/php-fpm/postfixadmin.sock;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+      }
+
+      location ~* ^/postfixadmin/.+\.(jpg|jpeg|gif|png|ico|css|zip|tgz|gz|rar|bz2|doc|xls|exe|pdf|ppt|txt|tar|mid|midi|wav|bmp|rtf|js|swf|flv|avi|djvu|mp3)$ {
+        root /var/www/;
+        allow all;
+      }
+    path: /etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf
+  when: php_fpm_status.stat.exists
+  notify: restart nginx
+
+- name: (if apache) copy nginx config
+  blockinfile:
+    marker: ''
+    regexp: '^\t## postadmin'
+    block: |
+      rewrite ^/postadmin/?(.*)$ /postfixadmin/public/$1 redirect;
+
+      location /postfixadmin/ {
+        #auth_basic "Speak, friend, and enter.";
+        #auth_basic_user_file conf.d/htpasswd;
+
+        proxy_pass http://127.0.0.1:8080;
+        proxy_redirect off;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+        proxy_read_timeout 300;
+        client_max_body_size 256m;
+
+        proxy_buffer_size 16k;
+        proxy_buffers 32 16k;
+      }
+
+      location ~* ^/postfixadmin/.+\.(jpg|jpeg|gif|png|ico|css|zip|tgz|gz|rar|bz2|doc|xls|exe|pdf|ppt|txt|tar|mid|midi|wav|bmp|rtf|js|swf|flv|avi|djvu|mp3)$ {
+             root /var/www/;
+             allow all;
+      }
+    path: /etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf
+  when: apache2_status.stat.exists
+  notify: restart nginx
+
+- name: copy php-fpm config
+  copy:
+    src: centos_fpm.conf
+    dest: /etc/php-fpm.d/postfixadmin.conf
+  when: php_fpm_status.stat.exists
+  notify: restart php-fpm
+
+- name: copy httpd config
+  template:
+    src: apache_vhost.conf.j2
+    dest: /etc/httpd/conf.d/postfixadmin.conf
+    mode: 0644
+  when: apache2_status.stat.exists
+  notify: restart httpd
+
+- name: create pfxadmin db
+  mysql_db:
+    name: postfixadmin
+    collation: utf8_unicode_ci
+
+- name: create pfxadmin mysql user
+  mysql_user:
+    name: postfixadmin
+    password: "{{ lookup('password', '/root/06-pfxadmin_db_password chars=ascii_letters,digits,hexdigits length=15') }}"
+    priv: 'postfixadmin.*:ALL'
+    host: localhost
+
+- name: download postfixadmin
+  get_url:
+    #url: https://downloads.sourceforge.net/project/postfixadmin/postfixadmin/postfixadmin-3.2/postfixadmin-3.2.tar.gz
+    url: https://sourceforge.net/projects/postfixadmin/files/latest/download
+    dest: /var/www/postfixadmin.tar.gz
+    timeout: 60
+
+- name: install postfixadmin
+  shell: |
+    tar -xvf /tmp/postfixadmin.tar.gz -C /var/www/postfixadmin
+    mv /var/www/postfixadmin* /var/www/postfixadmin
+    chown -R apache: /var/www/postfixadmin
+    cp /var/www/postfixadmin/config.inc.php /usr/share/postfixadmin/config.local.php
+    rm /tmp/postfixadmin.tar.gz
+  args:
+    warn: false
+
+- name: make changes to pfxadmin config file
+  lineinfile:
+    path: /var/www/postfixadmin/config.local.php
+    regexp: "{{ item.regmatch }}"
+    line: "{{ item.change }}"
+  loop:
+    - { regmatch: "^$CONF['configured", change: "$CONF['configured'] = true;" }
+    - { regmatch: "^$CONF['database_type", change: "$CONF['database_type'] = 'mysqli';" }
+    - { regmatch: "^$CONF['database_host", change: "$CONF['database_host'] = 'localhost';" }
+    - { regmatch: "^$CONF['database_user", change: "$CONF['database_user'] = 'postfixadmin';" }
+    - { regmatch: "^$CONF['database_password", change: "$CONF['database_password'] = '{{ file_contents }}';" }
+    - { regmatch: "^$CONF['database_name", change: "$CONF['database_name'] = 'postfixadmin';" }
+    - { regmatch: "^$CONF['domain_path", change: "$CONF['domain_path'] = 'NO';" }
+    - { regmatch: "^$CONF['domain_in_mailbox", change: "$CONF['domain_in_mailbox'] = 'YES';" }
+    vars:
+      file_contents: "{{ lookup('file', '/root/06-pfxadmin_db_password') }}"
+
+#TODO
+# generate pfxadmin setup password and put hash into /var/www/postfixadmin/config.local.php
+# create folder /var/www/postfixadmin/templates_c and chown it to apache:
+# go to http://IP/postfixadmin/public/setup.php with curl This way postfixadmin will create all the database structure
+# bash /var/www/html/postfixadmin-3.2/scripts/postfixadmin-cli admin add admin@your_domain_idroot.net --password strong_password22 --password2 strong_password22 --superadmin 1 --active 1
+
+- name: create a table for the domains
+  shell: >
+    CREATE TABLE `virtual_domains` (`id` int(11) NOT NULL auto_increment, `name` varchar(50) NOT NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;
