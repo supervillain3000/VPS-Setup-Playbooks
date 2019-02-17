@@ -117,15 +117,24 @@
     - { regmatch: "^$CONF['database_name", change: "$CONF['database_name'] = 'postfixadmin';" }
     - { regmatch: "^$CONF['domain_path", change: "$CONF['domain_path'] = 'NO';" }
     - { regmatch: "^$CONF['domain_in_mailbox", change: "$CONF['domain_in_mailbox'] = 'YES';" }
-    vars:
-      file_contents: "{{ lookup('file', '/root/06-pfxadmin_db_password') }}"
+  vars:
+    file_contents: "{{ lookup('file', '/root/06-pfxadmin_db_password') }}"
+
+- name: create templates_c directory
+  file:
+    path: /var/www/postfixadmin/templates_c
+    state: directory
+    owner: apache
+    group: apache
 
 #TODO
 # generate pfxadmin setup password and put hash into /var/www/postfixadmin/config.local.php
-# create folder /var/www/postfixadmin/templates_c and chown it to apache:
-# go to http://IP/postfixadmin/public/setup.php with curl This way postfixadmin will create all the database structure
-# bash /var/www/html/postfixadmin-3.2/scripts/postfixadmin-cli admin add admin@your_domain_idroot.net --password strong_password22 --password2 strong_password22 --superadmin 1 --active 1
+# {{ lookup('password', '/root/07-pfxadmin_admin_password chars=ascii_letters,digits length=15') }}
 
-- name: create a table for the domains
-  shell: >
-    CREATE TABLE `virtual_domains` (`id` int(11) NOT NULL auto_increment, `name` varchar(50) NOT NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+- name: make postfixadmin populate db using setup script
+  shell: curl -vL http://{{ ansible_default_ipv4.address }}/postfixadmin/public/setup.php
+  args:
+    warn: false
+
+- name: add postfixadmin admin user
+  shell: bash /var/www/html/postfixadmin/scripts/postfixadmin-cli admin add admin@{{ vhost }} --password Strong_pass22# --password2 Strong_pass22# --superadmin 1 --active 1
