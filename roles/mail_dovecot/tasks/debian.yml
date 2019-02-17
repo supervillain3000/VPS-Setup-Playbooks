@@ -1,0 +1,9 @@
+---
+- name: install packages
+  apt:
+    name: "{{ main_packages }}"
+    update_cache: yes
+  vars:
+    main_packages:
+      - dovecot
+      - dovecot-mysql
