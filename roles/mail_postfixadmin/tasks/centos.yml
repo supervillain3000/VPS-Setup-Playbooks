@@ -5,6 +5,7 @@
     regexp: '^\t## postadmin'
     block: |
       rewrite ^/postadmin/?(.*)$ /postfixadmin/$1 redirect;
+      rewrite ^/postfixadmin/?(.*)$ /postfixadmin/public/$1 redirect;
 
       location /postfixadmin/ {
         #auth_basic "Speak, friend, and enter.";
@@ -31,6 +32,7 @@
     regexp: '^\t## postadmin'
     block: |
       rewrite ^/postadmin/?(.*)$ /postfixadmin/public/$1 redirect;
+      rewrite ^/postfixadmin/?(.*)$ /postfixadmin/public/$1 redirect;
 
       location /postfixadmin/ {
         #auth_basic "Speak, friend, and enter.";

@@ -7,3 +7,7 @@
     main_packages:
       - dovecot
       - dovecot-mysql
+
+#TODO
+#add user vmail for dovecot:
+#useradd -u 150 vmail -g 12 -s /bin/nologin vmail
