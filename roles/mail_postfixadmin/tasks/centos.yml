@@ -1,14 +1,4 @@
 ---
-- name: install
-  yum:
-    name: "{{ main_packages }}"
-    update_cache: yes
-  vars:
-    main_packages:
-      - postfix
-      - dovecot
-      - dovecot-mysql
-
 - name: (if php-fpm) copy nginx config
   blockinfile:
     marker: ''
