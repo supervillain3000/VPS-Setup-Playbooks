@@ -1,12 +1,12 @@
 ---
 - name: check if there is apache
   stat:
-    path: /usr/sbin/httpd
-  register: httpd_status
+    path: /etc/apache2/apache2.conf
+  register: apache2_status
 
 - name: check if there is php-fpm
   stat:
-    path: /usr/sbin/php-fpm
+    path: /usr/sbin/php-fpm{{ php_version_u }}
   register: php_fpm_status
 
 - name: (if php-fpm) copy nginx config
