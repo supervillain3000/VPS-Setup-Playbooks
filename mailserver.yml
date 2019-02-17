@@ -1,6 +1,10 @@
 ---
 - hosts: vps
   roles:
+    - nginx
+    - apache2
     - mysql
     - postfix
+    - dovecot
+    - postfixadmin
     - fail2ban
