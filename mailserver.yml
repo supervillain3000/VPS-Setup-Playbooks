@@ -4,7 +4,7 @@
     - nginx
     - apache2
     - mysql
+    - postfixadmin
     - postfix
     - dovecot
-    - postfixadmin
     - fail2ban
