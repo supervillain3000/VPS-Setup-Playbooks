@@ -82,7 +82,7 @@
 - name: create pfxadmin mysql user
   mysql_user:
     name: postfixadmin
-    password: "{{ lookup('password', '/root/06-pfxadmin_db_password chars=ascii_letters,digits,hexdigits length=15') }}"
+    password: "{{ lookup('password', '/root/06-pfxadmin_db_password chars=ascii_letters,digits length=20') }}"
     priv: 'postfixadmin.*:ALL'
     host: localhost
 

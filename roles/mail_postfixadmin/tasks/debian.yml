@@ -1,5 +1,1 @@
 ---
-- name: install
-  apt:
-    name:
-    update_cache: yes
