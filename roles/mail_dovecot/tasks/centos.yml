@@ -9,8 +9,8 @@
       - dovecot-mysql
 
 #TODO
-#add user vmail for dovecot:
-#useradd -u 150 vmail -g 12 -s /bin/nologin vmail
+#1. add user vmail for dovecot: useradd -u 150 vmail -g 12 -s /bin/nologin vmail
+#2. mkdir /var/vmail; chown: vmail:mail /var/vmail
 
 - name: Enable pop and imap on firewall-cmd
   firewalld:
