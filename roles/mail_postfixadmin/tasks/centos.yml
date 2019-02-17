@@ -1,4 +1,14 @@
 ---
+- name: check if there is apache
+  stat:
+    path: /usr/sbin/httpd
+  register: httpd_status
+
+- name: check if there is php-fpm
+  stat:
+    path: /usr/sbin/php-fpm
+  register: php_fpm_status
+
 - name: (if php-fpm) copy nginx config
   blockinfile:
     marker: ''
