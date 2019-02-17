@@ -7,7 +7,77 @@
     main_packages:
       - postfix
 
-- name: Enable pop and imap on firewall-cmd
+- name: set postfix main.cf settings
+  shell: |
+    postconf -e "myhostname = $(hostname -f)"
+    postconf -e "virtual_mailbox_domains = proxy:mysql:/etc/postfix/sql/mysql_virtual_domains_maps.cf"
+    postconf -e "virtual_alias_maps = proxy:mysql:/etc/postfix/sql/mysql_virtual_alias_maps.cf, proxy:mysql:/etc/postfix/sql/mysql_virtual_alias_domain_maps.cf, proxy:mysql:/etc/postfix/sql/mysql_virtual_alias_domain_catchall_maps.cf"
+    postconf -e "virtual_mailbox_maps = proxy:mysql:/etc/postfix/sql/mysql_virtual_mailbox_maps.cf, proxy:mysql:/etc/postfix/sql/mysql_virtual_alias_domain_mailbox_maps.cf"
+    postconf -e "smtpd_tls_cert_file = /etc/pki/tls/certs/localhost.crt"
+    postconf -e "smtpd_tls_key_file = /etc/pki/tls/private/localhost.key"
+    postconf -e "smtpd_use_tls = yes"
+    postconf -e "smtpd_tls_auth_only = no"
+    postconf -e "smtpd_sasl_type = dovecot"
+    postconf -e "smtpd_sasl_path = private/auth"
+    postconf -e "smtpd_sasl_auth_enable = yes"
+    postconf -e "smtpd_recipient_restrictions = permit_sasl_authenticated, permit_mynetworks, reject_unauth_destination"
+    postconf -e "mydestination = localhost"
+    postconf -e "mynetworks = 127.0.0.0/8"
+    postconf -e "inet_protocols = ipv4"
+    postconf -e "inet_interfaces = all"
+    postconf -e "virtual_transport = lmtp:unix:private/dovecot-lmtp"
+  notify: restart postfix
+
+- name: create sql config files directory
+  file:
+    path: /etc/postfix/sql/
+    state: directory
+
+- name: copy master.cf
+  copy:
+    src: master.cf
+    dest: /etc/postfix/master.cf
+    mode: 0644
+  notify: restart postfix
+
+- name: copy sql connection files
+  copy:
+    src: "{{ time.source }}"
+    dest: "{{ time.target }}"
+    mode: 0644
+  loop:
+    - { source: 'mysql_virtual_alias_domain_catchall_maps.cf', target: '/etc/postfix/sql/mysql_virtual_alias_domain_catchall_maps.cf'}
+    - { source: 'mysql_virtual_alias_domain_mailbox_maps.cf', target: '/etc/postfix/sql/mysql_virtual_alias_domain_mailbox_maps.cf'}
+    - { source: 'mysql_virtual_alias_domain_maps.cf', target: '/etc/postfix/sql/mysql_virtual_alias_domain_maps.cf'}
+    - { source: 'mysql_virtual_alias_maps.cf', target: '/etc/postfix/sql/mysql_virtual_alias_maps.cf'}
+    - { source: 'mysql_virtual_domains_maps.cf', target: '/etc/postfix/sql/mysql_virtual_domains_maps.cf'}
+    - { source: 'mysql_virtual_mailbox_limit_maps.cf', target: '/etc/postfix/sql/mysql_virtual_mailbox_limit_maps.cf'}
+    - { source: 'mysql_virtual_mailbox_limit_maps.cf', target: '/etc/postfix/sql/mysql_virtual_mailbox_maps.cf'}
+  notify: restart postfix
+
+- name: replace dummy password with a real one
+  replace:
+    path: {{ item }}
+    regexp: 'strong_password$'
+    replace: "{{ file_contents }}"
+  loop:
+    - /etc/postfix/sql/mysql_virtual_alias_domain_catchall_maps.cf
+    - /etc/postfix/sql/mysql_virtual_alias_domain_mailbox_maps.cf
+    - /etc/postfix/sql/mysql_virtual_alias_domain_maps.cf
+    - /etc/postfix/sql/mysql_virtual_alias_maps.cf
+    - /etc/postfix/sql/mysql_virtual_domains_maps.cf
+    - /etc/postfix/sql/mysql_virtual_mailbox_limit_maps.cf
+    - /etc/postfix/sql/mysql_virtual_mailbox_maps.cf
+  vars:
+    file_contents: "{{ lookup('file', '/root/06-pfxadmin_db_password') }}"
+  notify: restart postfix
+
+- name: make sure postfix is enabled
+  service:
+    name: postfix
+    enabled: yes
+
+- name: enable smtp on firewall-cmd
   firewalld:
     service: "{{ item }}"
     state: enabled
