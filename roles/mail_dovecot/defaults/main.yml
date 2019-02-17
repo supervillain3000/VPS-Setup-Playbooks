@@ -1,2 +1,5 @@
 ---
-# defaults file for roles/dovecot
+- name: restart dovecot
+  service:
+    name: dovecot
+    state: restarted
