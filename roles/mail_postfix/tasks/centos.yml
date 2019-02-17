@@ -57,7 +57,7 @@
 
 - name: replace dummy password with a real one
   replace:
-    path: {{ item }}
+    path: "{{ item }}"
     regexp: 'strong_password$'
     replace: "{{ file_contents }}"
   loop:
