@@ -6,5 +6,5 @@
     - mysql
     - mail_postfixadmin
     - mail_postfix
-#    - mail_dovecot
+    - mail_dovecot
     - fail2ban
