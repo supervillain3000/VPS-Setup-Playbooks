@@ -11,3 +11,16 @@
 #TODO
 #add user vmail for dovecot:
 #useradd -u 150 vmail -g 12 -s /bin/nologin vmail
+
+- name: Enable pop and imap on firewall-cmd
+  firewalld:
+    service: "{{ item }}"
+    state: enabled
+    permanent: yes
+    immediate: yes
+    zone: public
+  loop:
+    - pop3
+    - pop3s
+    - imap
+    - imaps
