@@ -76,13 +76,20 @@
   when: php_fpm_status.stat.exists
   notify: restart php-fpm
 
-- name: copy httpd config
+- name: copy apache2 config
   template:
     src: apache_vhost.conf.j2
-    dest: /etc/httpd/conf.d/postfixadmin.conf
-    mode: 0644
+    dest: /etc/apache2/sites-available/postfixadmin.conf
   when: apache2_status.stat.exists
-  notify: restart httpd
+  notify: restart apache2
+
+- name: create apache vhost file symlink
+  file:
+    state: link
+    path: /etc/apache2/sites-enabled/postfixadmin.conf
+    src: /etc/apache2/sites-available/postfixadmin.conf
+  when: apache2_status.stat.exists
+  notify: restart apache2
 
 - name: create pfxadmin db
   mysql_db:
@@ -107,7 +114,7 @@
   shell: |
     tar -xvf /tmp/postfixadmin.tar.gz -C /var/www/postfixadmin
     mv /var/www/postfixadmin* /var/www/postfixadmin
-    chown -R apache: /var/www/postfixadmin
+    chown -R www-data: /var/www/postfixadmin
     cp /var/www/postfixadmin/config.inc.php /usr/share/postfixadmin/config.local.php
     rm /tmp/postfixadmin.tar.gz
   args:
@@ -134,8 +141,8 @@
   file:
     path: /var/www/postfixadmin/templates_c
     state: directory
-    owner: apache
-    group: apache
+    owner: www-data
+    group: www-data
 
 #TODO
 # generate pfxadmin setup password and put hash into /var/www/postfixadmin/config.local.php

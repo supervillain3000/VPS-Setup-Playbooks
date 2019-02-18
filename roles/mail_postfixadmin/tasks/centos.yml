@@ -81,7 +81,7 @@
     src: apache_vhost.conf.j2
     dest: /etc/httpd/conf.d/postfixadmin.conf
     mode: 0644
-  when: apache2_status.stat.exists
+  when: httpd_status.stat.exists
   notify: restart httpd
 
 - name: create pfxadmin db
