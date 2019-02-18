@@ -21,7 +21,7 @@
         #auth_basic "Speak, friend, and enter.";
         #auth_basic_user_file conf.d/htpasswd;
 
-        root /usr/share;
+        root /var/www;
         fastcgi_index index.php;
         fastcgi_pass unix:/var/run/php-fpm/postfixadmin.sock;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
@@ -103,19 +103,18 @@
     priv: 'postfixadmin.*:ALL'
     host: localhost
 
-- name: download postfixadmin
-  get_url:
-    url: https://downloads.sourceforge.net/project/postfixadmin/postfixadmin/postfixadmin-3.2/postfixadmin-3.2.tar.gz
-    #url: https://sourceforge.net/projects/postfixadmin/files/latest/download
+- name: copy postfixadmin
+  copy:
+    src: postfixadmin.tar.gz
     dest: /tmp/postfixadmin.tar.gz
-    timeout: 60
+  notify: restart dovecot
 
 - name: install postfixadmin
   shell: |
     tar -xvf /tmp/postfixadmin.tar.gz -C /var/www/
     mv /var/www/postfixadmin* /var/www/postfixadmin
     chown -R www-data: /var/www/postfixadmin
-    cp /var/www/postfixadmin/config.inc.php /usr/share/postfixadmin/config.local.php
+    cp /var/www/postfixadmin/config.inc.php /var/www/postfixadmin/config.local.php
     rm /tmp/postfixadmin.tar.gz
   args:
     warn: false
