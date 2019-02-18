@@ -105,14 +105,14 @@
 
 - name: download postfixadmin
   get_url:
-    #url: https://downloads.sourceforge.net/project/postfixadmin/postfixadmin/postfixadmin-3.2/postfixadmin-3.2.tar.gz
-    url: https://sourceforge.net/projects/postfixadmin/files/latest/download
-    dest: /var/www/postfixadmin.tar.gz
+    url: https://downloads.sourceforge.net/project/postfixadmin/postfixadmin/postfixadmin-3.2/postfixadmin-3.2.tar.gz
+    #url: https://sourceforge.net/projects/postfixadmin/files/latest/download
+    dest: /tmp/postfixadmin.tar.gz
     timeout: 60
 
 - name: install postfixadmin
   shell: |
-    tar -xvf /tmp/postfixadmin.tar.gz -C /var/www/postfixadmin
+    tar -xvf /tmp/postfixadmin.tar.gz -C /var/www/
     mv /var/www/postfixadmin* /var/www/postfixadmin
     chown -R www-data: /var/www/postfixadmin
     cp /var/www/postfixadmin/config.inc.php /usr/share/postfixadmin/config.local.php
