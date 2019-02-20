@@ -107,7 +107,7 @@
     tar -xvf /tmp/postfixadmin.tar.gz -C /var/www/
     mv /var/www/postfixadmin* /var/www/postfixadmin
     chown -R www-data: /var/www/postfixadmin
-    cp /var/www/postfixadmin/config.inc.php /var/wwwpostfixadmin/config.local.php
+    cp /var/www/postfixadmin/config.inc.php /var/www/postfixadmin/config.local.php
     rm /tmp/postfixadmin.tar.gz
   args:
     warn: false
