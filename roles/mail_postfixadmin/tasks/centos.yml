@@ -127,10 +127,10 @@
     regexp: "{{ item.regmatch }}"
     line: "{{ item.change }}"
   loop:
-    - { regmatch: '^\$CONF[\'configured', change: '$CONF['configured'] = true;' }
-    - { regmatch: '^\$CONF[\'database_type', change: '$CONF['database_type'] = 'mysqli';' }
-    #- { regmatch: "^\$CONF['database_host", change: "$CONF['database_host'] = 'localhost';" }
-    #- { regmatch: "^\$CONF['database_user", change: "$CONF['database_user'] = 'postfixadmin';" }
+    - { regmatch: '.*configured.*', change: '$CONF['configured'] = true;' }
+    - { regmatch: '.*database_type.*', change: '$CONF['database_type'] = 'mysqli';' }
+    - { regmatch: '.*database_host.*', change: '$CONF['database_host'] = 'localhost';' }
+    - { regmatch: '.*CONF['database_user.*', change: '$CONF['database_user'] = 'postfixadmin';' }
     #- { regmatch: "^\$CONF['database_password", change: "$CONF['database_password'] = '{{ file_contents }}';" }
     #- { regmatch: "^\$CONF['database_name", change: "$CONF['database_name'] = 'postfixadmin';" }
     #- { regmatch: "^\$CONF['domain_path", change: "$CONF['domain_path'] = 'NO';" }
