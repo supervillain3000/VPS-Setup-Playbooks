@@ -103,6 +103,14 @@
     priv: 'postfixadmin.*:ALL'
     host: localhost
 
+- name: insert pfxadmin mysql user text into password file
+  blockinfile:
+    dest: /root/06-pfxadmin_db_password
+    insertbefore: BOF
+    block: |
+
+      Пароль пользователя postfixadmin в БД postfixadmin:
+
 - name: copy postfixadmin
   copy:
     src: postfixadmin.tar.gz
