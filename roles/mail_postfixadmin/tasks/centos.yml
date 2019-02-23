@@ -150,6 +150,8 @@
     regexp: 'postfix_database_password_string'
     replace: "{{ lookup('file', '/root/06-pfxadmin_db_password') }}"
 
+
+
 - name: create templates_c directory
   file:
     path: /var/www/postfixadmin/templates_c
@@ -169,7 +171,11 @@
     warn: false
 
 - name: replace php binary path in postfixadmin-cli script
+<<<<<<< HEAD
   replace:
+=======
+  repace:
+>>>>>>> 5f075f5aafd3c01352c80e29f56fb2abb154b0e3
     path: '/var/www/postfixadmin/scripts/postfixadmin-cli'
     regexp: 'exec php'
     replace: 'exec /opt/remi/php{{php_version}}/root/bin/php'
