@@ -115,11 +115,17 @@
   shell: |
     tar -xvf /tmp/postfixadmin.tar.gz -C /var/www/
     mv /var/www/postfixadmin* /var/www/postfixadmin
-    chown -R www-data: /var/www/postfixadmin
+    chown -R apache: /var/www/postfixadmin
     cp /var/www/postfixadmin/config.inc.php /var/www/postfixadmin/config.local.php
     rm /tmp/postfixadmin.tar.gz
   args:
     warn: false
+
+- name: copy pfxadmin config file
+  copy:
+    src: pxf_config_file
+    dest: /var/www/postfixadmin/config.local.php
+    mode: 0644
 
 #- name: make changes to pfxadmin config file
 #  lineinfile:
@@ -137,6 +143,12 @@
     #- { regmatch: "^\$CONF['domain_in_mailbox", change: "$CONF['domain_in_mailbox'] = 'YES';" }
 #  vars:
 #    file_contents: "{{ lookup('file', '/root/06-pfxadmin_db_password') }}"
+
+- name: change database_password var in pfx_config
+  lineinfile:
+    path: /var/www/postfixadmin/config.local.php
+    regexp: 'postfix_database_password_string'
+    replace: "{{ lookup('file', '/root/06-pfxadmin_db_password') }}"
 
 - name: create templates_c directory
   file:
