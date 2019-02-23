@@ -145,7 +145,7 @@
 #    file_contents: "{{ lookup('file', '/root/06-pfxadmin_db_password') }}"
 
 - name: change database_password var in pfx_config
-  lineinfile:
+  replace:
     path: /var/www/postfixadmin/config.local.php
     regexp: 'postfix_database_password_string'
     replace: "{{ lookup('file', '/root/06-pfxadmin_db_password') }}"
