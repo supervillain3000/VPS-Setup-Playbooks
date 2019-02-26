@@ -109,7 +109,6 @@
   copy:
     src: postfixadmin.tar.gz
     dest: /tmp/postfixadmin.tar.gz
-  notify: restart dovecot
 
 - name: install postfixadmin
   shell: |
