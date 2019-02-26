@@ -149,8 +149,6 @@
     regexp: 'postfix_database_password_string'
     replace: "{{ lookup('file', '/root/06-pfxadmin_db_password') }}"
 
-
-
 - name: create templates_c directory
   file:
     path: /var/www/postfixadmin/templates_c
