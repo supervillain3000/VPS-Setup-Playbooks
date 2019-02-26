@@ -16,13 +16,13 @@
     regexp: '^\t## postadmin'
     block: |
       rewrite ^/postadmin/?(.*)$ /postfixadmin/$1 redirect;
-      rewrite ^/postfixadmin/?(.*)$ /postfixadmin/public/$1 redirect;
 
       location /postfixadmin/ {
+        alias /var/www/postfixadmin/;
+        
         #auth_basic "Speak, friend, and enter.";
         #auth_basic_user_file conf.d/htpasswd;
 
-        root /var/www;
         fastcgi_index index.php;
         fastcgi_pass unix:/var/run/php-fpm/postfixadmin.sock;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
@@ -42,10 +42,11 @@
     marker: ''
     regexp: '^\t## postadmin'
     block: |
-      rewrite ^/postadmin/?(.*)$ /postfixadmin/public/$1 redirect;
-      rewrite ^/postfixadmin/?(.*)$ /postfixadmin/public/$1 redirect;
+      rewrite ^/postadmin/?(.*)$ /postfixadmin/$1 redirect;
 
       location /postfixadmin/ {
+        alias /var/www/postfixadmin/public;
+
         #auth_basic "Speak, friend, and enter.";
         #auth_basic_user_file conf.d/htpasswd;
 
