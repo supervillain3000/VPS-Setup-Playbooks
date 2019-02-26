@@ -49,7 +49,7 @@
         auth_basic "Speak, friend, and enter.";
         auth_basic_user_file conf.d/htpasswd;
 
-        root /usr/share;
+        alias /usr/share/phpmyadmin/;
         fastcgi_index index.php;
         fastcgi_pass unix:/var/run/php-fpm/phpmyadmin.sock;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
@@ -57,7 +57,7 @@
       }
 
       location ~* ^/phpmyadmin/.+\.(jpg|jpeg|gif|png|ico|css|zip|tgz|gz|rar|bz2|doc|xls|exe|pdf|ppt|txt|tar|mid|midi|wav|bmp|rtf|js|swf|flv|avi|djvu|mp3)$ {
-        root /usr/share;
+        alias /usr/share/phpmyadmin/;
         allow all;
       }
     path: /etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf
@@ -77,6 +77,8 @@
       }
 
       location /phpmyadmin/ {
+        alias /usr/share/phpmyadmin/;
+
         auth_basic "Speak, friend, and enter.";
         auth_basic_user_file conf.d/htpasswd;
 
@@ -94,7 +96,7 @@
       }
 
       location ~* ^/phpmyadmin/.+\.(jpg|jpeg|gif|png|ico|css|zip|tgz|gz|rar|bz2|doc|xls|exe|pdf|ppt|txt|tar|mid|midi|wav|bmp|rtf|js|swf|flv|avi|djvu|mp3)$ {
-        root /usr/share;
+        alias /usr/share/phpmyadmin/;
         allow all;
       }
     path: /etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf
