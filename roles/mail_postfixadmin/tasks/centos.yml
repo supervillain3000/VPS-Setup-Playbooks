@@ -98,14 +98,6 @@
     priv: 'postfixadmin.*:ALL'
     host: localhost
 
-- name: insert pfxadmin mysql user text into password file
-  blockinfile:
-    dest: /root/06-pfxadmin_db_password
-    insertbefore: BOF
-    block: |
-
-      Пароль пользователя postfixadmin в БД postfixadmin:
-
 - name: copy postfixadmin
   copy:
     src: postfixadmin.tar.gz
@@ -126,23 +118,6 @@
     src: pfx_config_file
     dest: /var/www/postfixadmin/config.local.php
     mode: 0644
-
-#- name: make changes to pfxadmin config file
-#  lineinfile:
-#    path: /var/www/postfixadmin/config.local.php
-#    regexp: "{{ item.regmatch }}"
-#    line: "{{ item.change }}"
-#  loop:
-#    - { regmatch: '.*configured.*', change: '$CONF['configured'] = true;' }
-#    - { regmatch: '.*database_type.*', change: '$CONF['database_type'] = 'mysqli';' }
-#    - { regmatch: '.*database_host.*', change: '$CONF['database_host'] = 'localhost';' }
-#    - { regmatch: '.*CONF['database_user.*', change: '$CONF['database_user'] = 'postfixadmin';' }
-    #- { regmatch: "^\$CONF['database_password", change: "$CONF['database_password'] = '{{ file_contents }}';" }
-    #- { regmatch: "^\$CONF['database_name", change: "$CONF['database_name'] = 'postfixadmin';" }
-    #- { regmatch: "^\$CONF['domain_path", change: "$CONF['domain_path'] = 'NO';" }
-    #- { regmatch: "^\$CONF['domain_in_mailbox", change: "$CONF['domain_in_mailbox'] = 'YES';" }
-#  vars:
-#    file_contents: "{{ lookup('file', '/root/06-pfxadmin_db_password') }}"
 
 - name: change database_password var in pfx_config
   replace:
@@ -176,3 +151,11 @@
 
 - name: add postfixadmin admin user
   shell: bash /var/www/postfixadmin/scripts/postfixadmin-cli admin add admin@{{ vhost }} --password Strong_pass22# --password2 Strong_pass22# --superadmin 1 --active 1
+
+- name: insert pfxadmin mysql user text into password file
+  blockinfile:
+    dest: /root/06-pfxadmin_db_password
+    insertbefore: BOF
+    block: |
+
+      Пароль пользователя postfixadmin в БД postfixadmin:

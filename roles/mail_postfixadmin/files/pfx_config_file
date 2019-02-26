@@ -48,7 +48,7 @@ $CONF['setup_password'] = 'changeme';
 
 // Language config
 // Language files are located in './languages', change as required..
-$CONF['default_language'] = 'en';
+$CONF['default_language'] = 'ru';
 
 // Hook to override or add translations in $PALANG
 // Set to the function name you want to use as hook function (see language_hook example function below)
