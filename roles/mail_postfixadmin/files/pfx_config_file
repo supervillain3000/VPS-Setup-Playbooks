@@ -101,8 +101,8 @@ function language_hook($PALANG, $language) {
 $CONF['database_type'] = 'mysqli';
 $CONF['database_host'] = 'localhost';
 $CONF['database_user'] = 'postfixadmin';
-$CONF['database_password'] = 'postfixadmin';
-$CONF['database_name'] = 'postfix_database_password_string';
+$CONF['database_password'] = 'postfix_database_password_string';
+$CONF['database_name'] = 'postfixadmin';
 
 // Database SSL Config
 $CONF['database_use_ssl'] = false;
