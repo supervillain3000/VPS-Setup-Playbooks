@@ -42,8 +42,8 @@
 
 - name: copy sql connection files
   copy:
-    src: "{{ time.source }}"
-    dest: "{{ time.target }}"
+    src: "{{ item.source }}"
+    dest: "{{ item.target }}"
     mode: 0644
   loop:
     - { source: 'mysql_virtual_alias_domain_catchall_maps.cf', target: '/etc/postfix/sql/mysql_virtual_alias_domain_catchall_maps.cf'}
