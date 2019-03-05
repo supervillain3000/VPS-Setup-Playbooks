@@ -22,11 +22,13 @@
     marker: ''
     block: |
       [DEFAULT]
-
       ignoreip = 127.0.0.1/8
       bantime  = 1800
       findtime  = 600
       maxretry = 5
+
+      [sshd]
+      enabled = true
   notify: restart fail2ban
 
 - name: ensure f2b is enabled
