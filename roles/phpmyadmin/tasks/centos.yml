@@ -77,7 +77,6 @@
     marker: ''
     regexp: '^\t## pma'
     block: |
-      rewrite ^/phpMyAdmin/?(.*)$ /phpmyadmin/$1 redirect;
       rewrite ^/pma/?(.*)$ /phpmyadmin/$1 redirect;
 
       location /phpmyadmin/setup {
@@ -108,7 +107,6 @@
     marker: ''
     regexp: '^\t## pma'
     block: |
-      rewrite ^/phpMyAdmin/?(.*)$ /phpmyadmin/$1 redirect;
       rewrite ^/pma/?(.*)$ /phpmyadmin/$1 redirect;
 
       location /phpmyadmin/setup {
