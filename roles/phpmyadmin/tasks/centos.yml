@@ -102,7 +102,7 @@
   notify: restart nginx
   when: php_fpm_status.stat.exists
 
-- name: copy modphp nginx handler confing
+- name: copy modphp nginx handler config
   blockinfile:
     marker: ''
     regexp: '^\t## pma'
