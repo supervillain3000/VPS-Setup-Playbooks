@@ -87,7 +87,7 @@
         auth_basic "Speak, friend, and enter.";
         auth_basic_user_file conf.d/htpasswd;
 
-        alias /usr/share/phpmyadmin/;
+        root /usr/share;
         fastcgi_index index.php;
         fastcgi_pass unix:/var/run/php-fpm/phpmyadmin.sock;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
@@ -114,7 +114,7 @@
       }
 
       location /phpmyadmin/ {
-        alias /usr/share/phpmyadmin/;
+        root /usr/share;
 
         auth_basic "Speak, friend, and enter.";
         auth_basic_user_file conf.d/htpasswd;
