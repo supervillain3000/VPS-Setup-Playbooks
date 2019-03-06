@@ -52,7 +52,7 @@
   file:
     state: directory
     path: /usr/share/phpmyadmin/tmp/
-    group: www-data
+    group: apache
     mode: 0770
 
 - name: check if there is apache
