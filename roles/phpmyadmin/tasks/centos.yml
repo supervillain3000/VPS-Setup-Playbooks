@@ -1,20 +1,59 @@
 ---
-- name: install pma and trivia
+#- name: install pma and trivia
+#  yum:
+#    name: "{{ pma_packages }}"
+#    state: latest
+#    update_cache: yes
+#    enablerepo: remi-php{{ php_version }}
+#  vars:
+#    pma_packages:
+#    - phpmyadmin
+#    - python-passlib
+
+#- name: create symlink info phpmyadmin folder
+#  file:
+#    state: link
+#    src: /usr/share/phpMyAdmin
+#    path: /usr/share/phpmyadmin
+
+- name: install python-passlib
   yum:
-    name: "{{ pma_packages }}"
+    name: python-passlib
     state: latest
     update_cache: yes
-    enablerepo: remi-php{{ php_version }}
-  vars:
-    pma_packages:
-    - phpmyadmin
-    - python-passlib
 
-- name: create symlink info phpmyadmin folder
+- name: download phpmyadmin
+  get_url:
+    url: https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.zip
+    dest: /usr/share/phpMyAdmin-latest-all-languages.zip
+
+- name: install phpmyadmin
+  shell: |
+    unzip /usr/share/phpMyAdmin-latest-all-languages.zip -d /usr/share/
+    mv /usr/share/phpMyAdmin-*-all-languages/ /usr/share/phpmyadmin/
+    cp /usr/share/phpmyadmin/config.sample.inc.php /usr/share/phpmyadmin/config.inc.php
+    rm /usr/share/phpMyAdmin-latest-all-languages.zip
+  args:
+    warn: false
+
+- name: generate pma secret
+  lineinfile:
+    path: /usr/share/phpmyadmin/config.inc.php
+    line: "$cfg['blowfish_secret'] = '{{ lookup('password', 'chars=ascii_letters,digits,hexdigits,punctuation length=32') }}';"
+    regexp: '.*blowfish_secret.*'
+
+- name: add mysqli extension line into config
+  lineinfile:
+    path: /usr/share/phpmyadmin/config.inc.php
+    line: "$cfg['Servers'][$i]['extension'] = 'mysqli';"
+    insertafter: '.*auth_type.*'
+
+- name: create pma temp dir
   file:
-    state: link
-    src: /usr/share/phpMyAdmin
-    path: /usr/share/phpmyadmin
+    state: directory
+    path: /usr/share/phpmyadmin/tmp/
+    group: www-data
+    mode: 0770
 
 - name: check if there is apache
   stat:
@@ -54,12 +93,12 @@
         fastcgi_pass unix:/var/run/php-fpm/phpmyadmin.sock;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         include fastcgi_params;
+
+        location ~* ^.+\.(jpg|jpeg|gif|png|ico|css|zip|tgz|gz|rar|bz2|doc|xls|exe|pdf|ppt|txt|tar|mid|midi|wav|bmp|rtf|js|swf|flv|avi|djvu|mp3)$ {
+          expires max;
+        }
       }
 
-      location ~* ^/phpmyadmin/.+\.(jpg|jpeg|gif|png|ico|css|zip|tgz|gz|rar|bz2|doc|xls|exe|pdf|ppt|txt|tar|mid|midi|wav|bmp|rtf|js|swf|flv|avi|djvu|mp3)$ {
-        alias /usr/share/phpmyadmin/;
-        allow all;
-      }
     path: /etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf
   notify: restart nginx
   when: php_fpm_status.stat.exists
@@ -93,12 +132,12 @@
 
         proxy_buffer_size 16k;
         proxy_buffers 32 16k;
+
+        location ~* ^.+\.(jpg|jpeg|gif|png|ico|css|zip|tgz|gz|rar|bz2|doc|xls|exe|pdf|ppt|txt|tar|mid|midi|wav|bmp|rtf|js|swf|flv|avi|djvu|mp3)$ {
+          expires max;
+        }
       }
 
-      location ~* ^/phpmyadmin/.+\.(jpg|jpeg|gif|png|ico|css|zip|tgz|gz|rar|bz2|doc|xls|exe|pdf|ppt|txt|tar|mid|midi|wav|bmp|rtf|js|swf|flv|avi|djvu|mp3)$ {
-        alias /usr/share/phpmyadmin/;
-        allow all;
-      }
     path: /etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf
   when: httpd_status.stat.exists
   notify: restart nginx
