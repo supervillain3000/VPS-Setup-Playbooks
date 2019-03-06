@@ -142,6 +142,13 @@
   when: httpd_status.stat.exists
   notify: restart nginx
 
+- name: copy httpd vhost config
+  template:
+    src: pma_centos_apache.conf
+    dest: /etc/httpd/conf.d/phpmyadmin.conf
+  when: httpd_status.stat.exists
+  notify: restart httpd
+
 - name: add http auth for pma
   htpasswd:
     path: /etc/nginx/conf.d/htpasswd
