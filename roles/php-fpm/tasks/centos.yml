@@ -75,7 +75,8 @@
       }
   notify: restart nginx
 
-- name: ensure fpm is started and enabled
+- name: ensure fpm is started
   service:
-    name: php-fpm{{ php_version }}
+    name: php{{ php_version }}-php-fpm
     state: started
+    enabled: yes
