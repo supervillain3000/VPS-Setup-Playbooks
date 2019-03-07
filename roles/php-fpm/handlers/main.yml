@@ -6,5 +6,5 @@
 
 - name: restart centos php-fpm
   service:
-    name: php-fpm
+    name: php{{ php_version }}-php-fpm
     state: restarted
