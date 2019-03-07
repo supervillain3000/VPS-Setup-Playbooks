@@ -68,7 +68,7 @@
 - name: copy fpm nginx config
   copy:
     src: pma_centos_fpm.conf
-    dest: /etc/php-fpm.d/phpmyadmin.conf
+    dest: /etc/opt/remi/php{{ php_version }}/php-fpm.d/phpmyadmin.conf
   notify: restart php-fpm centos
   when: php_fpm_status.stat.exists
 
