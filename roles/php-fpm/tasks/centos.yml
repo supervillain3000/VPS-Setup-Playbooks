@@ -6,7 +6,7 @@
 
 - name: install php-fpm
   yum:
-    name: php-fpm
+    name: php{{ php_version }}-php-fpm
     enablerepo: remi-php{{ php_version }}
     update_cache: yes
     state: latest
