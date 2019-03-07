@@ -97,3 +97,4 @@
 
 #TODO
 # 1. add log-error=/var/log/mariadb/mariadb.log to [mysqld]
+# 2. add other main parameters
