@@ -62,7 +62,7 @@
 
 - name: check if there is php-fpm
   stat:
-    path: /usr/sbin/php-fpm
+    path: /opt/remi/php{{ php_version }}/root/usr/sbin/php-fpm
   register: php_fpm_status
 
 - name: copy fpm nginx config
