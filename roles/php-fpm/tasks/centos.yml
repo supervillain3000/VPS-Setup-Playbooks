@@ -63,7 +63,7 @@
       location ~ \.php$ {
               fastcgi_index index.php;
               fastcgi_param PHP_ADMIN_VALUE "sendmail_path = /usr/sbin/sendmail -t -i -f webmaster@{{ vhost }}";
-              fastcgi_pass unix:/var/run/php-fpm/{{ vhost }}.sock;
+              fastcgi_pass unix:/var/run/{{ vhost }}.sock;
               fastcgi_split_path_info ^((?U).+\.ph(?:p\d*|tml))(/?.+)$;
               try_files $uri =404;
               fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
