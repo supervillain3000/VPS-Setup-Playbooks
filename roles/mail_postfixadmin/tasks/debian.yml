@@ -74,7 +74,7 @@
     src: centos_fpm.conf
     dest: /etc/php-fpm.d/postfixadmin.conf
   when: php_fpm_status.stat.exists
-  notify: restart php-fpm
+  notify: restart php-fpm debian
 
 - name: copy apache2 config
   template:

@@ -7,7 +7,7 @@
 
 - name: check if there is php-fpm
   stat:
-    path: /usr/sbin/php-fpm
+    path: /opt/remi/php{{ php_version }}/root/usr/sbin/php-fpm
   register: php_fpm_status
 
 - name: (if php-fpm) copy nginx config
@@ -24,7 +24,7 @@
           #auth_basic_user_file conf.d/htpasswd;
 
           fastcgi_index index.php;
-          fastcgi_pass unix:/var/run/php-fpm/postfixadmin.sock;
+          fastcgi_pass unix:/var/run/postfixadmin.sock;
           fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
           include fastcgi_params;
 
@@ -75,7 +75,7 @@
     src: centos_fpm.conf
     dest: /etc/php-fpm.d/postfixadmin.conf
   when: php_fpm_status.stat.exists
-  notify: restart php-fpm
+  notify: restart php-fpm centos
 
 - name: copy httpd config
   template:

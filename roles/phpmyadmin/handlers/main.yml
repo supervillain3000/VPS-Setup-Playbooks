@@ -1,7 +1,7 @@
 ---
 - name: restart php-fpm centos
   service:
-    name: php-fpm
+    name: php{{ php_version }}-php-fpm
     state: restarted
 
 - name: restart php-fpm debian

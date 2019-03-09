@@ -6,7 +6,7 @@
 
 - name: install php-fpm
   yum:
-    name: php-fpm
+    name: php{{ php_version }}-php-fpm
     enablerepo: remi-php{{ php_version }}
     update_cache: yes
     state: latest
@@ -21,18 +21,18 @@
 - name: clear default pool file
   copy:
     content: '; disabled, use separate vhost pools'
-    dest: /etc/php-fpm.d/www.conf
+    dest: /etc/opt/remi/php{{ php_version }}/php-fpm.d/www.conf
   notify: restart centos php-fpm
 
 - name: create pool for a virtual host
   template:
-    dest: /etc/php-fpm.d/{{ vhost }}.conf
+    dest: /etc/opt/remi/php{{ php_version }}/php-fpm.d/{{ vhost }}.conf
     src: vhost_pool_centos.j2
   notify: restart centos php-fpm
 
 - name: add cgi.fix_pathinfo = 0 to php.ini
   ini_file:
-    path: /etc/php.ini
+    path: /etc/opt/remi/php72/php.ini
     section: PHP
     option: cgi.fix_pathinfo
     value: 0
@@ -50,6 +50,8 @@
   copy:
     src: index.php
     dest: /var/www/{{ vhost }}/index.php
+    owner: apache
+    group: apache
     mode: 0644
 
 - name: add fpm handler block for nginx
@@ -61,7 +63,7 @@
       location ~ \.php$ {
               fastcgi_index index.php;
               fastcgi_param PHP_ADMIN_VALUE "sendmail_path = /usr/sbin/sendmail -t -i -f webmaster@{{ vhost }}";
-              fastcgi_pass unix:/var/run/php-fpm/{{ vhost }}.sock;
+              fastcgi_pass unix:/var/run/{{ vhost }}.sock;
               fastcgi_split_path_info ^((?U).+\.ph(?:p\d*|tml))(/?.+)$;
               try_files $uri =404;
               fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
@@ -73,7 +75,8 @@
       }
   notify: restart nginx
 
-- name: ensure fpm is started and enabled
+- name: ensure fpm is started
   service:
-    name: "php-fpm"
+    name: php{{ php_version }}-php-fpm
     state: started
+    enabled: yes
