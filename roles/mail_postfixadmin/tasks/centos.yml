@@ -73,7 +73,7 @@
 - name: copy php-fpm config
   copy:
     src: centos_fpm.conf
-    dest: /etc/php-fpm.d/postfixadmin.conf
+    dest: /etc/opt/remi/php{{ php_version }}/php-fpm.d/postfixadmin.conf
   when: php_fpm_status.stat.exists
   notify: restart php-fpm centos
 
