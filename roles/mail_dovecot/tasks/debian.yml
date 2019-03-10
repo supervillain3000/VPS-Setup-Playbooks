@@ -48,7 +48,7 @@
 - name: set postmaster email address
   lineinfile:
     regexp: '^postmaster_address'
-    line: 'postmaster_address = postmaster@your_domain_name.com'
+    line: 'postmaster_address = postmaster@{{ vhost }}'
     path: /etc/dovecot/conf.d/15-lda.conf
   notify: restart dovecot
 
@@ -92,4 +92,14 @@
     name: dovecot
     enabled: yes
 
-#- name: Enable pop and imap on ufw
+- name: enable  pop and imap on ufw
+  ufw:
+    state: enabled
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+  loop:
+    - pop3
+    - pop3s
+    - imap
+    - imaps

@@ -48,7 +48,7 @@
 - name: set postmaster email address
   lineinfile:
     regexp: '^postmaster_address'
-    line: 'postmaster_address = postmaster@your_domain_name.com'
+    line: 'postmaster_address = postmaster@{{ vhost }}'
     path: /etc/dovecot/conf.d/15-lda.conf
   notify: restart dovecot
 
