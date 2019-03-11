@@ -149,10 +149,10 @@
     name: curl
     state: latest
 
-- name: make postfixadmin populate db using setup script
-  shell: curl -vL http://{{ ansible_default_ipv4.address }}/postfixadmin/setup.php
-  args:
-    warn: false
+#- name: make postfixadmin populate db using setup script
+#  shell: curl -vL http://{{ ansible_default_ipv4.address }}/postfixadmin/setup.php
+#  args:
+#    warn: false
 
 #- name: replace php binary path in postfixadmin-cli script
 #  replace:
@@ -160,5 +160,5 @@
 #    regexp: 'exec php'
 #    replace: 'exec /opt/remi/php{{php_version}}/root/bin/php'
 
-- name: add postfixadmin admin user
-  shell: bash /var/www/postfixadmin/scripts/postfixadmin-cli admin add admin@{{ vhost }} --password Strong_pass22# --password2 Strong_pass22# --superadmin 1 --active 1
+#- name: add postfixadmin admin user
+#  shell: bash /var/www/postfixadmin/scripts/postfixadmin-cli admin add admin@{{ vhost }} --password Strong_pass22# --password2 Strong_pass22# --superadmin 1 --active 1
