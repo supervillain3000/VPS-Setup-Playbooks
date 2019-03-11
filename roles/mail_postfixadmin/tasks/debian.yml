@@ -76,11 +76,19 @@
   when: php_fpm_status.stat.exists
   notify: restart php-fpm centos
 
-- name: copy httpd config
+- name: copy apache2 config
   template:
     src: apache_vhost.conf.j2
-    dest: /etc/httpd/conf.d/postfixadmin.conf
+    dest: /etc/apache2/sites-available/postfixadmin.conf
     mode: 0644
+  when: apache2_status.stat.exists
+  notify: restart apache2
+
+- name: create apache2 vhost file symlink
+  file:
+    state: link
+    path: /etc/apache2/sites-enabled/postfixadmin.conf
+    src: /etc/apache2/sites-available/postfixadmin.conf
   when: apache2_status.stat.exists
   notify: restart apache2
 
