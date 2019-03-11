@@ -86,6 +86,7 @@
   loop:
     - smtp
     - smtps
+    - submission
 
 #TODO
 # generate ssl cert using https://e-rave.nl/create-a-self-signed-ssl-key-for-postfix
