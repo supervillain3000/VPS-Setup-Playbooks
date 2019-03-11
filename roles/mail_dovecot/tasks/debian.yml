@@ -8,6 +8,7 @@
       - dovecot-lmtpd
       - dovecot-mysql
       - dovecot-imapd
+      - dovecot-pop3d
 
 - name: copy 10-mail
   copy:
