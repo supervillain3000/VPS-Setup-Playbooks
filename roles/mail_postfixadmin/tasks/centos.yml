@@ -150,11 +150,3 @@
 
 - name: add postfixadmin admin user
   shell: bash /var/www/postfixadmin/scripts/postfixadmin-cli admin add admin@{{ vhost }} --password Strong_pass22# --password2 Strong_pass22# --superadmin 1 --active 1
-
-#- name: insert pfxadmin mysql user text into password file
-#  blockinfile:
-#    dest: /root/06-pfxadmin_db_password
-#    insertbefore: BOF
-#    block: |
-#
-#      Пароль пользователя postfixadmin в БД postfixadmin:
