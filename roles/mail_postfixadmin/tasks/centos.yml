@@ -138,7 +138,7 @@
 - meta: flush_handlers
 
 - name: make postfixadmin populate db using setup script
-  shell: curl -vL http://{{ ansible_default_ipv4.address }}/postfixadmin/public/setup.php
+  shell: curl -vL http://{{ ansible_default_ipv4.address }}/postfixadmin/setup.php
   args:
     warn: false
 
