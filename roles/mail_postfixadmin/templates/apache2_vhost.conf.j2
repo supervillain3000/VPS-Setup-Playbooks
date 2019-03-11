@@ -1,0 +1,15 @@
+<VirtualHost 127.0.0.1:8080 >
+        ServerName "{{ ansible_default_ipv4.address }}"
+        UseCanonicalName Off
+
+        Alias "/postfixadmin" "/var/www/postfixadmin/public/"
+
+        ErrorLog "/var/log/apache2/postfixadmin_error.log"
+
+        DirectoryIndex "index.html" "index.php" "index.xhtml" "index.htm" "index.shtml"
+
+        <Directory "/var/www/postfixadmin/public/">
+                Options -Indexes +FollowSymLinks
+                AllowOverride None
+        </Directory>
+</VirtualHost>

@@ -78,7 +78,7 @@
 
 - name: copy apache2 config
   template:
-    src: apache_vhost.conf.j2
+    src: apache2_vhost.conf.j2
     dest: /etc/apache2/sites-available/postfixadmin.conf
     mode: 0644
   when: apache2_status.stat.exists
