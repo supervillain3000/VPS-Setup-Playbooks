@@ -65,7 +65,6 @@
     name: root
     host: localhost
     password: "{{ lookup('password', '/root/04-mysqlr_password chars=ascii_letters,digits,hexdigits length=15') }}"
-  tags: website_stack
 
 - name: copy root mysql password file
   copy:
@@ -90,4 +89,3 @@
     block: |
 
       Пароль от mysql root-пользователя:
-  tags: website_stack
