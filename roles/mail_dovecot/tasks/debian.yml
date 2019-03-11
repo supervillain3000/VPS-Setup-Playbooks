@@ -5,8 +5,9 @@
     update_cache: yes
   vars:
     main_packages:
-      - dovecot
+      - dovecot-lmtpd
       - dovecot-mysql
+      - dovecot-imapd
 
 - name: copy 10-mail
   copy:
