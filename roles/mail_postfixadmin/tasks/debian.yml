@@ -113,7 +113,7 @@
   shell: |
     tar -xvf /tmp/postfixadmin.tar.gz -C /var/www/
     mv /var/www/postfixadmin* /var/www/postfixadmin
-    chown -R apache: /var/www/postfixadmin
+    chown -R www-data: /var/www/postfixadmin
     cp /var/www/postfixadmin/config.inc.php /var/www/postfixadmin/config.local.php
     rm /tmp/postfixadmin.tar.gz
   args:
@@ -135,8 +135,8 @@
   file:
     path: /var/www/postfixadmin/templates_c
     state: directory
-    owner: apache
-    group: apache
+    owner: www-data
+    group: www-data
 
 #TODO
 # generate pfxadmin setup password and put hash into /var/www/postfixadmin/config.local.php
