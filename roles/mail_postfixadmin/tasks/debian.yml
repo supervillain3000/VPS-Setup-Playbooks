@@ -154,11 +154,11 @@
   args:
     warn: false
 
-- name: replace php binary path in postfixadmin-cli script
-  replace:
-    path: '/var/www/postfixadmin/scripts/postfixadmin-cli'
-    regexp: 'exec php'
-    replace: 'exec /opt/remi/php{{php_version}}/root/bin/php'
+#- name: replace php binary path in postfixadmin-cli script
+#  replace:
+#    path: '/var/www/postfixadmin/scripts/postfixadmin-cli'
+#    regexp: 'exec php'
+#    replace: 'exec /opt/remi/php{{php_version}}/root/bin/php'
 
 - name: add postfixadmin admin user
   shell: bash /var/www/postfixadmin/scripts/postfixadmin-cli admin add admin@{{ vhost }} --password Strong_pass22# --password2 Strong_pass22# --superadmin 1 --active 1
