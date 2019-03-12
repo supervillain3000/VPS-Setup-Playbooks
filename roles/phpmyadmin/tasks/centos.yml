@@ -20,7 +20,6 @@
   yum:
     name: python-passlib
     state: latest
-    update_cache: yes
 
 - name: download phpmyadmin
   get_url:

@@ -2,7 +2,6 @@
 - name: Install mysql and tools
   apt:
     state: latest
-    update_cache: yes
     name: "{{ mysql_packages }}"
   vars:
     mysql_packages:

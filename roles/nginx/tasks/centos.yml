@@ -1,9 +1,8 @@
 ---
-- name: Install nginx and trivia
+- name: Install nginx
   yum:
     name: nginx
     state: latest
-    update_cache: yes
 
 - name: Make sure nginx is started and enabled
   service:
@@ -39,7 +38,7 @@
     - { file: 'ipvhost.conf.j2', target: '/etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf' }
   notify: restart nginx
 
-- name: fix nginx not starting with ipv6
+- name: Fix nginx not starting with ipv6
   lineinfile:
     insertafter: '^\[Service\]'
     path: /etc/systemd/system/multi-user.target.wants/nginx.service

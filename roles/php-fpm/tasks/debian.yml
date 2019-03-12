@@ -1,13 +1,7 @@
 ---
-- name: add ppa:ondrej/php
-  apt_repository:
-    update_cache: yes
-    repo: ppa:ondrej/php
-
 - name: install php-fpm
   apt:
     name: php{{ php_version_u }}-fpm
-    update_cache: yes
     state: latest
 
 - name: install php modules

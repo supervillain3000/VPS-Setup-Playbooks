@@ -1,11 +1,10 @@
 ---
 - name: Install nginx and trivia
   apt:
-    name: "{{ nginxeatall }}"
+    name: "{{ nginx_and_trivia }}"
     state: latest
-    update_cache: yes
   vars:
-    nginxeatall:
+    nginx_and_trivia:
     - nginx
     - ufw
 

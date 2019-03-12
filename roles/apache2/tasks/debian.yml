@@ -1,9 +1,4 @@
 ---
-- name: add ppa:ondrej/php
-  apt_repository:
-    update_cache: yes
-    repo: ppa:ondrej/php
-
 - name: install apache2
   apt:
     name: apache2
@@ -120,8 +115,3 @@
         proxy_buffers 32 16k;
       }
   notify: restart nginx
-
-#TODO
-# add to php.ini
-# set post_max_size = 64M
-# set upload_max_filesize = 64M

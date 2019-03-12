@@ -1,4 +1,22 @@
 ---
+- hosts: all !load_balancers
+  become: yes
+  gather_facts: false
+  tasks:
+    - name: update apt cache
+      apt:
+        cache_valid_time: 42300
+
+- hosts: load_balancers
+  become: yes
+  gather_facts: false
+  tasks:
+    - name: update yum cache
+      yum:
+        name: curl
+        state: latest
+        update_cache: yes
+
 - hosts: vps
   roles:
     - nginx

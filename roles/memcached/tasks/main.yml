@@ -2,7 +2,7 @@
 - name: install memcached
   apt:
     name: "{{ items }}"
-    update_cache: yes
+    cache_valid_time: 42300
   loop:
     - php{{ php_version }}-memcached
     - memcached

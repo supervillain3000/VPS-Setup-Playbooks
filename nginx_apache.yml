@@ -1,5 +1,20 @@
 ---
 - hosts: vps
+  tasks:
+    - name: add ppa:ondrej/php
+      apt_repository:
+        update_cache: yes
+        repo: ppa:ondrej/php
+      when: ansible_facts['os_family'] == "Debian"
+
+    - name: update yum cache
+      yum:
+        name: curl
+        state: latest
+        update_cache: yes
+      when: ansible_facts['os_family'] == "RedHat"
+
+- hosts: vps
   roles:
     - nginx
     - apache2
