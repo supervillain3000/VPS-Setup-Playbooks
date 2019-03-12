@@ -1,21 +1,18 @@
 ---
-- hosts: all !load_balancers
-  become: yes
-  gather_facts: false
+- hosts: vps
   tasks:
-    - name: update apt cache
-      apt:
-        cache_valid_time: 42300
+    - name: add ppa:ondrej/php
+      apt_repository:
+        update_cache: yes
+        repo: ppa:ondrej/php
+      when: ansible_facts['os_family'] == "Debian"
 
-- hosts: load_balancers
-  become: yes
-  gather_facts: false
-  tasks:
     - name: update yum cache
       yum:
         name: curl
         state: latest
         update_cache: yes
+      when: ansible_facts['os_family'] == "RedHat"
 
 - hosts: vps
   roles:
