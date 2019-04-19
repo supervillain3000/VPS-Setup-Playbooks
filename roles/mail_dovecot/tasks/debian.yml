@@ -24,6 +24,13 @@
     mode: 0644
   notify: restart dovecot
 
+- name: copy 10-ssl
+  copy:
+    src: 10-ssl.conf
+    dest: /etc/dovecot/conf.d/10-ssl.conf
+    mode: 0644
+  notify: restart dovecot
+
 - name: copy dovecot-sql
   copy:
     src: dovecot-sql.conf.ext
