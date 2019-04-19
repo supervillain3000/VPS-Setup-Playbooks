@@ -1,21 +1,4 @@
 ---
-#- name: install pma and trivia
-#  yum:
-#    name: "{{ pma_packages }}"
-#    state: latest
-#    update_cache: yes
-#    enablerepo: remi-php{{ php_version }}
-#  vars:
-#    pma_packages:
-#    - phpmyadmin
-#    - python-passlib
-
-#- name: create symlink info phpmyadmin folder
-#  file:
-#    state: link
-#    src: /usr/share/phpMyAdmin
-#    path: /usr/share/phpmyadmin
-
 - name: install python-passlib
   yum:
     name: python-passlib
