@@ -31,6 +31,22 @@
       enabled = true
   notify: restart fail2ban
 
+- name: add postfix and dovecot jails for mailserver role
+  blockinfile:
+    create: yes
+    insertafter: EOF
+    path: /etc/fail2ban/jail.local
+    marker: ''
+    block: |
+      [dovecot]
+      enabled = true
+      action = iptables-multiport[name="email", port="imap,imap3,imaps,pop3,pop3s,smtp,smtps,submission"]
+
+      [postfix-sasl]
+      enabled = true
+      action = iptables-multiport[name="email", port="imap,imap3,imaps,pop3,pop3s,smtp,smtps,submission"]
+  notify: restart fail2ban
+
 - name: ensure f2b is enabled
   service:
     name: fail2ban
