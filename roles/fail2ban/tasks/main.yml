@@ -46,6 +46,7 @@
       enabled = true
       action = iptables-multiport[name="email", port="imap,imap3,imaps,pop3,pop3s,smtp,smtps,submission"]
   notify: restart fail2ban
+  tags: mailserver
 
 - name: ensure f2b is enabled
   service:
