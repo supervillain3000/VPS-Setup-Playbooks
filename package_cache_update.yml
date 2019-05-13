@@ -39,7 +39,7 @@
 
 - name: Add nginx mainline repo
   yum_repository:
-    name: nginx repo
+    name: nginx-official-repo
     description: Official NGINX yum repository
     gpgcheck: no
     baseurl: http://nginx.org/packages/centos/$releasever/$basearch/
