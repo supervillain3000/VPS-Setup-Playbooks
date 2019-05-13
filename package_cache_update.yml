@@ -13,6 +13,7 @@
   apt_key:
     url: https://nginx.org/keys/nginx_signing.key
     id: ABF5BD827BD9BF62
+  when: ansible_facts['distribution'] == "Debian"
 
 - name: Add nginx mainline debian nginx repo # to get the latest nginx (not the most stable) version
   apt_repository:
@@ -22,6 +23,7 @@
 - name: Add apt-key for ondrej php repo
   apt_key:
     url: https://packages.sury.org/php/apt.gpg
+  when: ansible_facts['distribution'] == "Debian"
 
 - name: Add packages.sury.org/php debian php repo
   apt_repository:
