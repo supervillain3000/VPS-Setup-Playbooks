@@ -29,6 +29,11 @@
     - 05-open_file
   notify: restart nginx
 
+- name: generate dhparam file in background
+  shell: "(openssl dhparam -out /etc/nginx/dhparam.pem 4096 2>&1 &)"
+  async: 3600
+  poll: 0
+
 - name: Create /etc/nginx/vhosts/
   file: state=directory path=/etc/nginx/vhosts/ mode=0755
 
