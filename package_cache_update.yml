@@ -7,24 +7,24 @@
       - lsb-release
       - apt-transport-https
       - ca-certificates
-  when: ansible_facts['distribution']  == "Debian"
+  when: ansible_facts['distribution'] == "Debian"
 
-- name: Add nginx mainline debian php repo # to get the latest nginx (not the most stable) version
+- name: Add nginx mainline debian nginx repo # to get the latest nginx (not the most stable) version
   apt_repository:
     repo: deb http://nginx.org/packages/mainline/debian {{ ansible_facts['distribution_release'] }} nginx
-  when: ansible_facts['distribution']  == "Debian"
+  when: ansible_facts['distribution'] == "Debian"
 
 - name: Add packages.sury.org/php debian php repo
   apt_repository:
     update_cache: yes
     repo: deb https://packages.sury.org/php {{ ansible_facts['distribution_release'] }} main
-  when: ansible_facts['distribution']  == "Debian"
+  when: ansible_facts['distribution'] == "Debian"
 
 - name: Add ppa:ondrej/php php ubuntu repo
   apt_repository:
     update_cache: yes
     repo: ppa:ondrej/php
-  when: ansible_facts['distribution']  == "Ubuntu"
+  when: ansible_facts['distribution'] == "Ubuntu"
 
 - name: Update yum cache
   yum:
