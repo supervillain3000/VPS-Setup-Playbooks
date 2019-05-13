@@ -1,18 +1,9 @@
 ---
 - hosts: vps
   tasks:
-    - name: add ppa:ondrej/php
-      apt_repository:
-        update_cache: yes
-        repo: ppa:ondrej/php
-      when: ansible_facts['os_family']  == "Debian"
-
-    - name: update yum cache
-      yum:
-        name: curl
-        state: latest
-        update_cache: yes
-      when: ansible_facts['os_family'] == "RedHat"
+    name: Add repos and update package manager cache before main playbook execution
+    import_tasks: package_cache_update.yml
+    #this is useful to save time on playbook execution
 
 - hosts: vps
   roles:
