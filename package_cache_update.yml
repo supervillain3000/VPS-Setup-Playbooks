@@ -37,6 +37,13 @@
     repo: ppa:ondrej/php
   when: ansible_facts['distribution'] == "Ubuntu"
 
+- name: Add nginx mainline repo
+  yum_repository:
+    name: nginx repo
+    gpgcheck: no
+    baseurl: http://nginx.org/packages/centos/$releasever/$basearch/
+  when: ansible_facts['os_family'] == "RedHat"
+
 - name: Update yum cache
   yum:
     name: curl
