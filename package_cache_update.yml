@@ -1,5 +1,5 @@
 ---
-- name: Install debian packages required to add php repo
+- name: Install debian base packages
   apt:
     name: "{{ package_list }}"
   vars:
@@ -7,7 +7,12 @@
       - lsb-release
       - apt-transport-https
       - ca-certificates
-  when: ansible_facts['distribution'] == "Debian"
+      - sudo
+      - vim
+      - wget
+      - mc
+      - tmux
+  when: ansible_facts['os_family'] == "Debian"
 
 - name: Add apt-key for latest nginx repo
   apt_key:
