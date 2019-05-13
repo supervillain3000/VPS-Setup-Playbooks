@@ -40,6 +40,7 @@
 - name: Add nginx mainline repo
   yum_repository:
     name: nginx repo
+    description: Official NGINX yum repository
     gpgcheck: no
     baseurl: http://nginx.org/packages/centos/$releasever/$basearch/
   when: ansible_facts['os_family'] == "RedHat"
