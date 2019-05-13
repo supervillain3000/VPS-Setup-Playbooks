@@ -9,10 +9,19 @@
       - ca-certificates
   when: ansible_facts['distribution'] == "Debian"
 
+- name: Add apt-key for latest nginx repo
+  apt_key:
+    url: https://nginx.org/keys/nginx_signing.key
+    id: ABF5BD827BD9BF62
+
 - name: Add nginx mainline debian nginx repo # to get the latest nginx (not the most stable) version
   apt_repository:
     repo: deb http://nginx.org/packages/mainline/debian {{ ansible_facts['distribution_release'] }} nginx
   when: ansible_facts['distribution'] == "Debian"
+
+- name: Add apt-key for ondrej php repo
+  apt_key:
+    url: https://packages.sury.org/php/apt.gpg
 
 - name: Add packages.sury.org/php debian php repo
   apt_repository:
