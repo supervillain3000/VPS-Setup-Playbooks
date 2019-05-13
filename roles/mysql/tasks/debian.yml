@@ -13,22 +13,14 @@
     path: /etc/mysql/mysql.conf.d/mysqld.cnf
     regexp: '127\.0\.0\.1'
     line: 'bind-address = 127.0.0.1'
-<<<<<<< HEAD
   when: ansible_facts['distribution'] == "Ubuntu"
-=======
-    when: ansible_facts['distribution'] == "Ubuntu"
->>>>>>> b20bd7edc59d8401d017838cb80146bfe793e53b
 
 - name: change mysql bind-address
   lineinfile:
     path: /etc/mysql/mariadb.conf.d/50-server.cnf
     regexp: '127\.0\.0\.1'
     line: 'bind-address = 127.0.0.1'
-<<<<<<< HEAD
   when: ansible_facts['distribution'] == "Debian"
-=======
-    when: ansible_facts['distribution'] == "Debian"
->>>>>>> b20bd7edc59d8401d017838cb80146bfe793e53b
 
 - name: Ensure mysql is started and enabled
   service:
