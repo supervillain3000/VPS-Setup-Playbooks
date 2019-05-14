@@ -12,6 +12,8 @@
       - wget
       - mc
       - tmux
+      - atop
+      - htop
   when: ansible_facts['os_family'] == "Debian"
 
 - name: Add apt-key for latest nginx repo
@@ -35,6 +37,11 @@
     update_cache: yes
     repo: deb https://packages.sury.org/php {{ ansible_facts['distribution_release'] }} main
   when: ansible_facts['distribution'] == "Debian"
+
+- name: Add ubuntu nginx mainline repo
+  apt_repository:
+    repo: ppa:nginx/stable
+  when: ansible_facts['distribution'] == "Ubuntu"
 
 - name: Add ppa:ondrej/php php ubuntu repo
   apt_repository:
