@@ -1,11 +1,11 @@
 ---
-- name: enable ssh on ufw
+- name: Enable ssh on ufw
   ufw:
     rule: allow
     port: ssh
     proto: tcp
 
-- name: create site user
+- name: Create site user
   user:
     name: "{{ ansible_hostname }}"
     uid: 33
@@ -15,7 +15,7 @@
     shell: /usr/sbin/nologin
     home: /var/www/{{ vhost }}/
 
-- name: insert site user name into user password file
+- name: Insert site user name into user password file
   blockinfile:
     dest: /root/01-sftp_password
     insertbefore: BOF
@@ -27,7 +27,7 @@
       Папка сайта: /var/www/{{ vhost }}
       Пользователь: {{ ansible_hostname }}
 
-- name: add sshd user part
+- name: Add sshd user part
   blockinfile:
     marker: ''
     path: /etc/ssh/sshd_config
@@ -42,8 +42,16 @@
       X11Forwarding no
   notify: restart sshd
 
-- name: change ftp-subsystem
+- name: Change ftp-subsystem
   lineinfile:
     path: /etc/ssh/sshd_config
     regexp: '^Subsystem'
     line: 'Subsystem       sftp    internal-sftp'
+  notify: restart sshd
+
+- name: Disable UsePAM
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^UsePAM'
+    line: '#UsePAM'
+  notify: restart sshd
