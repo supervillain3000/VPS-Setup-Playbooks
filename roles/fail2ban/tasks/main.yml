@@ -1,16 +1,15 @@
 ---
 - name: install fail2ban and dependencies Debian/Ubuntu
-  apt: name={{ item }} state=latest
-  loop:
+  apt: name={{ f2b_packages }} state=latest
+  vars:
+    f2b_packages:
     - fail2ban
     - iptables-persistent
   when:
     - ansible_facts['distribution'] == "Ubuntu" or ansible_facts['distribution'] == "Debian"
 
 - name: install fail2ban and dependencies on CentOS
-  yum: name={{ item }} state=latest
-  loop:
-    - fail2ban
+  yum: name=fail2ban state=latest
   when:
     - ansible_facts['distribution'] == "CentOS"
 
