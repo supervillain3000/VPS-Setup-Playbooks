@@ -26,7 +26,7 @@
   notify: restart nginx
 
 - name: generate dhparam file in background
-  shell: "(openssl dhparam -out /etc/nginx/dhparam.pem 4096 2>&1 &)"
+  shell: "(nice -n 19 openssl dhparam -out /etc/nginx/dhparam.pem 4096 2>&1 &)"
   async: 3600
   poll: 0
 
