@@ -1,2 +1,21 @@
 ---
-# tasks file for certbot
+- name: Install with dependencies on Debian/Ubuntu
+  apt:
+    name: certbot
+    state: latest
+  when:
+    - ansible_facts['distribution'] == "Ubuntu" or ansible_facts['distribution'] == "Debian"
+
+- name: Install with dependencies on CentOS
+  yum:
+    name: "{{ certbot_packages }}"
+    state: latest
+  vars:
+    certbot_packages:
+    - certbot
+    - yum-utils
+  when:
+    - ansible_facts['distribution'] == "CentOS"
+
+- name: Issue certificate for server vhost
+  shell: certbot certonly -w /var/www/{{ vhost }} -d {{ vhost }},www.{{ vhost }} --webroot --agree-tos -m admin@{{ vhost }} 2>&1 | tee cert_install.log
