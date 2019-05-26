@@ -17,10 +17,12 @@
   when:
     - ansible_facts['distribution'] == "CentOS"
 
-- name: Reload nginx
-  service:
-    name: nginx
-    state: reloaded
+#- name: Reload nginx
+#  service:
+#    name: nginx
+#    state: reloaded
+
+- meta: flush_handlers
 
 - name: Issue certificate for server vhost
   shell: certbot certonly -w /var/www/"{{ vhost }}" -d "{{ vhost }}",www."{{ vhost }}" --webroot --agree-tos -m admin@"{{ vhost }}" 2>&1 | tee /root/cert_install.log
