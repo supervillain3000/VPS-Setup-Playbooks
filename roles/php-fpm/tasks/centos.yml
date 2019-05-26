@@ -58,7 +58,7 @@
   blockinfile:
     marker: ''
     path: /etc/nginx/vhosts/{{ vhost }}.conf
-    insertafter: "^\t##\thandler"
+    regexp: "## handler"
     block: |
       location ~ \.php$ {
               fastcgi_index index.php;
