@@ -89,9 +89,9 @@
 
 - name: add php handler block for nginx
   blockinfile:
-    marker: ''
+    marker: ' '
     path: /etc/nginx/vhosts/{{ vhost }}.conf
-    insertafter: "^\t##\thandler"
+    insertafter: '## handler ##'
     block: |
       location / {
         proxy_pass http://127.0.0.1:8080;

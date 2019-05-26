@@ -47,9 +47,9 @@
 
 - name: add fpm handler block for nginx
   blockinfile:
-    marker: ''
+    marker: ' '
     path: /etc/nginx/vhosts/{{ vhost }}.conf
-    insertafter: "^\t##\thandler"
+    insertafter: '## handler ##'
     block: |
       location ~ \.php$ {
               fastcgi_index index.php;
