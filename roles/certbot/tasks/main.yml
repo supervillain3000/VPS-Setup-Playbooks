@@ -31,7 +31,11 @@
     path: /etc/nginx/vhosts/{{ vhost }}.conf
     state: absent
     regexp: ":80;$"
+<<<<<<< HEAD
   when: "'success' in cert_issue_result.stdout"
+=======
+  when: cert_issue_result
+>>>>>>> 37611ad39b98ca9898ff24079a6fac2339270d9b
   notify: restart nginx
 
 - name: Add cert and http listen to webserver config
@@ -47,7 +51,10 @@
 
               ssl_certificate /usr/local/psa/var/certificates/cert-sTUUdd;
               ssl_certificate_key /usr/local/psa/var/certificates/cert-sTUUdd;
+<<<<<<< HEAD
   when: "'success' in cert_issue_result.stdout"
+=======
+>>>>>>> 37611ad39b98ca9898ff24079a6fac2339270d9b
   notify: restart nginx
 
 - name: Add http to https redirect block to webserver config
@@ -65,5 +72,8 @@
 
               return 301 https://$host$request_uri;
       }
+<<<<<<< HEAD
   when: "'success' in cert_issue_result.stdout"
+=======
+>>>>>>> 37611ad39b98ca9898ff24079a6fac2339270d9b
   notify: restart nginx
