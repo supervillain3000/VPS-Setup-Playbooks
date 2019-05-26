@@ -17,5 +17,51 @@
   when:
     - ansible_facts['distribution'] == "CentOS"
 
+- name: Reload nginx
+  service:
+    name: nginx
+    state: reloaded
+
 - name: Issue certificate for server vhost
   shell: certbot certonly -w /var/www/"{{ vhost }}" -d "{{ vhost }}",www."{{ vhost }}" --webroot --agree-tos -m admin@"{{ vhost }}" 2>&1 | tee /root/cert_install.log
+  register: cert_issue_result
+
+- name: Remove http listen block from webserver config
+  lineinfile:
+    path: /etc/nginx/vhosts/{{ vhost }}.conf
+    state: absent
+    regexp: ":80;$"
+  when: cert_issue_result
+  notify: restart nginx
+
+- name: Add cert and http listen to webserver config
+  blockinfile:
+    path: /etc/nginx/vhosts/{{ vhost }}.conf
+    marker: ''
+    insertafter: "^\t## listen https"
+    block: |
+              listen {{ ansible_default_ipv4.address }}:443 ssl http2;
+              {% if ansible_default_ipv6.address is defined %}
+      listen [{{ ansible_default_ipv6.address }}]:443 ssl http2;
+              {% endif %}
+
+              ssl_certificate /usr/local/psa/var/certificates/cert-sTUUdd;
+              ssl_certificate_key /usr/local/psa/var/certificates/cert-sTUUdd;
+  notify: restart nginx
+
+- name: Add http to https redirect block to webserver config
+  blockinfile:
+    path: /etc/nginx/vhosts/{{ vhost }}.conf
+    marker: ''
+    insertafter: "## https redirect block ##"
+    block: |
+      server {
+              server_name {{ vhost }} www.{{ vhost }};
+              listen {{ ansible_default_ipv4.address }}:80;
+              {% if ansible_default_ipv6.address is defined %}
+      listen [{{ ansible_default_ipv6.address }}]:80;
+              {% endif %}
+
+              return 301 https://$host$request_uri;
+      }
+  notify: restart nginx
