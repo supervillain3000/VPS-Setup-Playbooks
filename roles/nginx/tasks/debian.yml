@@ -33,6 +33,7 @@
   shell: "(nice -n 19 openssl dhparam -out /etc/nginx/dhparam.pem 4096 2>&1 &)"
   async: 3600
   poll: 0
+  register: dhparam_sleeper
 
 - name: Create /etc/nginx/vhosts/
   file: state=directory path=/etc/nginx/vhosts/ mode=0755
