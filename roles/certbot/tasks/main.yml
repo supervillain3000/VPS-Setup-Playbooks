@@ -33,7 +33,7 @@
 - name: Add cert and http listen to webserver config
   blockinfile:
     path: /etc/nginx/vhosts/{{ vhost }}.conf
-    #marker: ' '
+    marker: 'http2 ssl'
     insertafter: "server_name"
     block: |
       listen {{ ansible_default_ipv4.address }}:443 ssl http2;
@@ -48,17 +48,17 @@
 - name: Add http to https redirect block to webserver config
   blockinfile:
     path: /etc/nginx/vhosts/{{ vhost }}.conf
-    #marker: ' '
+    marker: 'redirect to https'
     insertafter: EOF
     block: |
       server {
-              server_name {{ vhost }} www.{{ vhost }};
-              listen {{ ansible_default_ipv4.address }}:80;
-              {% if ansible_default_ipv6.address is defined %}
+      server_name {{ vhost }} www.{{ vhost }};
+      listen {{ ansible_default_ipv4.address }}:80;
+      {% if ansible_default_ipv6.address is defined %}
       listen [{{ ansible_default_ipv6.address }}]:80;
-              {% endif %}
+      {% endif %}
 
-              return 301 https://$host$request_uri;
+      return 301 https://$host$request_uri;
       }
   when: cert_issue_result.stdout.find("Congratulations") != -1
 
