@@ -68,6 +68,7 @@
   register: job_result
   until: job_result.finished
   retries: 30
+  ignore_errors: yes
 
 - name: Restart nginx
   service:
