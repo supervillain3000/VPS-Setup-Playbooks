@@ -28,7 +28,7 @@
     path: /etc/nginx/vhosts/{{ vhost }}.conf
     state: absent
     regexp: ":80;$"
-  when: "'Congratulations' in cert_issue_result.stdout"
+  when: cert_issue_result.stdout.find("Congratulations") != -1
 
 - name: Add cert and http listen to webserver config
   blockinfile:
@@ -43,7 +43,7 @@
 
       ssl_certificate /etc/letsencrypt/live/{{ vhost }}/fullchain.pem;
       ssl_certificate_key /etc/letsencrypt/live/{{ vhost }}/privkey.pem;
-  when: "'Congratulations' in cert_issue_result.stdout"
+  when: cert_issue_result.stdout.find("Congratulations") != -1
 
 - name: Add http to https redirect block to webserver config
   blockinfile:
@@ -60,9 +60,9 @@
 
               return 301 https://$host$request_uri;
       }
-  when: "'Congratulations' in cert_issue_result.stdout"
+  when: cert_issue_result.stdout.find("Congratulations") != -1
 
-  - name: Reload nginx
-    service:
-      name: nginx
-      state: reloaded
+- name: Reload nginx
+  service:
+    name: nginx
+    state: reloaded
