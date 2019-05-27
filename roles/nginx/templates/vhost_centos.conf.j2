@@ -7,8 +7,6 @@ server {
 listen [{{ ansible_default_ipv6.address }}]:80;
         {% endif %}
 
-        ## listen https ##
-
         index index.php index.html;
 
         disable_symlinks if_not_owner from=$root_path;
@@ -26,5 +24,3 @@ listen [{{ ansible_default_ipv6.address }}]:80;
                 expires 30d;
         }
 }
-
-## https redirect block ##
