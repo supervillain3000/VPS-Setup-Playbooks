@@ -34,7 +34,7 @@
   blockinfile:
     path: /etc/nginx/vhosts/{{ vhost }}.conf
     marker: ' '
-    insertafter: "^\t## listen https"
+    insertafter: "## listen https ##"
     block: |
       listen {{ ansible_default_ipv4.address }}:443 ssl http2;
       {% if ansible_default_ipv6.address is defined %}
