@@ -14,3 +14,12 @@
     - mail_postfix
     - mail_dovecot
     - fail2ban
+
+- hosts: vps
+  tasks:
+    - name: Chek on dhparam file generation
+      async_status:
+        jid: '{{ dhparam_sleeper.ansible_job_id }}'
+      register: job_result
+      until: job_result.finished
+      retries: 30
