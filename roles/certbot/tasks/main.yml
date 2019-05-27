@@ -17,11 +17,6 @@
   when:
     - ansible_facts['distribution'] == "CentOS"
 
-#- name: Reload nginx
-#  service:
-#    name: nginx
-#    state: reloaded
-
 - meta: flush_handlers
 
 - name: Issue certificate for server vhost
@@ -34,7 +29,6 @@
     state: absent
     regexp: ":80;$"
   when: "'Congratulations' in cert_issue_result.stdout"
-  notify: restart nginx
 
 - name: Add cert and http listen to webserver config
   blockinfile:
@@ -50,7 +44,6 @@
       ssl_certificate /etc/letsencrypt/live/{{ vhost }}/fullchain.pem;
       ssl_certificate_key /etc/letsencrypt/live/{{ vhost }}/privkey.pem;
   when: "'Congratulations' in cert_issue_result.stdout"
-  notify: restart nginx
 
 - name: Add http to https redirect block to webserver config
   blockinfile:
@@ -68,4 +61,8 @@
               return 301 https://$host$request_uri;
       }
   when: "'Congratulations' in cert_issue_result.stdout"
-  notify: restart nginx
+
+  - name: Reload nginx
+    service:
+      name: nginx
+      state: reloaded
