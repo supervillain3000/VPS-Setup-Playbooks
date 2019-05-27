@@ -33,7 +33,7 @@
 - name: Add cert and http listen to webserver config
   blockinfile:
     path: /etc/nginx/vhosts/{{ vhost }}.conf
-    marker: "# {mark} http2 ssl #"
+    marker: "# {mark} http2 ssl section"
     insertafter: "server_name"
     block: |
       listen {{ ansible_default_ipv4.address }}:443 ssl http2;
@@ -48,7 +48,7 @@
 - name: Add http to https redirect block to webserver config
   blockinfile:
     path: /etc/nginx/vhosts/{{ vhost }}.conf
-    marker: "# {mark} to https #"
+    marker: "# {mark} Redirect to https"
     insertafter: EOF
     block: |
       server {
