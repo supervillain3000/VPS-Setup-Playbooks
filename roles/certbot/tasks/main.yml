@@ -67,7 +67,7 @@
     jid: '{{ dhparam_sleeper.ansible_job_id }}'
   register: job_result
   until: job_result.finished
-  retries: 30
+  retries: 1000
   when: cert_issue_result.stdout.find("Congratulations") != -1
 
 - name: Restart nginx
