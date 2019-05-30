@@ -66,10 +66,10 @@
   async_status:
     jid: '{{ dhparam_sleeper.ansible_job_id }}'
     finished: 1
-  #register: job_result
-  #until: job_result.finished
+  register: job_result
+  until: job_result.finished
   retries: 1000
-  #when: cert_issue_result.stdout.find("Congratulations") != -1
+  when: cert_issue_result.stdout.find("Congratulations") != -1
 
 - name: Restart nginx
   service:
