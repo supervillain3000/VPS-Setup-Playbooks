@@ -62,7 +62,7 @@
       }
   when: cert_issue_result.stdout.find("Congratulations") != -1
 
-- name: Cheсk on dhparam file generation
+- name: Check on dhparam file generation
   async_status:
     jid: '{{ dhparam_sleeper.ansible_job_id }}'
     finished: 1
