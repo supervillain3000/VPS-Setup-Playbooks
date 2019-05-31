@@ -44,7 +44,7 @@
 - name: Change /var/www group and perm
   file:
     state: directory
-    path: /var/www/
+    path: /var/www
     owner: root
     group: apache
     mode: 0775
