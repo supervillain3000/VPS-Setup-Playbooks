@@ -40,3 +40,11 @@
       AllowTcpForwarding no
       X11Forwarding no
   notify: restart sshd
+
+- name: Change /var/www group and perm
+  file:
+    state: directory
+    path: /var/www/
+    owner: root
+    group: apache
+    mode: 0775
