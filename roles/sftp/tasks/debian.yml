@@ -13,7 +13,7 @@
     non_unique: yes
     password: "{{ lookup('password', '/root/01-sftp_password chars=ascii_letters,digits,hexdigits length=15') | password_hash('sha512') }}"
     shell: /usr/sbin/nologin
-    home: /var/www/{{ vhost }}/
+    home: /var/www/
 
 - name: Insert site user name into user password file
   blockinfile:
