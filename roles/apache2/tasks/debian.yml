@@ -70,7 +70,7 @@
 
 - name: change upload size vars in php.ini
   ini_file:
-    path: /etc/php/{{ php_version_u }}/cli/php.ini
+    path: /etc/php/{{ php_version_u }}/apache2/php.ini
     section: PHP
     option: "{{ item.options }}"
     value: "{{ item.value }}"
