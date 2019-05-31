@@ -56,10 +56,10 @@
     line: '#UsePAM'
   notify: restart sshd
 
-  - name: Change /var/www group and perm
-    file:
-      state: directory
-      path: /var/www
-      owner: root
-      group: www-data
-      mode: 0775
+- name: Change /var/www group and perm
+  file:
+    state: directory
+    path: /var/www
+    owner: root
+    group: www-data
+    mode: 0775
