@@ -65,7 +65,6 @@
 - name: Check on dhparam file generation
   async_status:
     jid: '{{ dhparam_sleeper.ansible_job_id }}'
-    finished: 1
   register: job_result
   until: job_result.finished
   retries: 1000
