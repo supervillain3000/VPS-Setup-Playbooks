@@ -62,13 +62,14 @@
       }
   when: cert_issue_result.stdout.find("Congratulations") != -1
 
-- name: Check on dhparam file generation
-  async_status:
-    jid: '{{ dhparam_sleeper.ansible_job_id }}'
-  register: job_result
-  until: job_result.finished
-  retries: 1000
-  when: cert_issue_result.stdout.find("Congratulations") != -1
+# disabled: no dhaparam file gen 
+#- name: Check on dhparam file generation
+#  async_status:
+#    jid: '{{ dhparam_sleeper.ansible_job_id }}'
+#  register: job_result
+#  until: job_result.finished
+#  retries: 1000
+#  when: cert_issue_result.stdout.find("Congratulations") != -1
 
 - name: Restart nginx
   service:
