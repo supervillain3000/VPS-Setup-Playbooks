@@ -10,8 +10,6 @@
       - sudo
       - vim
       - wget
-      - mc
-      - tmux
       - atop
       - htop
   when: ansible_facts['os_family'] == "Debian"
@@ -62,9 +60,7 @@
       - vim
       - htop
       - atop
-      - tmux
       - wget
-      - mc
   when: ansible_facts['os_family'] == "RedHat"
 
 - name: Add nginx mainline repo
