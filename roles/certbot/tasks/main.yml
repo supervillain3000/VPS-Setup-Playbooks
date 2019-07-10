@@ -62,7 +62,7 @@
       }
   when: cert_issue_result.stdout.find("Congratulations") != -1
 
-# disabled: no dhaparam file gen 
+# disabled: no dhaparam file gen
 #- name: Check on dhparam file generation
 #  async_status:
 #    jid: '{{ dhparam_sleeper.ansible_job_id }}'
@@ -75,3 +75,21 @@
   service:
     name: nginx
     state: restarted
+
+- name: Add path to cert file to postfix config
+  lineinfile:
+    path: /etc/postfix/main.cf
+    regexp: '^smtpd_tls_cert_file'
+    line: '/etc/letsencrypt/live/{{ vhost }}/fullchain.pem'
+  when: cert_issue_result.stdout.find("Congratulations") != -1
+  notify: restart postfix
+  tags: mailserver
+
+- name: Add path to cert key to postfix config
+  lineinfile:
+    path: /etc/postfix/main.cf
+    regexp: '^smtpd_tls_key_file'
+    line: '/etc/letsencrypt/live/{{ vhost }}/privkey.pem'
+  when: cert_issue_result.stdout.find("Congratulations") != -1
+  notify: restart postfix
+  tags: mailserver
