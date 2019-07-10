@@ -94,7 +94,13 @@
   notify: restart postfix
   tags: mailserver
 
-- name: Restart dovecot
-  service:
-    name: dovecot
-    state: restarted
+- name: Add ssl
+  blockinfile:
+    path: /etc/dovecot/conf.d/10-ssl.conf
+    marker: "# {mark} enable ssl"
+    insertafter: '^# Certificate files'
+    block: |
+      ssl_cert = </etc/letsencrypt/live/{{ vhost }}/fullchain.pem
+      ssl_key = </etc/letsencrypt/live/{{ vhost }}/privkey.pem
+  when: cert_issue_result.stdout.find("Congratulations") != -1
+  notify: restart dovecot
