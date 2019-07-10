@@ -93,3 +93,8 @@
   when: cert_issue_result.stdout.find("Congratulations") != -1
   notify: restart postfix
   tags: mailserver
+
+- name: Restart dovecot
+  service:
+    name: dovecot
+    state: restarted
