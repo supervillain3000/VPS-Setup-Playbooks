@@ -94,7 +94,7 @@
   notify: restart postfix
   tags: mailserver
 
-- name: Add ssl
+- name: Define cert files in dovecot conf
   blockinfile:
     path: /etc/dovecot/conf.d/10-ssl.conf
     marker: "# {mark} enable ssl"
