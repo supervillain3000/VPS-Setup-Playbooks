@@ -23,7 +23,7 @@
   notify: restart dovecot
 
 - name: copy 10-ssl
-  copy:
+  template:
     src: 10-ssl.conf
     dest: /etc/dovecot/conf.d/10-ssl.conf
     mode: 0644
