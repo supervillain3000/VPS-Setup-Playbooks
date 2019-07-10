@@ -14,3 +14,4 @@
     - mail_postfix
     - mail_dovecot
     - fail2ban
+    - certbot
