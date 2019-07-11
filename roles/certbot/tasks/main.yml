@@ -104,3 +104,4 @@
       ssl_key = </etc/letsencrypt/live/{{ vhost }}/privkey.pem
   when: cert_issue_result.stdout.find("Congratulations") != -1
   notify: restart dovecot
+  tags: mailserver
