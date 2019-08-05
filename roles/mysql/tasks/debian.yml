@@ -55,6 +55,27 @@
       Пользователь: {{ ansible_hostname }}
   tags: website_stack
 
+- name: add new superuser if debian
+  mysql_user:
+    state: present
+    name: "admin"
+    host: localhost
+    password: "{{ lookup('password', '/root/03-mysql-admin_password chars=ascii_letters,digits,hexdigits length=15') }}"
+    priv: '*.*:ALL'
+  tags: website_stack
+  when: ansible_facts['distribution'] == "Debian"
+
+- name: insert debian new superuser name into user password file
+  blockinfile:
+    dest: /root/03-mysql-admin_password
+    insertbefore: BOF
+    block: |
+
+      Админ-пользователь mysql:
+      Логин: admin
+  tags: website_stack
+  when: ansible_facts['distribution'] == "Debian"
+
 - name: remove anonymous users
   mysql_user:
     state: absent
