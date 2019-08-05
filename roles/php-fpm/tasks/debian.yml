@@ -24,10 +24,22 @@
 
 - name: add cgi.fix_pathinfo = 0 to php.ini
   ini_file:
-    path: /etc/php/{{ php_version_u }}/cli/php.ini
+    path: /etc/php/{{ php_version_u }}/fpm/php.ini
     section: PHP
     option: cgi.fix_pathinfo
     value: 0
+  notify: restart debian php-fpm
+
+- name: change upload size vars in php.ini
+  ini_file:
+    path: /etc/php/{{ php_version_u }}/fpm/php.ini
+    section: PHP
+    option: "{{ item.options }}"
+    value: "{{ item.value }}"
+  loop:
+    - { options: 'post_max_size', value: '64M' }
+    - { options: 'upload_max_filesize', value: '64M' }
+  notify: restart debian php-fpm
 
 - name: Create /var/www/ vhost subdir
   file:
