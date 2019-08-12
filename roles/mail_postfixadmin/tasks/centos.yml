@@ -175,6 +175,23 @@
 - name: add postfixadmin admin user
   shell: bash /var/www/postfixadmin/scripts/postfixadmin-cli admin add admin@{{ vhost }} --password Aybabtu12# --password2 Aybabtu12# --superadmin 1 --active 1
 
+- name: insert pfxadmin setup password text
+  blockinfile:
+    dest: /root/061-pfxadmin_setup_password
+    insertbefore: BOF
+    block: |
+
+      Setup password для postfixadmin:
+
+- name: insert pfxadmin db password
+  blockinfile:
+    dest: /root/06-pfxadmin_db_password
+    insertbefore: BOF
+    block: |
+
+      Данные для доступа к базе данных postfixadmin:
+      Пользователь: postfixadmin
+
 #TODO
 # generate pfxadmin setup password and put hash into /var/www/postfixadmin/config.local.php
 # {{ lookup('password', '/root/07-pfxadmin_admin_password chars=ascii_letters,digits length=15') }}
