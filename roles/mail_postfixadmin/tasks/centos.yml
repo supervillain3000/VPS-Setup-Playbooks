@@ -152,7 +152,7 @@
 #  register: curl_result
 
 - name: save curl result as file
-  shell: echo "'{{ curl_result.stdout }}'" > /tmp/curl_result.txt
+  shell: echo "{{ curl_result.stdout | quote }}" > /tmp/curl_result.txt
 
 - name: extract postfixadmin setup password hash
   shell: setup_pass_hash=$(grep '<pre>' /tmp/output.txt) && echo ${setup_pass_hash:171:72}
