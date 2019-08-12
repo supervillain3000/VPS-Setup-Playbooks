@@ -151,6 +151,16 @@
     status_code: 200
   register: curl_result
 
+- name: extract postfixadmin setup password hash
+  shell: setup_pass_hash=$({{ curl_result.stdout }} | grep '<pre>') && echo ${setup_pass_hash:171:72}
+  register: extract_result
+
+- name: get setup password hash into postfixadmin config
+  replace:
+    path: /var/www/postfixadmin/config.local.php
+    regexp: 'changeme'
+    replace: "{{ extract_result.stdout }}"
+
 - name: replace php binary path in postfixadmin-cli script
   replace:
     path: '/var/www/postfixadmin/scripts/postfixadmin-cli'
@@ -158,7 +168,7 @@
     replace: 'exec /opt/remi/php{{php_version}}/root/bin/php'
 
 - name: add postfixadmin admin user
-  shell: php /var/www/postfixadmin/scripts/postfixadmin-cli admin add admin@{{ vhost }} --password Aybabtu12# --password2 Aybabtu12# --superadmin 1 --active 1
+  shell: bash /var/www/postfixadmin/scripts/postfixadmin-cli admin add admin@{{ vhost }} --password Aybabtu12# --password2 Aybabtu12# --superadmin 1 --active 1
 
 #TODO
 # generate pfxadmin setup password and put hash into /var/www/postfixadmin/config.local.php
