@@ -124,6 +124,15 @@
     regexp: 'postfix_database_password_string'
     replace: "{{ lookup('file', '/root/06-pfxadmin_db_password') }}"
 
+- name: insert pfxadmin db password
+  blockinfile:
+    dest: /root/06-pfxadmin_db_password
+    insertbefore: BOF
+    block: |
+
+      Данные для доступа к базе данных postfixadmin:
+      Пользователь: postfixadmin
+
 - name: create templates_c directory
   file:
     path: /var/www/postfixadmin/templates_c
@@ -138,6 +147,14 @@
   args:
     warn: false
   register: curl_result
+
+- name: insert pfxadmin setup password text
+  blockinfile:
+    dest: /root/061-pfxadmin_setup_password
+    insertbefore: BOF
+    block: |
+
+      Setup password для postfixadmin:
 
 #- name: generate postfixadmin setup password
 #  uri:
@@ -176,23 +193,6 @@
   shell: bash /var/www/postfixadmin/scripts/postfixadmin-cli admin add admin@{{ vhost }} --password "{{ lookup('password', '/root/062-pfxadmin_admin_password chars=ascii_letters,digits,hexdigits length=15') }}" --password2 "{{ lookup('password', '/root/062-pfxadmin_admin_password') }}" --superadmin 1 --active 1
   args:
     warn: false
-
-- name: insert pfxadmin setup password text
-  blockinfile:
-    dest: /root/061-pfxadmin_setup_password
-    insertbefore: BOF
-    block: |
-
-      Setup password для postfixadmin:
-
-- name: insert pfxadmin db password
-  blockinfile:
-    dest: /root/06-pfxadmin_db_password
-    insertbefore: BOF
-    block: |
-
-      Данные для доступа к базе данных postfixadmin:
-      Пользователь: postfixadmin
 
 - name: insert pfxadmin db password
   blockinfile:
