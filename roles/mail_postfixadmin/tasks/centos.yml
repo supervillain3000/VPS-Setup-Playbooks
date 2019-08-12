@@ -173,7 +173,7 @@
     replace: 'exec /opt/remi/php{{php_version}}/root/bin/php'
 
 - name: add postfixadmin admin user
-  shell: bash /var/www/postfixadmin/scripts/postfixadmin-cli admin add admin@{{ vhost }} --password Aybabtu12# --password2 Aybabtu12# --superadmin 1 --active 1
+  shell: bash /var/www/postfixadmin/scripts/postfixadmin-cli admin add admin@{{ vhost }} --password "{{ lookup('password', '/root/062-pfxadmin_admin_password chars=ascii_letters,digits,hexdigits length=15') }}" --password2 "{{ lookup('password', '/root/062-pfxadmin_admin_password') }}" --superadmin 1 --active 1
 
 - name: insert pfxadmin setup password text
   blockinfile:
@@ -191,6 +191,15 @@
 
       Данные для доступа к базе данных postfixadmin:
       Пользователь: postfixadmin
+
+- name: insert pfxadmin db password
+  blockinfile:
+    dest: /root/062-pfxadmin_admin_password
+    insertbefore: BOF
+    block: |
+
+      Администратор postfixadmin:
+      Логин: admin@{{ vhost }}
 
 #TODO
 # generate pfxadmin setup password and put hash into /var/www/postfixadmin/config.local.php
