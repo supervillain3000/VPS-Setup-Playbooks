@@ -12,7 +12,7 @@
 - name: (if php-fpm) copy nginx config
   blockinfile:
     marker: "# {mark} postfixadmin"
-    regexp: "## postadmin"
+    insertafter: "## postadmin"
     block: |
       rewrite ^/postadmin/?(.*)$ /postfixadmin/$1 redirect;
 
@@ -39,7 +39,7 @@
 - name: (if apache) copy nginx config
   blockinfile:
     marker: "# {mark} postfixadmin"
-    regexp: "## postadmin"
+    insertafter: "## postadmin"
     block: |
       rewrite ^/postadmin/?(.*)$ /postfixadmin/$1 redirect;
 
