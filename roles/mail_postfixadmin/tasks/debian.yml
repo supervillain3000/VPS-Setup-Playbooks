@@ -11,8 +11,8 @@
 
 - name: (if php-fpm) copy nginx config
   blockinfile:
-    marker: ''
-    regexp: '^\t## postadmin'
+    marker: "# {mark} postfixadmin"
+    regexp: "## postadmin"
     block: |
       rewrite ^/postadmin/?(.*)$ /postfixadmin/$1 redirect;
 
@@ -38,8 +38,8 @@
 
 - name: (if apache) copy nginx config
   blockinfile:
-    marker: ''
-    regexp: '^\t## postadmin'
+    marker: "# {mark} postfixadmin"
+    regexp: "## postadmin"
     block: |
       rewrite ^/postadmin/?(.*)$ /postfixadmin/$1 redirect;
 
@@ -138,10 +138,6 @@
     owner: www-data
     group: www-data
 
-#TODO
-# generate pfxadmin setup password and put hash into /var/www/postfixadmin/config.local.php
-# {{ lookup('password', '/root/07-pfxadmin_admin_password chars=ascii_letters,digits length=15') }}
-
 - meta: flush_handlers
 
 - name: install curl
@@ -149,16 +145,17 @@
     name: curl
     state: latest
 
-#- name: make postfixadmin populate db using setup script
-#  shell: curl -vL http://{{ ansible_default_ipv4.address }}/postfixadmin/setup.php
-#  args:
-#    warn: false
+- name: generate postfixadmin setup password
+  uri:
+    url: http://{{ ansible_default_ipv4.address }}/postfixadmin/setup.php
+    method: POST
+    body_format: form-urlencoded
+    body:
+    - [ form, setuppw ]
+    - [ setup_password, "{{ lookup('password', '/root/061-pfxadmin_setup_password chars=ascii_letters,digits,hexdigits,punctuation') }}" ]
+    - [ setup_password2, "{{ lookup('password', '/root/061-pfxadmin_setup_password') }}" ]
+    status_code: 200
+  register: curl_result
 
-#- name: replace php binary path in postfixadmin-cli script
-#  replace:
-#    path: '/var/www/postfixadmin/scripts/postfixadmin-cli'
-#    regexp: 'exec php'
-#    replace: 'exec /opt/remi/php{{php_version}}/root/bin/php'
-
-#- name: add postfixadmin admin user
-#  shell: bash /var/www/postfixadmin/scripts/postfixadmin-cli admin add admin@{{ vhost }} --password Strong_pass22# --password2 Strong_pass22# --superadmin 1 --active 1
+- name: add postfixadmin admin user
+  shell: php /var/www/postfixadmin/scripts/postfixadmin-cli admin add admin@{{ vhost }} --password Strong_pass22# --password2 Strong_pass22# --superadmin 1 --active 1
