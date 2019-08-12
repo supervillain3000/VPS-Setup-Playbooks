@@ -133,23 +133,23 @@
 
 - meta: flush_handlers
 
-#- name:
-#  shell: curl -X POST -F form="setuppw" -F setup_password="Aybabtu12#" -F setup_password2="Aybabtu12#" http://78.40.108.108/postfixadmin/setup.php
-#  args:
-#    warn: false
-#  register: curl_result
-
 - name: generate postfixadmin setup password
-  uri:
-    url: http://{{ ansible_default_ipv4.address }}/postfixadmin/setup.php
-    method: POST
-    body_format: form-urlencoded
-    body:
-    - [ form, setuppw ]
-    - [ setup_password, "{{ lookup('password', '/root/061-pfxadmin_setup_password chars=ascii_letters,digits,hexdigits,punctuation') }}" ]
-    - [ setup_password2, "{{ lookup('password', '/root/061-pfxadmin_setup_password') }}" ]
-    status_code: 200
+  shell: curl -X POST -F form="setuppw" -F setup_password="{{ lookup('password', '/root/061-pfxadmin_setup_password chars=ascii_letters,digits,hexdigits,punctuation') }}" -F setup_password2="{{ lookup('password', '/root/061-pfxadmin_setup_password') }}" http://78.40.108.108/postfixadmin/setup.php
+  args:
+    warn: false
   register: curl_result
+
+#- name: generate postfixadmin setup password
+#  uri:
+#    url: http://{{ ansible_default_ipv4.address }}/postfixadmin/setup.php
+#    method: POST
+#    body_format: form-urlencoded
+#    body:
+#    - [ form, setuppw ]
+#    - [ setup_password, "{{ lookup('password', '/root/061-pfxadmin_setup_password chars=ascii_letters,digits,hexdigits,punctuation') }}" ]
+#    - [ setup_password2, "{{ lookup('password', '/root/061-pfxadmin_setup_password') }}" ]
+#    status_code: 200
+#  register: curl_result
 
 #- name: save curl result as file
 #  shell: grep "{{ curl_result.stdout }}" > /tmp/output.txt
