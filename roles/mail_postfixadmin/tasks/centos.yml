@@ -134,7 +134,7 @@
 - meta: flush_handlers
 
 - name: generate postfixadmin setup password
-  shell: curl -X POST -F form="setuppw" -F setup_password="{{ lookup('password', '/root/061-pfxadmin_setup_password chars=ascii_letters,digits,hexdigits,punctuation') }}" -F setup_password2="{{ lookup('password', '/root/061-pfxadmin_setup_password') }}" http://{{ ansible_default_ipv4.address }}/postfixadmin/setup.php
+  shell: curl -X POST -F form="setuppw" -F setup_password="{{ lookup('password', '/root/061-pfxadmin_setup_password chars=ascii_letters,digits,hexdigits length=15') }}" -F setup_password2="{{ lookup('password', '/root/061-pfxadmin_setup_password') }}" http://{{ ansible_default_ipv4.address }}/postfixadmin/setup.php
   args:
     warn: false
   register: curl_result
@@ -146,13 +146,13 @@
 #    body_format: form-urlencoded
 #    body:
 #    - [ form, setuppw ]
-#    - [ setup_password, "{{ lookup('password', '/root/061-pfxadmin_setup_password chars=ascii_letters,digits,hexdigits,punctuation') }}" ]
+#    - [ setup_password, "{{ lookup('password', '/root/061-pfxadmin_setup_password chars=ascii_letters,digits,hexdigits length=15') }}" ]
 #    - [ setup_password2, "{{ lookup('password', '/root/061-pfxadmin_setup_password') }}" ]
 #    status_code: 200
 #  register: curl_result
 
 - name: save curl result as file
-  shell: echo '"{{ curl_result.stdout }}"' > /tmp/curl_result.txt
+  shell: echo "'{{ curl_result.stdout }}'" > /tmp/curl_result.txt
 
 - name: extract postfixadmin setup password hash
   shell: setup_pass_hash=$(grep '<pre>' /tmp/output.txt) && echo ${setup_pass_hash:171:72}
