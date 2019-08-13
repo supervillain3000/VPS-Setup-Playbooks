@@ -100,7 +100,7 @@
 - name: create pfxadmin mysql user
   mysql_user:
     name: postfixadmin
-    password: "{{ lookup('password', '/root/06-pfxadmin_db_password chars=ascii_letters,digits length=20') }}"
+    password: "{{ lookup('password', '/root/060-pfxadmin_db_password chars=ascii_letters,digits length=20') }}"
     priv: 'postfixadmin.*:ALL'
     host: localhost
 
@@ -129,7 +129,7 @@
   replace:
     path: /var/www/postfixadmin/config.local.php
     regexp: 'postfix_database_password_string'
-    replace: "{{ lookup('file', '/root/06-pfxadmin_db_password') }}"
+    replace: "{{ lookup('file', '/root/060-pfxadmin_db_password') }}"
 
 - name: create templates_c directory
   file:
