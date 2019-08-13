@@ -201,6 +201,7 @@
     executable: /bin/bash
     warn: false
   register: postfix_superadmin_create
+  ignore_errors: yes
 
 #- name: add postfixadmin admin user
 #  shell: bash /var/www/postfixadmin/scripts/postfixadmin-cli admin add admin@{{ vhost }} --password "{{ lookup('password', '/root/062-pfxadmin_admin_password chars=ascii_letters,digits,hexdigits length=15') }}" --password2 "{{ lookup('password', '/root/062-pfxadmin_admin_password') }}" --superadmin 1 --active 1
