@@ -180,11 +180,11 @@
 - name: copy postfixadmin admin creation scripts
   template:
     src: create_postfix_admin.sh
-    dest: /root/create_postfix_admin.sh
+    dest: /root/ansible/create_postfix_admin.sh
     mode: 0754
 
 - name: add postfixadmin admin user
-  shell: /root/create_postfix_admin.sh
+  shell: /root/ansible/create_postfix_admin.sh
   args:
     executable: /bin/bash
     warn: false
