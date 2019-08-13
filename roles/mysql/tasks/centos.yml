@@ -53,6 +53,20 @@
       Пользователь: {{ ansible_hostname }}
   tags: website_stack
 
+- name: create pfxadmin db
+  mysql_db:
+    name: postfixadmin
+    collation: utf8_unicode_ci
+  tags: mailserver
+
+- name: create pfxadmin mysql user
+  mysql_user:
+    name: postfixadmin
+    password: "{{ lookup('password', '/root/060-pfxadmin_db_password chars=ascii_letters,digits length=20') }}"
+    priv: 'postfixadmin.*:ALL'
+    host: localhost
+  tags: mailserver
+
 - name: remove anonymous users
   mysql_user:
     state: absent

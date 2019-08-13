@@ -85,18 +85,6 @@
   when: httpd_status.stat.exists
   notify: restart httpd
 
-- name: create pfxadmin db
-  mysql_db:
-    name: postfixadmin
-    collation: utf8_unicode_ci
-
-- name: create pfxadmin mysql user
-  mysql_user:
-    name: postfixadmin
-    password: "{{ lookup('password', '/root/060-pfxadmin_db_password chars=ascii_letters,digits length=20') }}"
-    priv: 'postfixadmin.*:ALL'
-    host: localhost
-
 - name: copy postfixadmin
   copy:
     src: postfixadmin.tar.gz
