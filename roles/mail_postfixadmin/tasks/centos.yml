@@ -172,10 +172,23 @@
     regexp: 'exec php'
     replace: 'exec /opt/remi/php{{php_version}}/root/bin/php'
 
+- name: copy postfixadmin admin creation scripts
+  template:
+    src: create_postfix_admin.sh
+    dest: /root/create_postfix_admin.sh
+    mode: 0754
+
 - name: add postfixadmin admin user
-  shell: bash /var/www/postfixadmin/scripts/postfixadmin-cli admin add admin@{{ vhost }} --password "{{ lookup('password', '/root/062-pfxadmin_admin_password chars=ascii_letters,digits,hexdigits length=15') }}" --password2 "{{ lookup('password', '/root/062-pfxadmin_admin_password') }}" --superadmin 1 --active 1
+  shell: /root/create_postfix_admin.sh
   args:
+    executable: /bin/bash
     warn: false
+  register: postfix_superadmin_create
+
+#- name: add postfixadmin admin user
+#  shell: bash /var/www/postfixadmin/scripts/postfixadmin-cli admin add admin@{{ vhost }} --password "{{ lookup('password', '/root/062-pfxadmin_admin_password chars=ascii_letters,digits,hexdigits length=15') }}" --password2 "{{ lookup('password', '/root/062-pfxadmin_admin_password') }}" --superadmin 1 --active 1
+#  args:
+#    warn: false
 
 - name: insert pfxadmin setup password text
   blockinfile:
@@ -194,7 +207,7 @@
       Данные для доступа к базе данных postfixadmin:
       Пользователь: postfixadmin
 
-- name: insert pfxadmin db password
+- name: insert pfxadmin superadmin password
   blockinfile:
     dest: /root/062-pfxadmin_admin_password
     insertbefore: BOF
@@ -202,6 +215,7 @@
 
       Администратор postfixadmin:
       Логин: admin@{{ vhost }}
+  when: postfix_superadmin_create == 0
 
 #TODO
 # generate pfxadmin setup password and put hash into /var/www/postfixadmin/config.local.php
