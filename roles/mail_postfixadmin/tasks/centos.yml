@@ -166,3 +166,41 @@
 #  shell: bash /var/www/postfixadmin/scripts/postfixadmin-cli admin add admin@{{ vhost }} --password "{{ lookup('password', '/root/062-pfxadmin_admin_password chars=ascii_letters,digits,hexdigits length=15') }}" --password2 "{{ lookup('password', '/root/062-pfxadmin_admin_password') }}" --superadmin 1 --active 1
 #  args:
 #    warn: false
+
+- name: insert pfxadmin db password
+  blockinfile:
+    dest: /root/060-pfxadmin_db_password
+    insertbefore: BOF
+    block: |
+
+      Данные для доступа к базе данных postfixadmin:
+      Пользователь: postfixadmin
+
+- name: insert pfxadmin setup password text
+  blockinfile:
+    dest: /root/061-pfxadmin_setup_password
+    insertbefore: BOF
+    block: |
+
+      Setup password для postfixadmin:
+
+- name: insert pfxadmin superadmin password
+  blockinfile:
+    dest: /root/062-pfxadmin_admin_password
+    insertbefore: BOF
+    block: |
+
+      Для создания и изменения параметров почтовых ящиков, воспользуйтесь следующим доступом:
+      Ссылка: http://{{ ansible_default_ipv4.address }}/postadmin/
+      Логин: admin@{{ vhost }}
+  when: postfix_superadmin_create.rc == 0
+
+- name: insert pfxadmin superadmin password
+  blockinfile:
+    dest: /root/062-pfxadmin_admin_password
+    insertbefore: BOF
+    block: |
+
+      Для работы с postfixadmin необходимо создать администратора. Для этого откройте в браузере ссылку http://{{ ansible_default_ipv4.address }}/postfixadmin/setup.php и выполните инструкции. setup password доступен выше. При создании администратора можно ввести следующие данные:
+      Логин: admin@{{ vhost }}
+  when: postfix_superadmin_create.rc != 0
