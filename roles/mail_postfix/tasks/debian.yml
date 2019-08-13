@@ -69,7 +69,7 @@
     - /etc/postfix/sql/mysql_virtual_mailbox_limit_maps.cf
     - /etc/postfix/sql/mysql_virtual_mailbox_maps.cf
   vars:
-    file_contents: "{{ lookup('file', '/root/06-pfxadmin_db_password') }}"
+    file_contents: "{{ lookup('file', '/root/060-pfxadmin_db_password') }}"
   notify: restart postfix
 
 - name: make sure postfix is enabled

@@ -42,7 +42,7 @@
     regexp: 'strong_password$'
     replace: "{{ file_contents }}"
   vars:
-    file_contents: "{{ lookup('file', '/root/06-pfxadmin_db_password') }}"
+    file_contents: "{{ lookup('file', '/root/060-pfxadmin_db_password') }}"
   notify: restart dovecot
 
 - name: enable ssl support
