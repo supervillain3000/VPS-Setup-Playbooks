@@ -1,4 +1,4 @@
-#https://idroot.us/linux/install-mail-server-postfixadmin-centos-7/
+# based on https://idroot.us/linux/install-mail-server-postfixadmin-centos-7/
 ---
 - name: check if there is apache
   stat:
@@ -155,18 +155,6 @@
     block: |
 
       Setup password для postfixadmin:
-
-#- name: generate postfixadmin setup password
-#  uri:
-#    url: http://{{ ansible_default_ipv4.address }}/postfixadmin/setup.php
-#    method: POST
-#    body_format: form-urlencoded
-#    body:
-#    - [ form, setuppw ]
-#    - [ setup_password, "{{ lookup('password', '/root/061-pfxadmin_setup_password chars=ascii_letters,digits,hexdigits length=15') }}" ]
-#    - [ setup_password2, "{{ lookup('password', '/root/061-pfxadmin_setup_password') }}" ]
-#    status_code: 200
-#  register: curl_result
 
 - name: save curl result as file
   copy:
