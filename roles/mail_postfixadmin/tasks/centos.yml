@@ -143,7 +143,7 @@
 - meta: flush_handlers
 
 - name: generate postfixadmin setup password
-  shell: curl -X POST -F form="setuppw" -F setup_password="{{ lookup('password', '/root/061-pfxadmin_setup_password chars=ascii_letters,digits,hexdigits length=15') }}" -F setup_password2="{{ lookup('password', '/root/061-pfxadmin_setup_password') }}" http://{{ ansible_default_ipv4.address }}/postfixadmin/setup.php
+  shell: curl -X POST -F form="setuppw" -F setup_password="{{ lookup('password', '/root/061-pfxadmin_setup_password chars=ascii_letters,digits,hexdigits length=32') }}" -F setup_password2="{{ lookup('password', '/root/061-pfxadmin_setup_password') }}" http://{{ ansible_default_ipv4.address }}/postfixadmin/setup.php
   args:
     warn: false
   register: curl_result
