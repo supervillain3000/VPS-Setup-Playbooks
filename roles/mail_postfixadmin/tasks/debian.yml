@@ -209,6 +209,7 @@
     block: |
 
       Администратор postfixadmin:
+      Ссылка: http://{{ ansible_default_ipv4.address }}/postadmin/
       Логин: admin@{{ vhost }}
   when: postfix_superadmin_create.rc == 0
 
