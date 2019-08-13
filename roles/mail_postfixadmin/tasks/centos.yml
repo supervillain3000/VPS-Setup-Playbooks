@@ -207,28 +207,7 @@
 #  args:
 #    warn: false
 
-<<<<<<< HEAD
-- name: insert pfxadmin setup password text
-  blockinfile:
-    dest: /root/061-pfxadmin_setup_password
-    insertbefore: BOF
-    block: |
-
-      Setup password для postfixadmin:
-
-- name: insert pfxadmin db password
-  blockinfile:
-    dest: /root/06-pfxadmin_db_password
-    insertbefore: BOF
-    block: |
-
-      Данные для доступа к базе данных postfixadmin:
-      Пользователь: postfixadmin
-
 - name: insert pfxadmin superadmin password
-=======
-- name: insert pfxadmin db password
->>>>>>> 0313e9173355f56dd6787547905074bce59bf811
   blockinfile:
     dest: /root/062-pfxadmin_admin_password
     insertbefore: BOF
