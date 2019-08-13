@@ -10,6 +10,7 @@
       - sudo
       - vim
       - wget
+      - curl
       - atop
       - htop
   when: ansible_facts['os_family'] == "Debian"
