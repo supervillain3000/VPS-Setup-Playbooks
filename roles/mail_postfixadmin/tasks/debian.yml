@@ -208,7 +208,7 @@
     insertbefore: BOF
     block: |
 
-      Администратор postfixadmin:
+      Для создания и изменения почтовых ящиков, воспользуйтесь следующим доступом:
       Ссылка: http://{{ ansible_default_ipv4.address }}/postadmin/
       Логин: admin@{{ vhost }}
   when: postfix_superadmin_create.rc == 0
