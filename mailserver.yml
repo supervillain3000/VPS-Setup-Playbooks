@@ -10,8 +10,8 @@
     - nginx
     - apache2
     - mysql
-    - mail_postfixadmin
     - mail_postfix
     - mail_dovecot
+    - mail_postfixadmin
     - fail2ban
     - certbot
