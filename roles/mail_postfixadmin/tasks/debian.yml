@@ -128,11 +128,6 @@
 
 - meta: flush_handlers
 
-- name: install curl
-  apt:
-    name: curl
-    state: latest
-
 - name: generate postfixadmin setup password
   shell: curl -X POST -F form="setuppw" -F setup_password="{{ lookup('password', '/root/061-pfxadmin_setup_password chars=ascii_letters,digits,hexdigits length=32') }}" -F setup_password2="{{ lookup('password', '/root/061-pfxadmin_setup_password') }}" http://{{ ansible_default_ipv4.address }}/postfixadmin/setup.php
   args:
