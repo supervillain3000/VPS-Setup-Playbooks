@@ -6,6 +6,7 @@
   vars:
     main_packages:
       - postfix
+      - postfix-mysql
 
 - name: set postfix main.cf settings
   shell: |
