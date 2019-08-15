@@ -7,6 +7,7 @@
     main_packages:
       - dovecot
       - dovecot-mysql
+      - dovecot-pigeonhole
 
 - name: copy 10-mail
   copy:
@@ -86,6 +87,37 @@
     owner: vmail
     group: mail
 
+- name: create /var/vmail/sieve/global directory
+  file:
+    path: /var/vmail/sieve/global/
+    state: directory
+  tags: rspamd
+
+- name: copy sieve spam filter
+  copy:
+    src: spam-global.sieve
+    dest: /var/vmail/sieve/global/spam-global.sieve
+    mode: 0640
+    force: yes
+  notify: restart dovecot
+  tags: rspamd
+
+- name: copy sieve learn spam
+  copy:
+    src: learn-spam.sieve
+    dest: /var/vmail/sieve/global/learn-spam.sieve
+    mode: 0640
+  notify: restart dovecot
+  tags: rspamd
+
+- name: copy sieve learn ham
+  copy:
+    src: learn-ham.sieve
+    dest: /var/vmail/sieve/global/learn-ham.sieve
+    mode: 0640
+  notify: restart dovecot
+  tags: rspamd
+  
 - name: change dovecot directory permissions
   file:
     path: /etc/dovecot/
