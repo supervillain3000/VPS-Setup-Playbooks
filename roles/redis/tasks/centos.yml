@@ -2,6 +2,7 @@
 - name: Install redis
   yum:
     name: redis
+    enablerepo: remi
     state: latest
 
 - name: Make sure redis is started and enabled
