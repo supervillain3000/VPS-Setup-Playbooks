@@ -1,0 +1,152 @@
+---
+- name: Add rspamd stable official repo
+  yum_repository:
+    name: rspamd
+    description: Official rspamd stable repository
+    gpgcheck: yes
+    baseurl: http://rspamd.com/rpm-stable/centos-7/x86_64/
+    gpgkey: http://rspamd.com/rpm/gpg.key
+
+- name: Install packages
+  yum:
+    name: "{{ main_packages }}"
+    update_cache: yes
+  vars:
+    main_packages:
+      - rspamd
+      - python-passlib
+
+- name: Stop rspamd service and enable it
+  service:
+    name: rspamd
+    state: stopped
+    enabled: yes
+
+- name: Copy options.inc
+  copy:
+    src: options.inc
+    dest: /etc/rspamd/local.d/options.inc
+    mode: 0644
+  notify: restart rspamd
+
+- name: Copy worker-normal.inc
+  copy:
+    src: worker-normal.inc
+    dest: /etc/rspamd/local.d/worker-normal.inc
+    mode: 0644
+  notify: restart rspamd
+
+- name: Copy worker-controller.inc
+  copy:
+    src: worker-controller.inc
+    dest: /etc/rspamd/local.d/worker-controller.inc
+    mode: 0644
+  notify: restart rspamd
+
+- name: Generate rspamd web ui password
+  shell: openssl rand -hex 20 > /root/071-rspamd_webui_password && chmod 640 /root/071-rspamd_webui_password
+
+- name: Generate rspamd web ui password
+  shell: cat /root/071-rspamd_webui_password | rspamadm pw -p - 2>/dev/null | grep -v hyperscan
+  register: rspamd_web_ui_password
+
+- name: Get hashed password into worker-controller.inc
+  replace:
+    path: /etc/rspamd/local.d/worker-controller.inc
+    regexp: 'hash'
+    replace: "{{ rspamd_web_ui_password.stdout }}"
+  notify: restart rspamd
+
+- name: Copy worker-proxy.inc
+  copy:
+    src: worker-proxy.inc
+    dest: /etc/rspamd/local.d/worker-proxy.inc
+    mode: 0644
+  notify: restart rspamd
+
+- name: Copy logging.inc
+  copy:
+    src: logging.inc
+    dest: /etc/rspamd/local.d/logging.inc
+    mode: 0644
+  notify: restart rspamd
+
+- name: Copy milter_headers.conf
+  copy:
+    src: milter_headers.conf
+    dest: /etc/rspamd/local.d/milter_headers.conf
+    mode: 0644
+  notify: restart rspamd
+
+- name: Copy classifier-bayes.conf
+  copy:
+    src: classifier-bayes.conf
+    dest: /etc/rspamd/local.d/classifier-bayes.conf
+    mode: 0644
+  notify: restart rspamd
+
+- name: Create rspamd dkim folder
+  file:
+    path: /var/lib/rspamd/dkim/
+    owner: _rspamd
+    group: _rspamd
+    state: directory
+    mode: 0640
+
+- name: Generate dkim key
+  shell: rspamadm dkim_keygen -b 2048 -s default -k /var/lib/rspamd/dkim/default.key > /var/lib/rspamd/dkim/default.txt && chmod 440 /var/lib/rspamd/dkim/*
+
+- name: Copy dkim_signing.conf
+  copy:
+    src: dkim_signing.conf
+    dest: /etc/rspamd/local.d/dkim_signing.conf
+    mode: 0644
+  notify: restart rspamd
+
+- name: Copy arc config
+  copy:
+    src: dkim_signing.conf
+    dest: /etc/rspamd/local.d/arc.conf
+    mode: 0644
+
+- name: Add http auth for rspamd web ui
+  htpasswd:
+    path: /etc/nginx/conf.d/rspamd_htpasswd
+    name: rspamd_admin
+    password: "{{ lookup('password', '/root/070-rspamd_web_htpasswd_password chars=ascii_letters,digits,hexdigits length=15') }}"
+  notify: restart nginx
+
+- name: Copy nginx config
+  blockinfile:
+    marker: "# {mark} rspamd web ui access"
+    insertafter: "try_files"
+    block: |
+      location /rspamd/ {
+          auth_basic "Please log in to proceed";
+          auth_basic_user_file conf.d/rspamd_htpasswd;
+
+          proxy_pass http://127.0.0.1:11334/;
+          proxy_set_header Host $host;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      }
+    path: /etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf
+  notify: restart nginx
+
+- name: Insert rspamd_admin user name into password file
+  blockinfile:
+    dest: /root/070-rspamd_web_htpasswd_password
+    insertbefore: BOF
+    block: |
+
+      Защита веб-интерфейса rspamd:
+      http://{{ ansible_default_ipv4.address }}/rspamd/
+      Данные для http авторизации:
+      Логин: rspamd_admin
+
+- name: Insert rspamd web ui password description into file
+  blockinfile:
+    dest: /root/071-rspamd_webui_password
+    insertbefore: BOF
+    block: |
+
+      Пароль от веб-интерфейса rspamd:

@@ -1,0 +1,7 @@
+---
+- import_tasks: centos.yml
+  when: ansible_facts['os_family']|lower == 'redhat'
+- import_tasks: debian.yml
+  when: ansible_facts['os_family']|lower == 'debian'
+
+# Панель postfixadmin позволяет создавать, удалять почтовые ящики а также задавать их различные настройки, такие как перенаправления, псевдонимы, автоответчики и прочее.
