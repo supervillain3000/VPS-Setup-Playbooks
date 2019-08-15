@@ -150,3 +150,15 @@
     block: |
 
       Пароль от веб-интерфейса rspamd:
+
+- name: enable rspamd milter
+    blockinfile:
+      path: /etc/postfix/main.cf
+      marker: "# {mark} rspamd as milter"
+      insertafter: EOF
+      block: |
+        smtpd_milters = inet:localhost:11332
+        non_smtpd_milters = inet:localhost:11332
+        milter_protocol = 6
+        milter_mail_macros =  i {mail_addr} {client_addr} {client_name} {auth_authen}
+        milter_default_action = accept
