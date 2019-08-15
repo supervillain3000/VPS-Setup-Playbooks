@@ -14,5 +14,6 @@
     - mail_dovecot
     - mail_postfixadmin
     - mail_rspamd
+    - redis
     - fail2ban
     - certbot
