@@ -1,0 +1,19 @@
+---
+- hosts: vps
+  tasks:
+    - name: Add repos and update package manager cache before main playbook execution
+      import_tasks: package_cache_update.yml
+      #this is useful to save time on playbook execution
+
+- hosts: vps
+  roles:
+    - nginx
+    - apache2
+    - mysql
+    - phpmyadmin
+    - mail_postfix
+    - mail_dovecot
+    - mail_postfixadmin
+    - sftp
+    - fail2ban
+    - certbot
