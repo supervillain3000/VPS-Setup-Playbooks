@@ -53,7 +53,7 @@
   file:
     state: link
     src: /opt/remi/php{{php_version}}/root/bin/{{ item.source }}
-    dest: /usr/bin/php{{php_version}}{{ item.target }}
+    dest: /usr/bin/php{{ item.target }}
   loop:
     - { source: 'php', target: ''}
     - { source: 'php-cgi', target: '-cgi'}
