@@ -49,6 +49,18 @@
     - { options: 'upload_max_filesize', value: '64M' }
   notify: restart centos php-fpm
 
+- name: make remi php binary work using php command
+  file:
+    state: link
+    src: /opt/remi/php{{php_version}}/root/bin/{{ item.source }}
+    dest: /usr/bin/php{{php_version}}{{ item.target }}
+    dest: "{{ item.target }}"
+    mode: 0644
+  loop:
+    - { source: 'php', target: ''}
+    - { source: 'php-cgi', target: '-cgi'}
+    - { source: 'phar.phar', target: '-phar'}
+
 - name: Create /var/www/ vhost subdir
   file:
     state: directory
