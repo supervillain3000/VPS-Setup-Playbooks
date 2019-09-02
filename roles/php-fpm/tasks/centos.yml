@@ -54,7 +54,6 @@
     state: link
     src: /opt/remi/php{{php_version}}/root/bin/{{ item.source }}
     dest: /usr/bin/php{{php_version}}{{ item.target }}
-    dest: "{{ item.target }}"
     mode: 0644
   loop:
     - { source: 'php', target: ''}
