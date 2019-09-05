@@ -71,3 +71,18 @@
     gpgcheck: no
     baseurl: http://nginx.org/packages/centos/$releasever/$basearch/
   when: ansible_facts['os_family'] == "RedHat"
+
+- name: Tune bash history
+  blockinfile:
+    dest: /etc/profile.d/history.sh
+    create: yes
+    owner: root
+    group: root
+    mode: 0644
+    block: |
+      export HISTCONTROL=ignoreboth:erasedups
+      export PROMPT_COMMAND='RETRN_VAL=$?; logger -p local6.info "$(whoami) [$$]: $(history 1 | sed "s/^[ :0-9-]\+//" ) [$RETRN_VAL]"; history -a'
+      export HISTFILESIZE=4096
+      export HISTSIZE=4096
+      export HISTTIMEFORMAT='%F %T  '
+      readonly HISTTIMEFORMAT HISTSIZE HISTFILESIZE PROMPT_COMMAND HISTCONTROL
