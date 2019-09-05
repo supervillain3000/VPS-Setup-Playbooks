@@ -65,6 +65,16 @@
     - { options: 'upload_max_filesize', value: '64M' }
   notify: restart httpd
 
+- name: make remi php binary work using php command
+  file:
+    state: link
+    src: /opt/remi/php{{php_version}}/root/usr/bin/{{ item.source }}
+    dest: /usr/bin/php{{ item.target }}
+  loop:
+    - { source: 'php', target: ''}
+    - { source: 'php-cgi', target: '-cgi'}
+    - { source: 'phar.phar', target: '-phar'}
+
 - name: Create /var/www/ vhost subdir
   file:
     state: directory
