@@ -51,6 +51,14 @@
     path: /etc/systemd/system/multi-user.target.wants/nginx.service
     line: 'ExecStartPre=/bin/sleep 10'
 
+- name: Fix httproxy vulnerability
+  blockinfile:
+    marker: "## {mark} httpoxy vulnerability fix"
+    block: |
+      fastcgi_param  HTTP_PROXY         "";
+    insertafter: EOF
+    path: /etc/nginx/fastcgi_params
+
 - name: Enable http(s) on firewall-cmd
   firewalld:
     service: "{{ item }}"
