@@ -91,7 +91,7 @@
     owner: _rspamd
     group: _rspamd
     state: directory
-    mode: 0640
+    mode: 0740
 
 - name: Generate dkim key
   shell: rspamadm dkim_keygen -b 2048 -s default -k /var/lib/rspamd/dkim/default.key > /var/lib/rspamd/dkim/default.txt && chmod 440 /var/lib/rspamd/dkim/* && chown -R _rspamd:_rspamd /var/lib/rspamd/dkim
