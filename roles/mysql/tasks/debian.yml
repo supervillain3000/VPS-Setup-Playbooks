@@ -1,5 +1,5 @@
 ---
-- name: Install mysql and tools
+- name: Install mysql and tools for Ubuntu
   apt:
     state: latest
     name: "{{ mysql_packages }}"
@@ -7,6 +7,17 @@
     mysql_packages:
     - mysql-server
     - python-mysqldb
+  when: ansible_facts['distribution'] == "Ubuntu"
+
+- name: Install mysql and tools for Debian
+  apt:
+    state: latest
+    name: "{{ mariadb_packages }}"
+  vars:
+    mariadb_packages:
+    - mariadb-server
+    - python-mysqldb
+  when: ansible_facts['distribution'] == "Debian"
 
 - name: change mysql bind-address
   lineinfile:
