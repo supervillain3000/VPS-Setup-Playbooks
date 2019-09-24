@@ -6,6 +6,7 @@
     gpgcheck: yes
     baseurl: http://rspamd.com/rpm-stable/centos-7/x86_64/
     gpgkey: http://rspamd.com/rpm/gpg.key
+  when: ansible_facts['distribution_major_version'] != "8"
 
 - name: Install packages
   yum:
