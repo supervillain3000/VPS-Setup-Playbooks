@@ -87,3 +87,10 @@
       export HISTTIMEFORMAT='%F %T  '
       readonly HISTTIMEFORMAT HISTSIZE HISTFILESIZE PROMPT_COMMAND HISTCONTROL
   when: ansible_facts['distribution'] != "Ubuntu"
+
+- name: Tune bash history for Ubuntu
+  replace:
+    dest: /etc/profile.d/histtime.sh
+    regexp: 'HISTTIMEFORMAT="%h %d %H:%M:%S "'
+    replace: 'HISTTIMEFORMAT="%F %T  "'
+  when: ansible_facts['distribution'] == "Ubuntu"
