@@ -22,14 +22,6 @@
     src: vhost_pool_debian.j2
   notify: restart debian php-fpm
 
-- name: add cgi.fix_pathinfo = 0 to php.ini
-  ini_file:
-    path: /etc/php/{{ php_version_u }}/fpm/php.ini
-    section: PHP
-    option: cgi.fix_pathinfo
-    value: 0
-  notify: restart debian php-fpm
-
 - name: change upload size vars in php.ini
   ini_file:
     path: /etc/php/{{ php_version_u }}/fpm/php.ini
@@ -39,6 +31,8 @@
   loop:
     - { options: 'post_max_size', value: '64M' }
     - { options: 'upload_max_filesize', value: '64M' }
+    - { options: 'short_open_tag', value: 'On' }
+    - { options: 'cgi.fix_pathinfo', value: '0' }
   notify: restart debian php-fpm
 
 - name: Create /var/www/ vhost subdir
