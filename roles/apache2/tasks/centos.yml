@@ -54,7 +54,7 @@
       MaxRequestsPerChild 4096
   notify: restart httpd
 
-- name: change upload size vars in php.ini
+- name: tune some php.ini vars
   ini_file:
     path: /etc/opt/remi/php{{ php_version }}/php.ini
     section: PHP
@@ -63,6 +63,7 @@
   loop:
     - { options: 'post_max_size', value: '64M' }
     - { options: 'upload_max_filesize', value: '64M' }
+    - { options: 'short_open_tag', value: 'On' }
   notify: restart httpd
 
 - name: make remi php binary work using php command

@@ -68,7 +68,7 @@
       MaxRequestsPerChild 4096
   notify: restart apache2
 
-- name: change upload size vars in php.ini
+- name: tune some php.ini vars
   ini_file:
     path: /etc/php/{{ php_version_u }}/apache2/php.ini
     section: PHP
@@ -77,6 +77,7 @@
   loop:
     - { options: 'post_max_size', value: '64M' }
     - { options: 'upload_max_filesize', value: '64M' }
+    - { options: 'short_open_tag', value: 'On' }
   notify: restart apache2
 
 - name: Create /var/www/ vhost subdir
@@ -109,7 +110,7 @@
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         #httpoxy vulnerability fix
         proxy_set_header Proxy "";
-        
+
         proxy_read_timeout 300;
         client_max_body_size 256m;
 
