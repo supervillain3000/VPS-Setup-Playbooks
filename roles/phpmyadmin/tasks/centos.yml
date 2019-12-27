@@ -4,22 +4,21 @@
     name: python-passlib
     state: latest
 
-- name: check a php version var
-  debug:
-    msg: "{{ lookup('env','php_version') }}"
+- name: check a php version and register a var
+  shell: php -v | grep 5.6
+  register: php_version_for_pma
 
-# - name: download phpmyadmin latest 
-#   get_url:
-#     url: https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.zip
-#     dest: /usr/share/phpMyAdmin-latest-all-languages.zip
-#   when: "{{ lookup('env','php_version') }}" != "56"
-#   #debugger: always
+- name: download phpmyadmin latest 
+  get_url:
+    url: https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.zip
+    dest: /usr/share/phpMyAdmin-latest-all-languages.zip
+  when: php_version_for_pma.rc != 0
 
 - name: download phpmyadmin with old php support
   get_url:
     url: https://files.phpmyadmin.net/phpMyAdmin/4.9.3/phpMyAdmin-4.9.3-all-languages.zip
     dest: /usr/share/phpMyAdmin-4.9.3-all-languages.zip
-  # when: "{{ lookup('env','php_version') }}" == "56"
+  when: php_version_for_pma.rc == 0
 
 - name: install phpmyadmin
   shell: |
