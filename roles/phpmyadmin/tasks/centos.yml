@@ -8,6 +8,13 @@
   get_url:
     url: https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.zip
     dest: /usr/share/phpMyAdmin-latest-all-languages.zip
+  when: php_version != 56
+
+- name: download phpmyadmin
+  get_url:
+    url: https://files.phpmyadmin.net/phpMyAdmin/4.9.3/phpMyAdmin-4.9.3-all-languages.zip
+    dest: /usr/share/phpMyAdmin-latest-all-languages.zip
+  when: php_version == 56
 
 - name: install phpmyadmin
   shell: |
