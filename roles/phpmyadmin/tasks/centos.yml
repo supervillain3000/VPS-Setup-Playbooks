@@ -4,6 +4,10 @@
     name: python-passlib
     state: latest
 
+- name: check a php version var
+  debug:
+    msg: "{{ lookup('env','php_version') }}"
+
 # - name: download phpmyadmin latest 
 #   get_url:
 #     url: https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.zip
