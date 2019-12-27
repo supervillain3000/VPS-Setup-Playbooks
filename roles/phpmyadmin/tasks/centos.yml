@@ -18,7 +18,7 @@
 
 - name: install phpmyadmin
   shell: |
-    unzip /usr/share/phpMyAdmin-latest-all-languages.zip -d /usr/share/
+    unzip /usr/share/phpMyAdmin-*-all-languages.zip -d /usr/share/
     mv /usr/share/phpMyAdmin-*-all-languages/ /usr/share/phpmyadmin/
     cp /usr/share/phpmyadmin/config.sample.inc.php /usr/share/phpmyadmin/config.inc.php
     rm /usr/share/phpMyAdmin-latest-all-languages.zip
