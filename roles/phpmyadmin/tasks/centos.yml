@@ -9,6 +9,7 @@
     url: https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.zip
     dest: /usr/share/phpMyAdmin-latest-all-languages.zip
   when: php_version != 56
+  debugger: always
 
 - name: download phpmyadmin with old php support
   get_url:
