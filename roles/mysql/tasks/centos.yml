@@ -22,18 +22,18 @@
     description: MariaDB 10.4 CentOS
     baseurl: http://yum.mariadb.org/10.4/centos8-amd64
     gpgkey: https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
-  when: ansible_facts['distribution_major_version'] = "8"
+  when: ansible_facts['distribution_major_version'] == "8"
 
 - name: Install boost-program-options
   dnf:
     name: boost-program-options
-  when: ansible_facts['distribution_major_version'] = "8"
+  when: ansible_facts['distribution_major_version'] == "8"
 
 - name: Install mariadb-server
   dnf:
     name: MariaDB-server MariaDB-client 
     disablerepo: AppStream 
-  when: ansible_facts['distribution_major_version'] = "8"
+  when: ansible_facts['distribution_major_version'] == "8"
 #Disabling the AppStream repo is necessary for the time being in order for our MariaDB-server package to be found and used by dnf. And because the required boost-program-options package is located in the AppStream repo, it needs to be installed prior to installing MariaDB-server.
 
 - name: Change mysql bind-address
