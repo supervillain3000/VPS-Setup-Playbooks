@@ -41,14 +41,6 @@
     path: /etc/my.cnf.d/server.cnf
     regexp: '^#bind-address'
     line: 'bind-address = 127.0.0.1'
-  when: ansible_facts['distribution_major_version'] != "8"
-
-- name: Change mariadb bind-address
-  lineinfile:
-    path: /etc/my.cnf.d/mariadb-server.cnf
-    regexp: '^#bind-address'
-    line: 'bind-address = 127.0.0.1'
-  when: ansible_facts['distribution_major_version'] == "8"
 
 - name: Ensure mariadb is started and enabled
   service:
