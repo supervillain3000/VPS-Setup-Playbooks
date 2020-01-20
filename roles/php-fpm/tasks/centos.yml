@@ -18,6 +18,13 @@
     update_cache: yes
     state: latest
 
+- name: install libedit-devel # needed by php-devel package on centos8
+  yum:
+    name: libedit-devel
+    enablerepor: PowerTools
+    state: present
+  when: ansible_facts['distribution_major_version'] == "8"
+
 - name: install php modules
   yum:
     name: "{{ php_modules }}"
