@@ -1,8 +1,15 @@
 ---
-- name: install python-passlib
+- name: install python-passlib for centos7
   yum:
     name: python-passlib
     state: latest
+  when: ansible_facts['distribution_major_version'] != "8"
+
+- name: install python3-passlib for centos8
+  yum:
+    name: python3-passlib
+    state: latest
+  when: ansible_facts['distribution_major_version'] == "8"
 
 - name: check a php version and register a var
   shell: php -v | grep 5.6
