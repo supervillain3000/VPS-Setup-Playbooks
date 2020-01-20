@@ -24,9 +24,13 @@
     gpgkey: https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
   when: ansible_facts['distribution_major_version'] == "8"
 
-- name: Install boost-program-options
+- name: Install boost-program-options and python3-PyMySQL
   dnf:
-    name: boost-program-options
+    name: "{{ mariadb_packages }}"
+  vars:
+    mariadb_packages:
+    - boost-program-options
+    - python3-PyMySQL
   when: ansible_facts['distribution_major_version'] == "8"
 
 - name: Install mariadb-server
