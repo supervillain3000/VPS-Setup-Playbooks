@@ -9,9 +9,9 @@
 
 - name: Install mariadb and trivia for centos 7
   yum:
-    name: "{{ mysql_packages }}"
+    name: "{{ mariadb_packages }}"
   vars:
-    mysql_packages:
+    mariadb_packages:
     - mariadb-server
     - MySQL-python
   when: ansible_facts['distribution_major_version'] != "8"
