@@ -3,7 +3,7 @@
   yum_repository:
     name: MariaDB
     description: MariaDB 10.4 CentOS
-    baseurl: http://yum.mariadb.org/10.3/centos{{ ansible_distribution_major_version }}-amd64
+    baseurl: http://yum.mariadb.org/10.4/centos{{ ansible_distribution_major_version }}-amd64
     gpgkey: https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
 
 - name: Install mariadb and trivia for centos 7
