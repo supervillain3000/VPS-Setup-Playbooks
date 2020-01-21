@@ -1,11 +1,10 @@
 ---
-- name: Add mariadb 10.3 repo for centos 7
+- name: Add mariadb 10.4 repo
   yum_repository:
     name: MariaDB
-    description: MariaDB 10.3 CentOS
-    baseurl: http://yum.mariadb.org/10.3/centos7-amd64
+    description: MariaDB 10.4 CentOS
+    baseurl: http://yum.mariadb.org/10.3/centos{{ ansible_distribution_major_version }}-amd64
     gpgkey: https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
-  when: ansible_facts['distribution_major_version'] != "8"
 
 - name: Install mariadb and trivia for centos 7
   yum:
@@ -16,14 +15,6 @@
     - MySQL-python
   when: ansible_facts['distribution_major_version'] != "8"
 
-- name: Add mariadb 10.4 repo for centos 8
-  yum_repository:
-    name: MariaDB
-    description: MariaDB 10.4 CentOS
-    baseurl: http://yum.mariadb.org/10.4/centos8-amd64
-    gpgkey: https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
-  when: ansible_facts['distribution_major_version'] == "8"
-
 - name: Install boost-program-options and python3-PyMySQL
   dnf:
     name: "{{ mariadb_packages }}"
@@ -33,7 +24,7 @@
     - python3-PyMySQL
   when: ansible_facts['distribution_major_version'] == "8"
 
-- name: Install mariadb-server
+- name: Install mariadb-server for centos 8
   dnf:
     name: MariaDB-server
     disablerepo: AppStream 
@@ -51,6 +42,25 @@
     name: mariadb
     state: started
     enabled: yes
+
+- name: change root at localhost user password # as it is set to invalid in mariadb10.4
+  shell: mysql -e "set password for root@localhost = password('{{ lookup('password', '/root/04-mysqlr_password chars=ascii_letters,digits,hexdigits length=15') }}')"
+
+- name: copy root mysql password file
+  copy:
+    dest: /root/.my.cnf
+    src: root_my_cnf
+    owner: root
+    group: root
+    mode: 0660
+
+- name: add root password to root homedir my.cnf file
+  replace:
+    path: /root/.my.cnf
+    regexp: '^password'
+    replace: 'password="{{ file_contents }}"'
+  vars:
+    file_contents: "{{ lookup('file', '/root/04-mysqlr_password') }}"
 
 - name: add website db
   mysql_db:
@@ -103,29 +113,6 @@
   mysql_db:
     state: absent
     name: test
-
-- name: change root password
-  mysql_user:
-    state: present
-    name: root
-    host: localhost
-    password: "{{ lookup('password', '/root/04-mysqlr_password chars=ascii_letters,digits,hexdigits length=15') }}"
-
-- name: copy root mysql password file
-  copy:
-    dest: /root/.my.cnf
-    src: root_my_cnf
-    owner: root
-    group: root
-    mode: 0660
-
-- name: add root password to root homedir my.cnf file
-  replace:
-    path: /root/.my.cnf
-    regexp: '^password'
-    replace: 'password="{{ file_contents }}"'
-  vars:
-    file_contents: "{{ lookup('file', '/root/04-mysqlr_password') }}"
 
 - name: insert root mysql user name into root password file
   blockinfile:
