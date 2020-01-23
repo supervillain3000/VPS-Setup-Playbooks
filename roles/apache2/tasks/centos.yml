@@ -72,19 +72,19 @@
   notify: restart httpd
   when: ansible_facts['distribution_major_version'] != "8"
 
-- name: tune mpm_event # on centos 8 we use event as it's default
-  blockinfile:
-    path: /etc/httpd/conf/httpd.conf
-    insertafter: '^Listen'
-    marker: '#### Apache mpm_event tuning'
-    block: |
-      ThreadsPerChild 10
-      ServerLimit 2
-      MaxRequestWorkers 20
-      AsyncRequestWorkerFactor 2
-  notify: restart httpd
-  when: ansible_facts['distribution_major_version'] == "8"
-  #numbers based on https://httpd.apache.org/docs/2.4/mod/event.html
+# - name: tune mpm_event # on centos 8 we use event as it's default
+#   blockinfile:
+#     path: /etc/httpd/conf/httpd.conf
+#     insertafter: '^Listen'
+#     marker: '#### Apache mpm_event tuning'
+#     block: |
+#       ThreadsPerChild 10
+#       ServerLimit 2
+#       MaxRequestWorkers 20
+#       AsyncRequestWorkerFactor 2
+#   notify: restart httpd
+#   when: ansible_facts['distribution_major_version'] == "8"
+#   #numbers based on https://httpd.apache.org/docs/2.4/mod/event.html
 
 - name: tune some php.ini vars
   ini_file:
