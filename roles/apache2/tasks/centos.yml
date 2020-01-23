@@ -68,10 +68,10 @@
     insertafter: '^Listen'
     marker: '#### Apache mpm_event tuning'
     block: |
-      ThreadsPerChild = 10
-      ServerLimit = 2
-      MaxRequestWorkers = 20
-      AsyncRequestWorkerFactor = 2
+      ThreadsPerChild 10
+      ServerLimit 2
+      MaxRequestWorkers 20
+      AsyncRequestWorkerFactor 2
   notify: restart httpd
   when: ansible_facts['distribution_major_version'] == "8"
   #numbers based on https://httpd.apache.org/docs/2.4/mod/event.html
