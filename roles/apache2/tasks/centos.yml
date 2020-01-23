@@ -58,7 +58,15 @@
     line: 'Listen 127.0.0.1:8080'
   notify: restart httpd
 
-- name: tune mpm_prefork # on centos 7 we use prefork as it's default
+- name: switch from mpm_event to mpm_prefork on centos8 # as event is not compatible with prefork
+  lineinfile:
+    path:  /etc/httpd/conf.modules.d/00-mpm.conf
+    regexp: 'LoadModule mpm_event_module modules/mod_mpm_event.so'
+    line: 'LoadModule mpm_prefork_module modules/mod_mpm_prefork.so'
+  notify: restart httpd
+  when: ansible_facts['distribution_major_version'] == "8"
+
+- name: tune mpm_prefork
   blockinfile:
     path: /etc/httpd/conf/httpd.conf
     insertafter: '^Listen'
@@ -70,9 +78,8 @@
       MaxSpareServers 16
       MaxRequestsPerChild 4096
   notify: restart httpd
-  when: ansible_facts['distribution_major_version'] != "8"
 
-# - name: tune mpm_event # on centos 8 we use event as it's default
+# - name: tune mpm_event
 #   blockinfile:
 #     path: /etc/httpd/conf/httpd.conf
 #     insertafter: '^Listen'
