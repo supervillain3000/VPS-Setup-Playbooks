@@ -29,13 +29,13 @@
       [sshd]
       enabled = true
 
-      [recidive]
-      action = iptables-multiport[name="recidive", port="ssh"]
-      maxretry = 10
-      bantime = 86400
-      findtime = 43200
-      enabled = true
-      logpath = /var/log/fail2ban.log
+      #[recidive]
+      #action = iptables-multiport[name="recidive", port="ssh"]
+      #maxretry = 10
+      #bantime = 86400
+      #findtime = 43200
+      #enabled = true
+      #logpath = /var/log/fail2ban.log
   notify: restart fail2ban
 
 - name: add postfix and dovecot jails for mailserver role
