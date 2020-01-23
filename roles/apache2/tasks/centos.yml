@@ -48,11 +48,11 @@
     line: 'Listen 127.0.0.1:8080'
   notify: restart httpd
 
-- name: tune mpm_prefork
+- name: tune mpm_prefork # on centos 7 we use prefork as it's default
   blockinfile:
     path: /etc/httpd/conf/httpd.conf
     insertafter: '^Listen'
-    marker: ''
+    marker: 'Apache mpm_prefork tuning'
     block: |
       MaxClients 256
       StartServers 3
@@ -60,6 +60,21 @@
       MaxSpareServers 16
       MaxRequestsPerChild 4096
   notify: restart httpd
+  when: ansible_facts['distribution_major_version'] != "8"
+
+- name: tune mpm_event # on centos 8 we use event as it's default
+  blockinfile:
+    path: /etc/httpd/conf/httpd.conf
+    insertafter: '^Listen'
+    marker: 'Apache mpm_event tuning'
+    block: |
+      ThreadsPerChild = 10
+      ServerLimit = 2
+      MaxRequestWorkers = 20
+      AsyncRequestWorkerFactor = 2
+  notify: restart httpd
+  when: ansible_facts['distribution_major_version'] == "8"
+  #numbers based on https://httpd.apache.org/docs/2.4/mod/event.html
 
 - name: tune some php.ini vars
   ini_file:
