@@ -20,6 +20,16 @@
     state: latest
     enablerepo: remi-php{{ php_version }}
   notify: restart httpd
+  when: ansible_facts['distribution_major_version'] != "8"
+
+- name: install mod_php for centos8
+  dnf:
+    name: php{{ php_version }}-php
+    install_weak_deps: no
+    state: latest
+    enablerepo: remi-php{{ php_version }}
+  notify: restart httpd
+  when: ansible_facts['distribution_major_version'] == "8"
 
 - name: install libedit-devel # needed by php-devel package on centos8
   yum:
