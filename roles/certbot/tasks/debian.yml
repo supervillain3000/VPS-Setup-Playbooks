@@ -95,7 +95,7 @@
 
 - name: Add 8081 port to apache
   lineinfile:
-    path: /etc/apache2/apache.conf
+    path: /etc/apache2/apache2.conf
     insertafter: '^Listen'
     line: 'Listen 127.0.0.1:8081'
   notify: restart httpd
