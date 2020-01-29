@@ -60,6 +60,12 @@
     content: '# disabled'
     dest: /etc/apache2/ports.conf
 
+- name: enable apache2 mod_ssl
+  apache2_module:
+    state: present
+    name: ssl
+  notify: restart apache2
+
 - name: tune mpm_prefork
   blockinfile:
     marker: ''
