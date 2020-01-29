@@ -30,7 +30,7 @@
 
 - name: Clear mod ssl default conf file
   copy:
-    content: '; disabled, use separate vhost pools'
+    content: '; disabled'
     dest: /etc/httpd/conf.d/ssl.conf
 
 - name: install mod_php for centos8
