@@ -55,10 +55,10 @@
   register: apache2_status
 
 - name: Change proxy pass schema in nginx vhost conf
-  lineinfile:
+  replace:
     path: /etc/nginx/vhosts/{{ vhost }}.conf
-    regexp: '^proxy_pass'
-    line: 'proxy_pass https://127.0.0.1:8081;'
+    regexp: 'proxy_pass http://127.0.0.1:8080;'
+    replace: 'proxy_pass https://127.0.0.1:8081;'
   when: cert_issue_result.stdout.find("Congratulations") != -1 and apache2_status.stat.exists
 
 - name: Add https config block for apache
