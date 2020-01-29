@@ -66,6 +66,7 @@
   stat:
     path: /usr/sbin/httpd
   register: httpd_status
+  when: ansible_facts['os_family'] == "RedHat"
 
 - name: Change proxy pass schema in nginx vhost conf
   lineinfile:
