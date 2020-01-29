@@ -49,11 +49,16 @@
   notify: restart apache2
 
 - name: change listened port
-  lineinfile:
-    path: /etc/apache2/ports.conf
-    regexp: '^Listen'
-    line: 'Listen 127.0.0.1:8080'
+  replace:
+    path: /etc/apache2/apache2.conf
+    regexp: 'Include ports.conf'
+    replace: 'Listen 127.0.0.1:8080'
   notify: restart apache2
+
+- name: Disable ports.conf file
+  copy:
+    content: '# disabled'
+    path: /etc/apache2/ports.conf
 
 - name: tune mpm_prefork
   blockinfile:
