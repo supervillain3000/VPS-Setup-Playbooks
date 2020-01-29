@@ -98,8 +98,12 @@
     path: /etc/apache2/apache2.conf
     insertafter: '^Listen'
     line: 'Listen 127.0.0.1:8081'
-  notify: restart httpd
   when: cert_issue_result.stdout.find("Congratulations") != -1 and apache2_status.stat.exists
+
+- name: enable apache2 mod_ssl
+  apache2_module:
+    state: present
+    name: ssl
 
 # disabled: no dhaparam file gen
 #- name: Check on dhparam file generation
