@@ -58,7 +58,7 @@
 - name: Disable ports.conf file
   copy:
     content: '# disabled'
-    path: /etc/apache2/ports.conf
+    dest: /etc/apache2/ports.conf
 
 - name: tune mpm_prefork
   blockinfile:
