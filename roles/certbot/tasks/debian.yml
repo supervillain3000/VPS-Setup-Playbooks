@@ -63,7 +63,7 @@
 
 - name: Add https config block for apache
   blockinfile:
-    path: /etc/httpd/conf.d/{{ vhost }}.conf
+    path: /etc/apache2/sites-enabled/{{ vhost }}.conf
     marker: "# {mark} https block"
     insertafter: EOF
     block: |
@@ -80,7 +80,7 @@
         SSLCertificateKeyFile /etc/letsencrypt/live/{{ vhost }}/privkey.pem
 
         DocumentRoot "/var/www/{{ vhost }}"
-        ErrorLog "/var/log/httpd/{{ vhost }}_error.log"
+        ErrorLog "/var/log/apache2/{{ vhost }}_error.log"
 
         DirectoryIndex "index.html" "index.php" "index.xhtml" "index.htm" "index.shtml"
 
