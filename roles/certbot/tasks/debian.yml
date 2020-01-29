@@ -1,0 +1,152 @@
+---
+- name: Install on Debian/Ubuntu
+  apt:
+    name: certbot
+    state: latest
+
+- meta: flush_handlers
+
+- name: Issue certificate for server vhost
+  shell: certbot certonly -w /var/www/"{{ vhost }}" -d "{{ vhost }}",www."{{ vhost }}" --webroot --agree-tos -m admin@"{{ vhost }}" 2>&1 | tee /root/cert_install.log
+  register: cert_issue_result
+
+- name: Remove http listen block from webserver config
+  lineinfile:
+    path: /etc/nginx/vhosts/{{ vhost }}.conf
+    state: absent
+    regexp: ":80;$"
+  when: cert_issue_result.stdout.find("Congratulations") != -1
+
+- name: Add cert and http listen to webserver config
+  blockinfile:
+    path: /etc/nginx/vhosts/{{ vhost }}.conf
+    marker: "# {mark} http2 ssl section"
+    insertafter: "server_name"
+    block: |
+      listen {{ ansible_default_ipv4.address }}:443 ssl http2;
+      {% if ansible_default_ipv6.address is defined %}
+      listen [{{ ansible_default_ipv6.address }}]:443 ssl http2;
+      {% endif %}
+
+      ssl_certificate /etc/letsencrypt/live/{{ vhost }}/fullchain.pem;
+      ssl_certificate_key /etc/letsencrypt/live/{{ vhost }}/privkey.pem;
+  when: cert_issue_result.stdout.find("Congratulations") != -1
+
+- name: Add http to https redirect block to webserver config
+  blockinfile:
+    path: /etc/nginx/vhosts/{{ vhost }}.conf
+    marker: "# {mark} Redirect to https"
+    insertafter: EOF
+    block: |
+      server {
+      server_name {{ vhost }} www.{{ vhost }};
+      listen {{ ansible_default_ipv4.address }}:80;
+      {% if ansible_default_ipv6.address is defined %}
+      listen [{{ ansible_default_ipv6.address }}]:80;
+      {% endif %}
+
+      return 301 https://$host$request_uri;
+      }
+  when: cert_issue_result.stdout.find("Congratulations") != -1
+
+- name: check if there is apache
+  stat:
+    path: /etc/apache2/apache2.conf
+  register: apache2_status
+
+- name: Change proxy pass schema in nginx vhost conf
+  lineinfile:
+    path: /etc/nginx/vhosts/{{ vhost }}.conf
+    regexp: '^proxy_pass'
+    line: 'proxy_pass https://127.0.0.1:8081;'
+  when: cert_issue_result.stdout.find("Congratulations") != -1 and apache2_status.stat.exists
+
+- name: Add https config block for apache
+  blockinfile:
+    path: /etc/httpd/conf.d/{{ vhost }}.conf
+    marker: "# {mark} https block"
+    insertafter: EOF
+    block: |
+      <IfModule mod_ssl.c>
+      <VirtualHost 127.0.0.1:8081 >
+        ServerName "{{ vhost }}"
+        ServerAlias "www.{{ vhost }}"
+        ServerAdmin "admin@{{ vhost }}"
+        UseCanonicalName Off
+
+        SSLEngine on
+        SSLVerifyClient none
+        SSLCertificateFile /etc/letsencrypt/live/{{ vhost }}/fullchain.pem;
+        SSLCertificateKeyFile /etc/letsencrypt/live/{{ vhost }}/privkey.pem;
+
+        DocumentRoot "/var/www/{{ vhost }}"
+        ErrorLog "/var/log/httpd/{{ vhost }}_error.log"
+
+        DirectoryIndex "index.html" "index.php" "index.xhtml" "index.htm" "index.shtml"
+
+        <Directory /var/www/{{ vhost }}/>
+          Options -Indexes +FollowSymLinks
+          AllowOverride All
+        </Directory>
+
+      </VirtualHost>
+      </IfModule>
+  when: cert_issue_result.stdout.find("Congratulations") != -1 and apache2_status.stat.exists
+
+- name: Add 8081 port to apache
+  lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    insertafter: '^Listen'
+    line: 'Listen 127.0.0.1:8081'
+  notify: restart httpd
+  when: cert_issue_result.stdout.find("Congratulations") != -1 and apache2_status.stat.exists
+
+# disabled: no dhaparam file gen
+#- name: Check on dhparam file generation
+#  async_status:
+#    jid: '{{ dhparam_sleeper.ansible_job_id }}'
+#  register: job_result
+#  until: job_result.finished
+#  retries: 1000
+#  when: cert_issue_result.stdout.find("Congratulations") != -1
+
+- name: Restart nginx
+  service:
+    name: nginx
+    state: restarted
+
+- name: Restart apache2
+  service:
+    name: httpd
+    state: restarted
+  when: cert_issue_result.stdout.find("Congratulations") != -1 and apache2_status.stat.exists
+
+- name: Add path to cert file to postfix config
+  lineinfile:
+    path: /etc/postfix/main.cf
+    regexp: '^smtpd_tls_cert_file'
+    line: 'smtpd_tls_cert_file = /etc/letsencrypt/live/{{ vhost }}/fullchain.pem'
+  when: cert_issue_result.stdout.find("Congratulations") != -1
+  notify: restart postfix
+  tags: mailserver
+
+- name: Add path to cert key to postfix config
+  lineinfile:
+    path: /etc/postfix/main.cf
+    regexp: '^smtpd_tls_key_file'
+    line: 'smtpd_tls_key_file = /etc/letsencrypt/live/{{ vhost }}/privkey.pem'
+  when: cert_issue_result.stdout.find("Congratulations") != -1
+  notify: restart postfix
+  tags: mailserver
+
+- name: Define cert files in dovecot conf
+  blockinfile:
+    path: /etc/dovecot/conf.d/10-ssl.conf
+    marker: "# {mark} enable ssl"
+    insertafter: '^# Certificate files'
+    block: |
+      ssl_cert = </etc/letsencrypt/live/{{ vhost }}/fullchain.pem
+      ssl_key = </etc/letsencrypt/live/{{ vhost }}/privkey.pem
+  when: cert_issue_result.stdout.find("Congratulations") != -1
+  notify: restart dovecot
+  tags: mailserver
