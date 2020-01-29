@@ -117,7 +117,7 @@
 
 - name: Restart apache2
   service:
-    name: httpd
+    name: apache2
     state: restarted
   when: cert_issue_result.stdout.find("Congratulations") != -1 and apache2_status.stat.exists
 
