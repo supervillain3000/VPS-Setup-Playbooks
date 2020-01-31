@@ -18,13 +18,13 @@
 
 - name: download phpmyadmin latest 
   get_url:
-    url: https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.zip
+    url: https://files.phpmyadmin.net/snapshots/phpMyAdmin-5.1+snapshot-all-languages.zip
     dest: /usr/share/phpMyAdmin-latest-all-languages.zip
   when: php_version_for_pma.rc != 0
 
 - name: download phpmyadmin with old php support
   get_url:
-    url: https://files.phpmyadmin.net/phpMyAdmin/4.9.3/phpMyAdmin-4.9.3-all-languages.zip
+    url: https://files.phpmyadmin.net/phpMyAdmin/4.9.4/phpMyAdmin-4.9.4-all-languages.zip
     dest: /usr/share/phpMyAdmin-4.9.3-all-languages.zip
   when: php_version_for_pma.rc == 0
 
