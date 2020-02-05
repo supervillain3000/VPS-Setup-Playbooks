@@ -80,8 +80,8 @@
 
         SSLEngine on
         SSLVerifyClient none
-        SSLCertificateFile /etc/letsencrypt/live/{{ vhost }}/fullchain.pem
-        SSLCertificateKeyFile /etc/letsencrypt/live/{{ vhost }}/privkey.pem
+        SSLCertificateFile "/etc/letsencrypt/live/{{ vhost }}/fullchain.pem"
+        SSLCertificateKeyFile "/etc/letsencrypt/live/{{ vhost }}/privkey.pem"
 
         DocumentRoot "/var/www/{{ vhost }}"
         ErrorLog "/var/log/httpd/{{ vhost }}_error.log"
