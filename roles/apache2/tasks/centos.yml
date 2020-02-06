@@ -115,7 +115,14 @@
     - { options: 'upload_max_filesize', value: '64M' }
     - { options: 'short_open_tag', value: 'On' }
     - { options: 'date.timezone', value: 'Asia/Almaty' }
-    - { options: 'session.save_path', value: '/tmp' }
+  notify: restart httpd
+
+- name: Change session save path in php.ini
+  ini_file:
+    path: /etc/opt/remi/php{{ php_version }}/php.ini
+    section: Session
+    option: 'session.save_path'
+    value: "'/tmp'" 
   notify: restart httpd
 
 - name: make remi php binary work using php command

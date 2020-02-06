@@ -84,7 +84,14 @@
     - { options: 'upload_max_filesize', value: '64M' }
     - { options: 'short_open_tag', value: 'On' }
     - { options: 'date.timezone', value: 'Asia/Almaty' }
-    - { options: 'session.save_path', value: '/tmp' }
+  notify: restart apache2
+
+- name: Change session save path in php.ini
+  ini_file:
+    path: /etc/php/{{ php_version_u }}/apache2/php.ini
+    section: Session
+    option: 'session.save_path'
+    value: "'/tmp'" 
   notify: restart apache2
 
 - name: Create /var/www/ vhost subdir
