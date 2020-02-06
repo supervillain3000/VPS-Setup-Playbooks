@@ -36,14 +36,6 @@
     - { options: 'date.timezone', value: 'Asia/Almaty' }
   notify: restart debian php-fpm
 
-- name: Change session save path in php.ini
-  ini_file:
-    path: /etc/php/{{ php_version_u }}/fpm/php.ini
-    section: Session
-    option: 'session.save_path'
-    value: '/tmp' 
-  notify: restart debian php-fpm
-
 - name: Create /var/www/ vhost subdir
   file:
     state: directory
