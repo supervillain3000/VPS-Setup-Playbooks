@@ -48,6 +48,8 @@
     - { options: 'upload_max_filesize', value: '64M' }
     - { options: 'short_open_tag', value: 'On' }
     - { options: 'cgi.fix_pathinfo', value: '0' }
+    - { options: 'date.timezone', value: 'Asia/Almaty' }
+    - { options: 'session.save_path', value: '/tmp' }
   notify: restart centos php-fpm
 
 - name: make remi php binary work using php command

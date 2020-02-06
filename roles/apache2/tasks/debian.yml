@@ -83,6 +83,8 @@
     - { options: 'post_max_size', value: '64M' }
     - { options: 'upload_max_filesize', value: '64M' }
     - { options: 'short_open_tag', value: 'On' }
+    - { options: 'date.timezone', value: 'Asia/Almaty' }
+    - { options: 'session.save_path', value: '/tmp' }
   notify: restart apache2
 
 - name: Create /var/www/ vhost subdir
