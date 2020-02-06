@@ -21,6 +21,6 @@ listen [{{ ansible_default_ipv6.address }}]:80;
 
         location ~* \.(jpg|jpeg|gif|png|ico|css|zip|tgz|gz|rar|bz2|doc|xls|exe|pdf|ppt|txt|tar|mid|midi|wav|bmp|rtf|js|swf|flv|avi|djvu|mp3|mp4|ogv|3gp)$ {
                 root /var/www/{{ vhost }}/;
-                expires 30d;
+                expires max;
         }
 }
