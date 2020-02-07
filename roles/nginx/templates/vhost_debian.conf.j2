@@ -19,7 +19,7 @@ listen [{{ ansible_default_ipv6.address }}]:80;
 
         ## handler ##
 
-        location ~* \.(jpg|jpeg|gif|png|ico|css|zip|tgz|gz|rar|bz2|doc|xls|exe|pdf|ppt|txt|tar|mid|midi|wav|bmp|rtf|js|swf|flv|avi|djvu|mp3|mp4|ogv|3gp)$ {
+        location ~* \.(ac3|avi|bmp|bz2|css|cue|dat|doc|docx|dts|eot|exe|flv|gif|gz|htm|html|ico|img|iso|jpeg|jpg|js|mkv|mp3|mp4|mpeg|mpg|ogg|pdf|png|ppt|pptx|qt|rar|rm|svg|swf|tar|tgz|ttf|txt|wav|woff|woff2|xls|xlsx|zip)$ {
                 root /var/www/{{ vhost }}/;
                 expires max;
         }
