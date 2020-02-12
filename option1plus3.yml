@@ -10,12 +10,12 @@
     - nginx
     - apache2
     - mysql
-    #- phpmyadmin
+    - phpmyadmin
     - mail_postfix
     - mail_dovecot
     - mail_postfixadmin
-    - mail_rspamd
-    - redis
+    #- mail_rspamd
+    #- redis
     - sftp
     - fail2ban
     - certbot
