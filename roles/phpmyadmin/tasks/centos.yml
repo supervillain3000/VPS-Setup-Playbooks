@@ -144,7 +144,7 @@
 - name: copy httpd vhost config
   template:
     src: pma_centos_apache.conf
-    dest: /etc/httpd/conf.d/phpmyadmin.conf
+    dest: /etc/httpd/conf.d/{{ ansible_default_ipv4.address }}.conf
   when: httpd_status.stat.exists
   notify: restart httpd
 
