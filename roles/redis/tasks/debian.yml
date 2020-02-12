@@ -1,6 +1,6 @@
 ---
 - name: Install redis
-  yum:
+  apt:
     name: redis
     state: latest
 
