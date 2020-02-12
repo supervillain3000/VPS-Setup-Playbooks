@@ -76,19 +76,22 @@
   when: php_fpm_status.stat.exists
   notify: restart php-fpm centos
 
-- name: copy apache2 config
-  template:
-    src: apache2_vhost.conf.j2
-    dest: /etc/apache2/sites-available/postfixadmin.conf
-    mode: 0644
-  when: apache2_status.stat.exists
-  notify: restart apache2
+- name: copy apache2 config lines
+  blockinfile:
+    path: /etc/apache2/sites-available/{{ ansible_default_ipv4.address }}.conf
+    marker: "# {mark} postfixadmin"
+    insertbefore: "</VirtualHost>"
+    block: |
+        Alias "/postfixadmin" "/var/www/postfixadmin/public/"
 
-- name: create apache2 vhost file symlink
-  file:
-    state: link
-    path: /etc/apache2/sites-enabled/postfixadmin.conf
-    src: /etc/apache2/sites-available/postfixadmin.conf
+        ErrorLog "/var/log/apache2/postfixadmin_error.log"
+
+        DirectoryIndex "index.html" "index.php" "index.xhtml" "index.htm" "index.shtml"
+
+        <Directory "/var/www/postfixadmin/public/">
+                Options -Indexes +FollowSymLinks
+                AllowOverride None
+        </Directory>
   when: apache2_status.stat.exists
   notify: restart apache2
 

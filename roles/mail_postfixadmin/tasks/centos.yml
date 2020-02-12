@@ -77,11 +77,22 @@
   when: php_fpm_status.stat.exists
   notify: restart php-fpm centos
 
-- name: copy httpd config
-  template:
-    src: httpd_vhost.conf.j2
-    dest: /etc/httpd/conf.d/postfixadmin.conf
-    mode: 0644
+- name: copy httpd config lines
+  blockinfile:
+    path: /etc/httpd/conf.d/{{ ansible_default_ipv4.address }}.conf
+    marker: "# {mark} postfixadmin"
+    insertbefore: "</VirtualHost>"
+    block: |
+        Alias "/postfixadmin" "/var/www/postfixadmin/public/"
+
+        ErrorLog "/var/log/httpd/postfixadmin_error.log"
+
+        DirectoryIndex "index.html" "index.php" "index.xhtml" "index.htm" "index.shtml"
+
+        <Directory "/var/www/postfixadmin/public/">
+                Options -Indexes +FollowSymLinks
+                AllowOverride None
+        </Directory>
   when: httpd_status.stat.exists
   notify: restart httpd
 
