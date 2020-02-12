@@ -10,6 +10,7 @@
     - nginx
     - apache2
     - mysql
+    - phpmyadmin
     - mail_postfix
     - mail_dovecot
     - mail_postfixadmin
