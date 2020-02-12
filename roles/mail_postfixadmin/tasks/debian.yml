@@ -86,8 +86,6 @@
 
         ErrorLog "/var/log/apache2/postfixadmin_error.log"
 
-        DirectoryIndex "index.html" "index.php" "index.xhtml" "index.htm" "index.shtml"
-
         <Directory "/var/www/postfixadmin/public/">
                 Options -Indexes +FollowSymLinks
                 AllowOverride None
