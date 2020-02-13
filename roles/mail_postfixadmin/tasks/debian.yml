@@ -71,10 +71,10 @@
 
 - name: copy php-fpm config
   copy:
-    src: centos_fpm.conf
+    src: debian_fpm.conf
     dest: /etc/php/{{ php_version_u }}/fpm/pool.d/postfixadmin.conf
   when: php_fpm_status.stat.exists
-  notify: restart php-fpm centos
+  notify: restart php-fpm debian
 
 - name: copy apache2 config lines
   blockinfile:
