@@ -72,7 +72,7 @@
     name: "admin"
     host: localhost
     password: "{{ lookup('password', '/root/03-mysql-admin_password chars=ascii_letters,digits,hexdigits length=15') }}"
-    priv: '*.*:ALL'
+    priv: '*.*:ALL,GRANT'
   tags: website_stack
   when: ansible_facts['distribution'] == "Debian"
 
