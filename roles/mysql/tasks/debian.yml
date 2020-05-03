@@ -7,7 +7,17 @@
     mysql_packages:
     - mysql-server
     - python-mysqldb
-  when: ansible_facts['distribution'] == "Ubuntu"
+  when: ansible_facts['distribution'] == "Ubuntu" and ansible_facts['distribution_major_version'] != "20"
+
+- name: Install mysql and tools for Ubuntu 20
+  apt:
+    state: latest
+    name: "{{ mysql_packages }}"
+  vars:
+    mysql_packages:
+    - mysql-server
+    - python3-mysqldb
+  when: ansible_facts['distribution'] == "Ubuntu" and ansible_facts['distribution_major_version'] == "20"
 
 - name: Install mysql and tools for Debian
   apt:
