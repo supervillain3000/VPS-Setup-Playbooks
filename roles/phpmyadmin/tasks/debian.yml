@@ -7,7 +7,7 @@
 
 - name: install python3-passlib for Ubuntu 20
   apt:
-    name: python3 -passlib
+    name: python3-passlib
     state: latest
   when: ansible_facts['distribution'] == "Ubuntu" and ansible_facts['distribution_major_version'] == "20"
 
