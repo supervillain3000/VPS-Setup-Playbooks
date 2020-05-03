@@ -3,6 +3,13 @@
   apt:
     name: python-passlib
     state: latest
+  when: ansible_facts['distribution_major_version'] != "20"
+
+- name: install python3-passlib for Ubuntu 20
+  apt:
+    name: python3 -passlib
+    state: latest
+  when: ansible_facts['distribution'] == "Ubuntu" and ansible_facts['distribution_major_version'] == "20"
 
 - name: check a php version and register a var
   shell: php -v | grep 5.6
