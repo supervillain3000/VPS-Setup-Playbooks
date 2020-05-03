@@ -40,7 +40,7 @@
 - name: Add ubuntu nginx mainline repo
   apt_repository:
     repo: ppa:nginx/stable
-  when: ansible_facts['distribution'] == "Ubuntu"
+  when: ansible_facts['distribution'] == "Ubuntu" and ansible_facts['distribution_major_version'] != "20"
 
 - name: Add ppa:ondrej/php php ubuntu repo
   apt_repository:
