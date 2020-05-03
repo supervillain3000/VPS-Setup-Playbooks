@@ -72,8 +72,6 @@
     baseurl: http://nginx.org/packages/centos/$releasever/$basearch/
   when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] != "8"
 
-- name: Remove h
-
 - name: Tune bash history for CentOS and Debian
   blockinfile:
     dest: /etc/profile.d/history.sh
