@@ -72,6 +72,8 @@
     baseurl: http://nginx.org/packages/centos/$releasever/$basearch/
   when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] != "8"
 
+- name: Remove h
+
 - name: Tune bash history for CentOS and Debian
   blockinfile:
     dest: /etc/profile.d/history.sh
@@ -88,9 +90,21 @@
       readonly HISTTIMEFORMAT HISTSIZE HISTFILESIZE PROMPT_COMMAND HISTCONTROL
   when: ansible_facts['distribution'] != "Ubuntu"
 
+- name: Remove histtime.sh
+  file:
+    path: /etc/profile.d/histtime.sh
+    state: absent
+  when: ansible_facts['distribution'] == "Ubuntu"
+
 - name: Tune bash history for Ubuntu
-  replace:
+  blockinfile:
     dest: /etc/profile.d/histtime.sh
-    regexp: 'HISTTIMEFORMAT="%h %d %H:%M:%S "'
-    replace: 'HISTTIMEFORMAT="%F %T  "'
+    create: yes
+    owner: root
+    group: root
+    mode: 0644
+    block: |
+      export HISTFILESIZE=4096
+      export HISTSIZE=4096
+      export HISTTIMEFORMAT='%F %T  '
   when: ansible_facts['distribution'] == "Ubuntu"
