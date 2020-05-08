@@ -77,7 +77,7 @@
   user:
     name: vmail
     uid: 150
-    group: 150
+    group: vmail
     shell: /bin/nologin
 
 - name: create /var/vmail directory
