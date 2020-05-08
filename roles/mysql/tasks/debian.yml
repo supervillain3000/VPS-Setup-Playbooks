@@ -54,7 +54,7 @@
 - name: Ensure mysql is started and enabled
   service:
     name: mysql
-    state: started
+    state: restarted
     enabled: yes
 
 - name: add website db
