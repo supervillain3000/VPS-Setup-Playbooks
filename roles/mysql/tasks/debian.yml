@@ -44,6 +44,14 @@
   when: ansible_facts['distribution'] == "Ubuntu"
 # Этот фикс нужен поскольку дефолтный для mysql 8 метод caching_sha2_password поддерживается не всеми версиями php-расширений mysqli https://mysqlserverteam.com/upgrading-to-mysql-8-0-default-authentication-plugin-considerations/
 
+- name: change mysql server character set
+  lineinfile:
+    path: /etc/mysql/mysql.conf.d/mysqld.cnf
+    insertafter: '^# datadir'
+    line: 'character_set_server = utf8'
+  when: ansible_facts['distribution'] == "Ubuntu"
+# а без этого фикса с кодировой utf8mb4 phpmyadmin не пускает на php5.6
+
 - name: change mysql bind-address
   lineinfile:
     path: /etc/mysql/mariadb.conf.d/50-server.cnf
