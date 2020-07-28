@@ -13,7 +13,7 @@
     - phpmyadmin
     - mail_postfix
     - mail_dovecot
-    - mail_postfixadmin
+    #- mail_postfixadmin
     #- mail_rspamd
     #- redis
     - sftp
