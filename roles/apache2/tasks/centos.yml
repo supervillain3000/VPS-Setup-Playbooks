@@ -55,7 +55,7 @@
     name: "{{ php_modules_notPHP8 }}"
     state: latest
     enablerepo: remi-php{{ php_version }}
-  notify: restart centos php-fpm
+  notify: restart httpd
   when: php_version != "80"
 
 - name: install php modules for php 8
@@ -63,7 +63,7 @@
     name: "{{ php_modules_PHP8 }}"
     state: latest
     enablerepo: remi-php{{ php_version }}
-  notify: restart centos php-fpm
+  notify: restart httpd
   when: php_version == "80"
 
 - name: enable apache2 mod_rewrite
