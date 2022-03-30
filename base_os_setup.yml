@@ -48,6 +48,11 @@
     repo: ppa:ondrej/php
   when: ansible_facts['distribution'] == "Ubuntu"
 
+- name: Disabling SELinux state
+  selinux:
+    state: disabled
+  when: ansible_facts['os_family'] == "RedHat"
+
 - name: Install centos base packages
   yum:
     name: "{{ package_list }}"
@@ -63,6 +68,12 @@
       - atop
       - wget
   when: ansible_facts['os_family'] == "RedHat"
+
+- name: Ensure firewalld started
+  systemd:
+    name=firewalld
+    state=started
+    enabled=true
 
 - name: Add nginx mainline repo
   yum_repository:
