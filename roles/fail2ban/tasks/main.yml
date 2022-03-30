@@ -11,7 +11,7 @@
 - name: install fail2ban and dependencies on CentOS
   yum: name=fail2ban state=latest
   when:
-    - ansible_facts['distribution'] == "CentOS"
+    - ansible_facts['os_family']|lower == 'redhat'
 
 - name: duplicate jail.conf as jail.local and push key parameters
   blockinfile:
