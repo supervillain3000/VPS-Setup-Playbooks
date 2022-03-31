@@ -19,15 +19,23 @@
     - python3-mysqldb
   when: ansible_facts['distribution'] == "Ubuntu" and ansible_facts['distribution_major_version'] == "20"
 
-- name: Install mysql and tools for Debian
+- name: Install mysql for Debian
   apt:
     state: latest
-    name: "{{ mariadb_packages }}"
-  vars:
-    mariadb_packages:
-    - mariadb-server
-    - python-mysqldb
+    name: mariadb-server
   when: ansible_facts['distribution'] == "Debian"
+
+- name: Install python-mysqldb for Debian 10
+  apt:
+    state: latest
+    name: python-mysqldb
+  when: ansible_facts['distribution'] == "Debian" and ansible_facts['distribution_major_version'] != "11"
+
+- name: Install python3-mysqldb for Debian
+  apt:
+    state: latest
+    name: python3-mysqldb
+  when: ansible_facts['distribution'] == "Debian" and ansible_facts['distribution_major_version'] == "11"
 
 - name: change mysql bind-address
   lineinfile:
