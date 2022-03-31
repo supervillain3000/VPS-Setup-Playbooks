@@ -1,4 +1,5 @@
 ---
+
 - name: Install debian base packages
   apt:
     name: "{{ package_list }}"
@@ -74,6 +75,7 @@
     name=firewalld
     state=started
     enabled=true
+  when: ansible_facts['os_family'] == "RedHat"
 
 - name: Add nginx mainline repo
   yum_repository:
