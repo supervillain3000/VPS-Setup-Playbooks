@@ -1,0 +1,36 @@
+---
+
+- name: Download and unpack latest WordPress
+  unarchive:
+    src: https://wordpress.org/latest.tar.gz
+    dest: "/var/www/{{ vhost }}"
+    creates: "/var/www/{{ vhost }}/wordpress"
+    remote_src: yes
+
+- name: Copy wordpress to vhosts dir
+  copy:
+    src: /var/www/{{ vhost }}/wordpress/
+    dest: /var/www/{{ vhost }}/
+    remote_src: yes
+    directory_mode: yes
+
+- name: Remove temp dir
+  file:
+    state: absent
+    path: /var/www/{{ vhost }}/wordpress/
+
+- name: Set up wp-config
+  template:
+    src: "wp-config.php.j2"
+    dest: "/var/www/{{ vhost }}/wp-config.php"
+    group: apache
+    owner: apache
+
+- name: Set permissions for directories
+  file: dest=/var/www/{{ vhost }}/  owner=apache group=apache recurse=yes
+
+- name: Set permissions for directories
+  shell: "find . -type d -print0 | xargs -0 chmod 755"
+
+- name: Set permissions for files
+  shell: "find . -type f -print0 | xargs -0 chmod 644"

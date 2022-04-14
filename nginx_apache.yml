@@ -13,4 +13,5 @@
     - phpmyadmin
     - sftp
     - fail2ban
+    - { role: wordpress, tags: wordpress }
     - certbot
