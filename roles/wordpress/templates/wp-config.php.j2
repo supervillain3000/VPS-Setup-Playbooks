@@ -26,7 +26,7 @@ define( 'DB_NAME', '{{ ansible_hostname }}' );
 define( 'DB_USER', '{{ ansible_hostname }}' );
 
 /** MySQL database password */
-define( 'DB_PASSWORD', '{{ lookup('file', '/root/03-mysql_password') }}' );
+define( 'DB_PASSWORD', '{{ dbuser_password }}' );
 
 /** MySQL hostname */
 define( 'DB_HOST', 'localhost' );
