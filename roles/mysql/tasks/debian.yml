@@ -89,6 +89,10 @@
     priv: '{{ ansible_hostname }}.*:ALL'
   tags: website_stack
 
+- name: Set dbuser password
+  set_fact:
+    dbuser_password: "{{ lookup('file', '/root/03-mysql_password') }}"
+
 - name: insert mysql user name into user password file
   blockinfile:
     dest: /root/03-mysql_password

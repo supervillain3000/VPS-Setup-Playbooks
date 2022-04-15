@@ -1,2 +1,4 @@
 [vps]
-localhost ansible_connection=local
+#localhost ansible_connection=local
+94.247.129.184
+94.247.129.182
