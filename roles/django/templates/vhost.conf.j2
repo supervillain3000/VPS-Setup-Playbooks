@@ -4,7 +4,7 @@ upstream django {
 
 server {
         server_name {{ vhost }} www.{{ vhost }};
-        return 301 \$scheme://{{ vhost }}\$request_uri;
+        return 301 $scheme://{{ vhost }}$request_uri;
 }
 
 server {
