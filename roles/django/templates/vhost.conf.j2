@@ -1,0 +1,49 @@
+upstream django {
+        server unix:///var/www/django/{{ vhost }}/nginx.sock;
+}
+
+server {
+        server_name {{ vhost }} www.{{ vhost }};
+        return 301 \$scheme://{{ vhost }}\$request_uri;
+}
+
+server {
+        listen {{ ansible_default_ipv4.address }}:80;
+        {% if ansible_default_ipv6.address is defined %}
+        listen [{{ ansible_default_ipv6.address }}]:80;
+        {% endif %}
+
+
+        location /.well-known/ {
+                root /var/www/le/;
+        }
+
+        server_name {{ vhost }} www.{{ vhost }} ;
+
+        charset     utf-8;
+
+        # max upload size
+        client_max_body_size 512M;
+
+        # Django media and static
+        #location /media  {
+        #        alias /path/to/your/media;
+        #        expires max;
+        #}
+
+        location /static {
+                alias /var/www/django/{{ vhost }}/project/static;
+                expires max;
+        }
+
+        location / {
+            include uwsgi_params;
+            uwsgi_pass django;
+            uwsgi_param Host \$host;
+            uwsgi_param X-Real-IP \$remote_addr;
+            uwsgi_param X-Forwarded-For \$proxy_add_x_forwarded_for;
+            uwsgi_param X-Forwarded-Proto \$http_x_forwarded_proto;
+        }
+
+}
+

@@ -1,0 +1,25 @@
+[uwsgi]
+
+plugins         = python3
+# Django-related settings
+# the base directory (full path)
+chdir           = /var/www/django/{{ vhost }}/project
+# Django's wsgi file
+module          = project.wsgi:application
+# the virtualenv (full path)
+home            = /var/www/django/{{ vhost }}
+
+# process-related settings
+# master
+master          = true
+# maximum number of worker processes
+processes       = 5
+# the socket (use the full path to be safe
+socket          = /var/www/django/{{ vhost }}/nginx.sock
+chmod-socket    = 664
+# clear environment on exit
+vacuum          = true
+# respawn processes taking more than 20 seconds
+#harakiri       = 20
+# respawn processes after serving 5000 requests
+max-requests    = 5000
