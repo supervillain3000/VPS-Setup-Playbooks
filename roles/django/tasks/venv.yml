@@ -1,0 +1,78 @@
+---
+- name: Install python modules
+  apt:
+    pkg:
+      - python3-venv 
+      - uwsgi 
+      - uwsgi-plugin-python3 
+      - gcc 
+
+- name: Add the user Django
+  user:
+    name: django
+    password: "{{ lookup('password', '/tmp/pagsnagt chars=ascii_letters,digits,hexdigits length=15') }}"
+    home: /var/www/django
+    shell: /bin/bash
+    group: www-data
+
+- name: Add uwsgi conf
+  template:
+    src: uwsgi.ini.j2
+    dest: /etc/uwsgi/apps-available/django-{{ vhost }}.ini
+    mode: 0644
+
+- name: Install python3-setuptools
+  yum:
+    name: python3-setuptools
+    state: latest
+
+- name: Install venv and django
+  pip: 
+    name: "{{ item }}"
+    virtualenv: /var/www/django/{{ vhost }}
+    virtualenv_command: '/usr/bin/python3 -m venv'
+  become: yes
+  become_user: django
+  loop:
+    - Django
+    - path
+  register: venv_install
+
+- name: Creates Project directory
+  file:
+    path: /var/www/django/{{ vhost }}/project/
+    state: directory
+    owner: django
+    group: www-data
+  when: venv_install.changed
+
+- name: Install Django
+  shell: "/var/www/django/{{ vhost }}/bin/django-admin startproject project /var/www/django/{{ vhost }}/project/"
+  become: yes
+  become_user: django
+  when: venv_install.changed
+
+- name: Edit django STATIC_ROOT
+  lineinfile:
+    path: /var/www/django/{{ vhost }}/project/project/settings.py
+    line: STATIC_ROOT = str(str(BASE_DIR) + 'static/')
+  when: venv_install.changed
+
+- name: Edit django ALLOWED_HOSTS
+  lineinfile:
+    regexp: 'ALLOWED_HOSTS'
+    path: /var/www/django/{{ vhost }}/project/project/settings.py
+    line: ALLOWED_HOSTS = ['{{ vhost }}']
+  when: venv_install.changed
+
+- name: Django collectstatic
+  shell:  /var/www/django/mansurus.space2/bin/python /var/www/django/{{ vhost }}/project/manage.py collectstatic
+  become: yes
+  become_user: django
+  when: venv_install.changed
+
+- name: Restart and enable uwsgi
+  systemd:
+    name: uwsgi
+    state: restarted
+    enabled: yes

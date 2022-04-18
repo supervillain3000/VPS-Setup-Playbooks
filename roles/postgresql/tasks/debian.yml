@@ -1,0 +1,112 @@
+---
+
+- name: Install required packages
+  apt:
+    name:
+      - wget
+      - python3-psycopg2
+      - acl
+    state: latest
+
+- name: Set up Postgres 14 repo
+  shell: |
+    echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list
+    wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+  args:
+    warn: no
+
+- name: Install postgresql
+  apt:
+    name: postgresql-14
+    update_cache: yes
+  notify:
+    - Enable Postgresql
+
+- name: Ensure PostgreSQL is listening on *
+  lineinfile:
+    dest: /etc/postgresql/14/main/postgresql.conf
+    regexp: '^listen_addresses\s*='
+    line: "listen_addresses='*'"
+    state: present
+  notify: Restart Postgresql
+
+- name: Add new configuration to "pg_hba.conf"
+  blockinfile:
+    dest: /etc/postgresql/14/main/pg_hba.conf
+    block: |
+      host    all             all             0.0.0.0/0                md5
+      host    all             all             ::/0                     md5
+  notify: Restart Postgresql
+
+- name: Change peer identification to trust
+  shell: /bin/sed -i '/^local/s/peer/trust/' /etc/postgresql/14/main/pg_hba.conf
+  args:
+    warn: no
+  notify: Restart Postgresql
+
+
+- name: Create a Superuser PostgreSQL database user
+  become: yes
+  become_user: postgres
+  postgresql_user:
+    name: 'postgres'
+    password: "{{ lookup('password', '/root/04-postgres_admin_password chars=ascii_letters,digits,hexdigits length=15') }}"
+    role_attr_flags: CREATEDB,SUPERUSER,CREATEROLE
+    encrypted: yes
+    state: present
+
+- name: insert postgres superuser name into user password file
+  blockinfile:
+    dest: /root/04-postgres_admin_password
+    insertbefore: BOF
+    block: |
+
+      Админ-пользователь postgres:
+      Логин: postgres
+
+- name: "Create app database"
+  postgresql_db:
+    state: present
+    name: "{{ ansible_hostname }}"
+  become: yes
+  become_user: postgres
+
+- name: "Create db user"
+  postgresql_user:
+    state: present
+    name: "{{ ansible_hostname }}"
+    password: "{{ lookup('password', '/root/03-postgres_password chars=ascii_letters,digits,hexdigits length=15') }}"
+  become: yes
+  become_user: postgres
+
+- name: insert postgres user name into user password file
+  blockinfile:
+    dest: /root/03-postgres_password
+    insertbefore: BOF
+    block: |
+
+      Данные для доступа к базе данных:
+      Имя БД: {{ ansible_hostname }}
+      Пользователь: {{ ansible_hostname }}
+
+- name: "Grant db user access to app db"
+  postgresql_privs:
+    type: database
+    database: "{{ ansible_hostname }}"
+    roles: "{{ ansible_hostname }}"
+    grant_option: no
+    privs: all
+  become: yes
+  become_user: postgres
+
+- name: "Allow md5 connection for the db user"
+  postgresql_pg_hba:
+    dest: "/etc/postgresql/14/main/postgresql.conf"
+    contype: host
+    databases: all
+    method: md5
+    users: "{{ ansible_hostname }}"
+    create: true
+  become: yes
+  become_user: postgres
+  notify: Restart Postgresql
