@@ -66,10 +66,22 @@
   when: venv_install.changed
 
 - name: Django collectstatic
-  shell:  /var/www/django/mansurus.space2/bin/python /var/www/django/{{ vhost }}/project/manage.py collectstatic
+  shell:  /var/www/django/{{ vhost }}/bin/python /var/www/django/{{ vhost }}/project/manage.py collectstatic
   become: yes
   become_user: django
   when: venv_install.changed
+
+- name: Add uwcgi config
+  template:
+    src: "uwsgi.ini.j2"
+    dest: "/etc/uwsgi/apps-available/{{ vhost }}.ini"
+    mode: 0644
+
+- name: Create uwsgi ini symbolic link
+  file:
+    src: "/etc/uwsgi/apps-available/{{ vhost }}.ini"
+    dest: "/etc/uwsgi/apps-enabled/{{ vhost }}.ini"
+    state: link
 
 - name: Restart and enable uwsgi
   systemd:
