@@ -9,5 +9,6 @@
   roles:
     - nginx
     - django
-      #    - sftp
-      #    - fail2ban
+    - postgresql
+    - sftp
+    - fail2ban
