@@ -65,5 +65,5 @@
     path: /var/www/{{ vhost }}
 
 - name: Start todo APP
-  command: pm2 start server.js --name node-todo chdir=/var/www/{{ vhost }}
+  command: cd /var/www/{{ vhost }}/; pm2 start server.js --name node-todo
   ignore_errors: yes
