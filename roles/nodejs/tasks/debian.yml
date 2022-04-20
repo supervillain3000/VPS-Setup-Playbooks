@@ -1,0 +1,69 @@
+---
+- name: Add node.js user
+  user:
+    name: nodejs
+    #    home: /var/www/{{ vhost }}
+    shell: /usr/sbin/nologin
+    password: "{{ lookup('password', '/tmp/pagsnagt chars=ascii_letters,digits,hexdigits length=15') }}"
+
+- name: Setup the Git repo
+  git: repo=https://github.com/scotch-io/node-todo.git dest=/var/www/{{ vhost }} accept_hostkey=yes
+
+
+- name: Ensure that the application file permissions are set properly
+  file: path=/var/www/{{ vhost }}
+        recurse=yes
+        owner=nodejs
+        group=nodejs
+        state=directory
+
+- name: Ensure dependencies are present.
+  apt:
+    name:
+      - apt-transport-https
+      - gnupg2
+    state: present
+
+- name: add apt key for nodesource
+  apt_key: url=https://deb.nodesource.com/gpgkey/nodesource.gpg.key
+
+- name: Add NodeSource repositories for Node.js.
+  apt_repository:
+    repo: "{{ item }}"
+    state: present
+  with_items:
+    - "deb https://deb.nodesource.com/node_16.x {{ ansible_distribution_release }} main"
+    - "deb-src https://deb.nodesource.com/node_16.x {{ ansible_distribution_release }} main"
+  register: node_repo
+
+- name: Update apt cache if repo was added.
+  apt: update_cache=yes
+  when: node_repo.changed
+
+- name: Ensure Node.js and npm are installed.
+  apt:
+    name: "nodejs"
+    state: present
+
+- name: Install PM2
+  npm:
+    name: pm2
+    global: yes
+
+- name: Install PM2
+  npm:
+    name: "@angular/cli"
+    global: yes
+
+- name: Install Express
+  npm:
+    name: express
+    global: yes
+
+- name: Install npm package from package.json.
+  npm:
+    path: /var/www/{{ vhost }}
+
+- name: Start todo APP
+  command: pm2 start server.js --name node-todo chdir=/var/www/{{ vhost }}
+  ignore_errors: yes

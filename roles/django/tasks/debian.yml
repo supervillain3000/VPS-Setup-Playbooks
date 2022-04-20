@@ -12,7 +12,7 @@
     name: django
     password: "{{ lookup('password', '/tmp/pagsnagt chars=ascii_letters,digits,hexdigits length=15') }}"
     home: /var/www/django
-    shell: /bin/bash
+    shell: /usr/sbin/nologin
     group: www-data
 
 - name: Add uwsgi conf
@@ -88,3 +88,12 @@
     name: uwsgi
     state: restarted
     enabled: yes
+
+- name: Add nginx vhost config
+  template:
+    src: "vhost.conf.j2"
+    dest: "/etc/nginx/vhosts/{{ vhost }}.conf"
+    mode: 0644
+
+- name: restart nginx
+  service: name=nginx state=restarted

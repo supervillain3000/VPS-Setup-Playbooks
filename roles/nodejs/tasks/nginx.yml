@@ -1,0 +1,12 @@
+---
+- name: Add nginx vhost config
+  template:
+    src: "vhost.conf.j2"
+    dest: "/etc/nginx/vhosts/{{ vhost }}.conf"
+    mode: 0644
+  register: vhosts
+
+- name: restart nginx
+  service: name=nginx state=restarted
+  when: vhosts.changed
+

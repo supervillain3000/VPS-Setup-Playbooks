@@ -1,0 +1,63 @@
+---
+- name: Import GPG key for Ubuntu
+  apt_key:
+    url: https://www.mongodb.org/static/pgp/server-4.4.asc
+    state: present
+
+- name: Add MongoDB repository
+  apt_repository: repo='deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse' state=present
+
+- name: Install mongo on Ubuntu
+  apt: name=mongodb-org update_cache=yes
+
+- name: Make sure mongod is started and enabled
+  service:
+    name: mongod
+    state: started
+    enabled: yes
+
+- name: Install ansible dependencies
+  apt: name=python3-pymongo
+
+- name: Set nproc to mongod user to 5000
+  lineinfile: dest=/etc/security/limits.conf line="mongod soft nproc 5000"
+
+- name: Create MongoDB root user
+  mongodb_user:
+    login_port: "27017"
+    database: "admin"
+    name: "admin"
+    password: "{{ lookup('password', '/root/04-mongo_admin_password chars=ascii_letters,digits,hexdigits length=15') }}"
+    roles: "root"
+
+- name: Create MongoDB site user
+  mongodb_user:
+    login_user: "admin"
+    login_password: "{{ lookup('file', '/root/04-mongo_admin_password') }}"
+    login_port: "27017"
+    state: present
+    database: "{{ ansible_hostname }}"
+    name: "{{ ansible_hostname }}"
+    password:  "{{ lookup('password', '/root/03-mongo_password chars=ascii_letters,digits,hexdigits length=15') }}"
+    roles:
+            #      - { db: "admin", role: "readWrite" }
+      - { db: "{{ ansible_hostname }}", role: "readWrite" }
+
+- name: insert MongoDB superuser name into user password file
+  blockinfile:
+    dest: /root/04-mongo_admin_password
+    insertbefore: BOF
+    block: |
+
+      Админ-пользователь MongoDB:
+      Логин: admin
+
+- name: insert mongo user name into user password file
+  blockinfile:
+    dest: /root/03-mongo_password
+    insertbefore: BOF
+    block: |
+
+      Данные для доступа к базе данных:
+      Имя БД: {{ ansible_hostname }}
+      Пользователь: {{ ansible_hostname }}
