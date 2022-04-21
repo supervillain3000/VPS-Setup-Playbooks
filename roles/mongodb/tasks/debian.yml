@@ -36,12 +36,12 @@
     login_password: "{{ lookup('file', '/root/04-mongo_admin_password') }}"
     login_port: "27017"
     state: present
-    database: "{{ ansible_hostname }}"
-    name: "{{ ansible_hostname }}"
+    database: "{{ short_vhost }}"
+    name: "{{ short_vhost }}"
     password:  "{{ lookup('password', '/root/03-mongo_password chars=ascii_letters,digits,hexdigits length=15') }}"
     roles:
             #      - { db: "admin", role: "readWrite" }
-      - { db: "{{ ansible_hostname }}", role: "readWrite" }
+      - { db: "{{ short_vhost }}", role: "readWrite" }
 
 - name: insert MongoDB superuser name into user password file
   blockinfile:
@@ -59,5 +59,5 @@
     block: |
 
       Данные для доступа к базе данных:
-      Имя БД: {{ ansible_hostname }}
-      Пользователь: {{ ansible_hostname }}
+      Имя БД: {{ short_vhost }}
+      Пользователь: {{ short_vhost }}

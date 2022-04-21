@@ -7,7 +7,7 @@
 
 - name: Create site user
   user:
-    name: "{{ ansible_hostname }}"
+    name: "{{ short_vhost }}"
     uid: 33
     group: www-data
     non_unique: yes
@@ -25,7 +25,7 @@
       Тип подключений: SFTP
       Порт: 22
       Папка сайта: /var/www/{{ vhost }}
-      Пользователь: {{ ansible_hostname }}
+      Пользователь: {{ short_vhost }}
 
 - name: Add sshd user part
   blockinfile:
@@ -33,7 +33,7 @@
     path: /etc/ssh/sshd_config
     insertafter: EOF
     block: |
-      Match User {{ ansible_hostname }}
+      Match User {{ short_vhost }}
       ForceCommand internal-sftp
       PasswordAuthentication yes
       PermitTunnel no

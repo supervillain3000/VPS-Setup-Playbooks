@@ -20,27 +20,27 @@
 
 - name: create site group
   group:
-    name: {{ ansible_hostname }}
+    name: {{ short_vhost }}
 
 - name: create site user
   user:
-    name: {{ ansible_hostname }}
-    group: {{ ansible_hostname }}
-    password: {{ ansible_hostname }}
+    name: {{ short_vhost }}
+    group: {{ short_vhost }}
+    password: {{ short_vhost }}
     shell: /bin/bash
 
 - name: change ftp server name
   lineinfile:
     path: /etc/proftpd/proftpd.conf
     regexp: '^ServerName'
-    line: 'ServerName        FTP_{{ ansible_hostname }}'
+    line: 'ServerName        FTP_{{ short_vhost }}'
   notify: restart proftpd
 
 - name: change chroot to vhost dir
   lineinfile:
     path: /etc/proftpd/proftpd.conf
     regexp: '^# DefaultRoot'
-    line: 'DefaultRoot    /var/www/{{ vhost }}    {{ ansible_hostname }}'
+    line: 'DefaultRoot    /var/www/{{ vhost }}    {{ short_vhost }}'
   notify: restart proftpd
 
 - name: change chroot to vhost dir

@@ -67,14 +67,14 @@
 - name: "Create app database"
   postgresql_db:
     state: present
-    name: "{{ ansible_hostname }}"
+    name: "{{ short_vhost }}"
   become: yes
   become_user: postgres
 
 - name: "Create db user"
   postgresql_user:
     state: present
-    name: "{{ ansible_hostname }}"
+    name: "{{ short_vhost }}"
     password: "{{ lookup('password', '/root/03-postgres_password chars=ascii_letters,digits,hexdigits length=15') }}"
   become: yes
   become_user: postgres
@@ -86,14 +86,14 @@
     block: |
 
       Данные для доступа к базе данных:
-      Имя БД: {{ ansible_hostname }}
-      Пользователь: {{ ansible_hostname }}
+      Имя БД: {{ short_vhost }}
+      Пользователь: {{ short_vhost }}
 
 - name: "Grant db user access to app db"
   postgresql_privs:
     type: database
-    database: "{{ ansible_hostname }}"
-    roles: "{{ ansible_hostname }}"
+    database: "{{ short_vhost }}"
+    roles: "{{ short_vhost }}"
     grant_option: no
     privs: all
   become: yes
@@ -105,7 +105,7 @@
     contype: host
     databases: all
     method: md5
-    users: "{{ ansible_hostname }}"
+    users: "{{ short_vhost }}"
     create: true
   become: yes
   become_user: postgres
