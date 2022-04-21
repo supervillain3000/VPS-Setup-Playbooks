@@ -78,17 +78,17 @@
 - name: add website db
   mysql_db:
     state: present
-    name: "{{ ansible_hostname }}"
+    name: "{{ short_vhost }}"
     collation: utf8_unicode_ci
   tags: website_stack
 
 - name: add db user
   mysql_user:
     state: present
-    name: "{{ ansible_hostname }}"
+    name: "{{ short_vhost }}"
     host: localhost
     password: "{{ lookup('password', '/root/03-mysql_password chars=ascii_letters,digits,hexdigits length=15') }}"
-    priv: '{{ ansible_hostname }}.*:ALL'
+    priv: '{{ short_vhost }}.*:ALL'
   tags: website_stack
 
 - name: Set dbuser password
@@ -102,8 +102,8 @@
     block: |
 
       Данные для доступа к базе данных:
-      Имя БД: {{ ansible_hostname }}
-      Пользователь: {{ ansible_hostname }}
+      Имя БД: {{ short_vhost }}
+      Пользователь: {{ short_vhost }}
   tags: website_stack
 
 - name: create pfxadmin db
