@@ -12,3 +12,4 @@
     - mongodb
     - sftp
     - fail2ban
+    - certbot
