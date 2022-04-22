@@ -12,3 +12,4 @@
     - postgresql
     - sftp
     - fail2ban
+    - certbot
