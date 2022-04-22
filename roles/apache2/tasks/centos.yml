@@ -70,17 +70,11 @@
   notify: restart httpd
   when: php_version == "80"
 
+
 - name: enable apache2 mod_rewrite
   apache2_module:
     state: present
     name: rewrite
-  notify: restart httpd
-
-- name: change listened port
-  lineinfile:
-    path: /etc/httpd/conf/httpd.conf
-    regexp: '^Listen'
-    line: 'Listen 127.0.0.1:8080'
   notify: restart httpd
 
 - name: switch from mpm_event to mpm_prefork on centos8 # as event is not compatible with prefork
@@ -193,3 +187,4 @@
         proxy_buffers 32 16k;
       }
   notify: restart nginx
+  tags: nginx

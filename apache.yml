@@ -8,7 +8,6 @@
 - hosts: vps
   roles:
     - apache2
-    - nginx
     - mysql
     - phpmyadmin
     - sftp

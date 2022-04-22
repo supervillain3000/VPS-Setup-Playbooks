@@ -1,13 +1,34 @@
 ---
+
+- name: Ensure the default Apache port is 8080
+  lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    regexp: '^Listen '
+    insertafter: '^#Listen '
+    line: Listen 8080
+
 - name: Install nginx
   yum:
     name: nginx
     state: latest
 
+- name: Ensure the default Apache port is 8080
+  lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    regexp: '^Listen '
+    insertafter: '^#Listen '
+    line: Listen 8080
+
+- name: Ensure the default Apache port is 8080
+  lineinfile:
+    path: /etc/httpd/conf.d/{{ vhost }}.conf
+    regexp: '^VirtualHost 127.0.0.1:80'
+    line: 'VirtualHost 127.0.0.1:8080'
+
 - name: Make sure nginx is started and enabled
   service:
     name: nginx
-    state: started
+   state: started
     enabled: yes
 
 - name: Change nginx.conf file
