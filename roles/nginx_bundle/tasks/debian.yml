@@ -22,16 +22,16 @@
       }
   notify: restart nginx
 
-- name: change listened port
-  replace:
-    path: /etc/apache2/apache2.conf
-    regexp: 'Include ports.conf'
-    replace: 'Listen 127.0.0.1:8080'
-  notify: restart apache2
+- name: Ensure the default Apache port is 8080
+  lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    regexp: '^Listen '
+    insertafter: '^#Listen '
+    line: Listen 8080
 
 - name: Ensure the default Apache port is 8080
   lineinfile:
     path: /etc/httpd/conf.d/{{ vhost }}.conf
     regexp: '^VirtualHost 127.0.0.1:80'
-    line: 'VirtualHost 127.0.0.1:8080'
+    line: '<VirtualHost 127.0.0.1:8080>'
   notify: restart apache2

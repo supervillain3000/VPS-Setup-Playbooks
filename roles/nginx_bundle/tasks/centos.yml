@@ -1,5 +1,4 @@
 ---
-
 - name: add php handler block for nginx
   blockinfile:
     marker: ' '
@@ -29,4 +28,11 @@
     regexp: '^Listen '
     insertafter: '^#Listen '
     line: Listen 8080
+  notify: restart httpd
 
+- name: Ensure the default Apache site port is 8080
+  lineinfile:
+    path: /etc/httpd/conf.d/{{ vhost }}.conf
+    regexp: '^<VirtualHost'
+    line: '<VirtualHost 127.0.0.1:8080>'
+  notify: restart httpd
