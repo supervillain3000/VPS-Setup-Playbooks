@@ -7,11 +7,11 @@
 
 - hosts: vps
   roles:
-    - apache2
     - nginx
+    - apache2
+    - nginx_bundle
     - mysql
     - phpmyadmin
     - sftp
     - fail2ban
-    - { role: wordpress, tags: wordpress }
     - certbot
