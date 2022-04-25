@@ -5,6 +5,16 @@
     name: http://mirror.neolabs.kz/remi/enterprise/remi-release-{{ ansible_distribution_major_version }}.rpm
     state: present
 
+    #- name: "Check installed packages"
+    #  package_facts:
+    #    manager: "auto"
+    #
+    #- name: Stopped apache if installed
+    #  service:
+    #    name: nginx
+    #    state: stopped
+    #  when: "'nginx' in ansible_facts.packages"
+
 - name: install httpd
   yum:
     name: httpd
