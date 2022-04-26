@@ -33,6 +33,6 @@
 - name: Ensure the default Apache site port is 8080
   lineinfile:
     path: /etc/httpd/conf.d/{{ vhost }}.conf
-    regexp: '^\<VirtualHost 192.168.0.68:80>'
+    regexp: '^<VirtualHost'
     line: '<VirtualHost 127.0.0.1:8080>'
   notify: restart httpd
