@@ -1,19 +1,20 @@
 ---
-- name: "Check installed packages"
-  package_facts:
-    manager: "auto"
+#- name: "Check installed packages"
+#  package_facts:
+#    manager: "auto"
 
     #- name: Stopped apache if installed
     #  service:
     #    name: nginx
     #    state: stopped
     #  when: "'nginx' in ansible_facts.packages"
-    #
-    #- name: install apache2
-    #  apt:
-    #    name: apache2
-    #    state: latest
-    #    update_cache: yes
+
+
+- name: install apache2
+  apt:
+  name: apache2
+  state: latest
+  update_cache: yes
 
 - name: ensure apache2 is enabled
   service:
