@@ -66,4 +66,3 @@
 
 - name: Start todo APP
   shell: cd /var/www/{{ vhost }} ; pm2 start server.js --name node-todo
-  ignore_errors: yes
