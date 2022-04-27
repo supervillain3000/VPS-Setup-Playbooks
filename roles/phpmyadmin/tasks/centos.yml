@@ -145,23 +145,17 @@
 
 - name: copy httpd vhost config
   template:
-    src: pma_centos_apache.conf
+    src: pma_centos_apache.conf.j2
     dest: /etc/httpd/conf.d/{{ ansible_default_ipv4.address }}.conf
-  when: httpd_status.stat.exists
+  when: httpd_status.stat.exists and frontend == "nginx"
   notify: restart httpd
 
-- name: copy apache base auth handler config
-  blockinfile:
-    marker: ''
-    insertafter: '## handler ##'
-    block: |
-      AuthType Basic
-      AuthName "Speak, friend, and enter."
-      AuthUserFile /etc/httpd/.htpasswd
-      Require valid-user
-    path: /etc/httpd/conf.d/{{ ansible_default_ipv4.address }}.conf
+- name: copy httpd vhost config
+  template:
+    src: pma_centos_apache_lamp.conf.j2
+    dest: /etc/httpd/conf.d/{{ ansible_default_ipv4.address }}.conf
   when: httpd_status.stat.exists and frontend == "apache"
-  notify: restart apache
+  notify: restart httpd
 
 - name: Ensure the default Apache site port is 8080
   lineinfile:

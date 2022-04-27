@@ -144,23 +144,18 @@
 
 - name: copy apache vhost config
   template:
-    src: pma_debian_apache.conf
+    src: pma_debian_apache.conf.j2
     dest: /etc/apache2/sites-available/{{ ansible_default_ipv4.address }}.conf
-  when: apache2_status.stat.exists
+  when: apache2_status.stat.exists and frontend == "nginx"
   notify: restart apache2
 
-- name: copy apache base auth handler config
-  blockinfile:
-    marker: ''
-    insertafter: '## handler ##'
-    block: |
-      AuthType Basic
-      AuthName "Speak, friend, and enter."
-      AuthUserFile /etc/apache2/.htpasswd
-      Require valid-user
-    path: /etc/apache2/sites-available/{{ ansible_default_ipv4.address }}.conf
+- name: copy apache vhost config
+  template:
+    src: pma_debian_apache_lamp.conf.j2
+    dest: /etc/apache2/sites-available/{{ ansible_default_ipv4.address }}.conf
   when: apache2_status.stat.exists and frontend == "apache"
   notify: restart apache2
+
 
 - name: Ensure the default Apache port is 8080
   lineinfile:
