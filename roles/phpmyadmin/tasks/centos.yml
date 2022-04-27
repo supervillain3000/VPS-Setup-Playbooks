@@ -160,7 +160,7 @@
       AuthUserFile /etc/httpd/.htpasswd
       Require valid-user
     path: /etc/httpd/conf.d/{{ ansible_default_ipv4.address }}.conf
-  when: httpd_status.stat.exists and frontend == "nginx"
+  when: httpd_status.stat.exists and frontend == "apache"
   notify: restart apache
 
 - name: Ensure the default Apache site port is 8080
