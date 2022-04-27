@@ -9,6 +9,16 @@
     #    state: stopped
     #  when: "'nginx' in ansible_facts.packages"
 
+- name: enable ssh and http(s) on ufw
+  ufw:
+    state: enabled
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+  loop:
+    - ssh
+    - http
+    - https
 
 - name: install apache2
   apt:
@@ -58,7 +68,7 @@
   replace:
     path: /etc/apache2/apache2.conf
     regexp: 'Include ports.conf'
-    replace: 'Listen 8080'
+    replace: 'Listen 80'
   notify: restart apache2
   when: frontend == "apache"
 

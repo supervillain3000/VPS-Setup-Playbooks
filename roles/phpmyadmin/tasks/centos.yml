@@ -153,7 +153,7 @@
 - name: copy apache base auth handler config
   blockinfile:
     marker: ''
-    regexp: '^\t#Basic_auth'
+    insertafter: '## handler ##'
     block: |
       AuthType Basic
       AuthName "Speak, friend, and enter."
