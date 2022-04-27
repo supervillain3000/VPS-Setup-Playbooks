@@ -40,13 +40,6 @@
     - { file: 'ipvhost.conf.j2', target: '/etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf' }
   notify: restart nginx
 
-- name: Fix nginx not starting with ipv6
-  lineinfile:
-    insertafter: '^\[Service\]'
-    path: /etc/systemd/system/multi-user.target.wants/nginx.service
-    line: 'ExecStartPre=/bin/sleep 10'
-    state: present
-
 - name: Fix httproxy vulnerability
   blockinfile:
     marker: "## {mark} httpoxy vulnerability fix"
