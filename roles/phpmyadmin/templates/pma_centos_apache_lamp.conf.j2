@@ -2,6 +2,7 @@
 	ServerName "{{ ansible_default_ipv4.address }}"
 	UseCanonicalName Off
 
+	Redirect 301 "/pma" "/phpmyadmin"
 	Alias "/phpmyadmin" "/usr/share/phpmyadmin/"
 	ErrorLog "/var/log/httpd/pma_error.log"
 

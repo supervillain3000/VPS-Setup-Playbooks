@@ -2,6 +2,7 @@
 	ServerName "{{ ansible_default_ipv4.address }}"
 	UseCanonicalName Off
 
+	Redirect 301 "/pma" "/phpmyadmin"
 	Alias "/phpmyadmin" "/usr/share/phpmyadmin/"
 	ErrorLog "/var/log/apache2/pma_error.log"
 
@@ -12,7 +13,7 @@
 		AllowOverride None
 		AuthType Basic
 		AuthName "Speak, friend, and enter."
-		AuthUserFile /etc/httpd/.htpasswd
+		AuthUserFile /etc/apache2/.htpasswd
 		Require valid-user
 	</Directory>
 </VirtualHost>
