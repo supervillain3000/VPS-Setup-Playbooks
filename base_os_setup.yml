@@ -14,7 +14,31 @@
       - curl
       - atop
       - htop
+      - ufw
   when: ansible_facts['os_family'] == "Debian"
+
+- name: Configure ufw defaults
+  ufw: direction={{ item.direction }} policy={{ item.policy }}
+  with_items:
+    - { direction: 'incoming', policy: 'deny' }
+    - { direction: 'outgoing', policy: 'allow' }
+  notify:
+    - restart ufw
+  when: ansible_facts['os_family'] == "Debian"
+
+- name: Configure ufw rules
+  ufw: rule=limit port=22 proto=tcp
+  when: ansible_facts['os_family'] == "Debian"
+
+- name: Enable ufw
+  ufw: state=enabled
+  when: ansible_facts['os_family'] == "Debian"
+
+- name: enable ufw
+  systemd:
+    name: ufw
+    state: started
+    enabled: yes
 
 - name: Add apt-key for latest nginx repo
   apt_key:

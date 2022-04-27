@@ -44,6 +44,8 @@
     - { file: 'ipvhost.conf.j2', target: '/etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf' }
   notify: restart nginx
 
+
+
 - name: Fix httproxy vulnerability
   blockinfile:
     marker: "## {mark} httpoxy vulnerability fix"

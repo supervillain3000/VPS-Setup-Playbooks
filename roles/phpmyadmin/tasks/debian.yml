@@ -139,7 +139,7 @@
       }
 
     path: /etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf
-  when: apache2_status.stat.exists
+  when: apache2_status.stat.exists and frontend == "nginx"
   notify: restart nginx
 
 - name: copy apache vhost config
@@ -148,6 +148,27 @@
     dest: /etc/apache2/sites-available/{{ ansible_default_ipv4.address }}.conf
   when: apache2_status.stat.exists
   notify: restart apache2
+
+- name: copy apache base auth handler config
+  blockinfile:
+    marker: ''
+    regexp: '^\t#Basic_auth'
+    block: |
+      AuthType Basic
+      AuthName "Speak, friend, and enter."
+      AuthUserFile /etc/apache2/.htpasswd
+      Require valid-user
+    path: /etc/apache2/conf.d/{{ ansible_default_ipv4.address }}.conf
+  when: apache2_status.stat.exists and frontend == "nginx"
+  notify: restart apache
+
+- name: Ensure the default Apache port is 8080
+  lineinfile:
+    path: /etc/apache2/sites-available/{{ vhost }}.conf
+    regexp: '^<VirtualHost'
+    line: '<VirtualHost 127.0.0.1:8080>'
+  notify: restart apache2
+  when: frontend == "nginx"
 
 - name: create apache vhost file symlink
   file:
@@ -163,6 +184,15 @@
     name: pma_admin
     password: "{{ lookup('password', '/root/02-pma_password chars=ascii_letters,digits,hexdigits length=15') }}"
   notify: restart nginx
+  when: frontend == "nginx"
+
+- name: add http auth for pma
+  htpasswd:
+    path: /etc/apache2/.htpasswd
+    name: pma_admin
+    password: "{{ lookup('password', '/root/02-pma_password chars=ascii_letters,digits,hexdigits length=15') }}"
+  notify: restart apache2
+  when: frontend == "apache"
 
 - name: insert pmd_admin user name into password file
   blockinfile:
