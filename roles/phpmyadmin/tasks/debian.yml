@@ -160,7 +160,7 @@
       Require valid-user
     path: /etc/apache2/sites-available/{{ ansible_default_ipv4.address }}.conf
   when: apache2_status.stat.exists and frontend == "apache"
-  notify: restart apache
+  notify: restart apache2
 
 - name: Ensure the default Apache port is 8080
   lineinfile:
