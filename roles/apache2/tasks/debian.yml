@@ -26,6 +26,23 @@
     state: latest
     update_cache: yes
 
+- name: change listened port
+  replace:
+    path: /etc/apache2/apache2.conf
+    regexp: 'Include ports.conf'
+    replace: 'Listen 8080'
+  notify: restart apache2
+  when: frontend == "nginx"
+
+- name: change listened port
+  replace:
+    path: /etc/apache2/apache2.conf
+    regexp: 'Include ports.conf'
+    replace: 'Listen 80'
+  notify: restart apache2
+  when: frontend == "apache"
+
+  when: frontend == "apache"
 - name: ensure apache2 is enabled
   service:
     name: apache2
@@ -55,22 +72,6 @@
     dest: /etc/apache2/sites-enabled/000-default.conf
     follow: yes
   notify: restart apache2
-
-- name: change listened port
-  replace:
-    path: /etc/apache2/apache2.conf
-    regexp: 'Include ports.conf'
-    replace: 'Listen 8080'
-  notify: restart apache2
-  when: frontend == "nginx"
-
-- name: change listened port
-  replace:
-    path: /etc/apache2/apache2.conf
-    regexp: 'Include ports.conf'
-    replace: 'Listen 80'
-  notify: restart apache2
-  when: frontend == "apache"
 
 - name: add vhost config
   template:
