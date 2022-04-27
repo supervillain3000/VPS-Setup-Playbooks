@@ -9,7 +9,6 @@
   roles:
     - nginx
     - apache2
-    - nginx_bundle
     - mysql
     - phpmyadmin
     - sftp

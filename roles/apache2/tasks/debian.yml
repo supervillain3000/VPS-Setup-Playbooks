@@ -9,6 +9,16 @@
     #    state: stopped
     #  when: "'nginx' in ansible_facts.packages"
 
+- name: enable ssh and http(s) on ufw
+  ufw:
+    state: enabled
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+  loop:
+    - ssh
+    - http
+    - https
 
 - name: install apache2
   apt:
@@ -46,11 +56,35 @@
     follow: yes
   notify: restart apache2
 
+- name: change listened port
+  replace:
+    path: /etc/apache2/apache2.conf
+    regexp: 'Include ports.conf'
+    replace: 'Listen 8080'
+  notify: restart apache2
+  when: frontend == "nginx"
+
+- name: change listened port
+  replace:
+    path: /etc/apache2/apache2.conf
+    regexp: 'Include ports.conf'
+    replace: 'Listen 80'
+  notify: restart apache2
+  when: frontend == "apache"
+
 - name: add vhost config
   template:
     src: vhost_debian.j2
     dest: /etc/apache2/sites-available/{{ vhost }}.conf
   notify: restart apache2
+
+- name: Ensure the default Apache port is 8080
+  lineinfile:
+    path: /etc/apache2/sites-available/{{ vhost }}.conf
+    regexp: '^<VirtualHost'
+    line: '<VirtualHost 127.0.0.1:8080>'
+  notify: restart apache2
+  when: frontend == "nginx"
 
 - name: create vhost file symlink
   file:
@@ -113,3 +147,27 @@
     owner: www-data
     group: www-data
     mode: 0644
+
+- name: add php handler block for nginx
+  blockinfile:
+    marker: ' '
+    path: /etc/nginx/vhosts/{{ vhost }}.conf
+    insertafter: '## handler ##'
+    block: |
+      location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_redirect off;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        #httpoxy vulnerability fix
+        proxy_set_header Proxy "";
+
+        proxy_read_timeout 300;
+        client_max_body_size 256m;
+
+        proxy_buffer_size 16k;
+        proxy_buffers 32 16k;
+      }
+  notify: restart nginx
+  when: frontend == "nginx"

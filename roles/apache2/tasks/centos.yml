@@ -108,6 +108,25 @@
       MaxRequestsPerChild 4096
   notify: restart httpd
 
+- name: Ensure the default Apache port is 8080
+  lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    regexp: '^Listen '
+    insertafter: '^#Listen '
+    line: Listen 8080
+  notify: restart httpd
+  when: frontend == "nginx"
+
+- name: Ensure the default Apache port is 80
+  lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    regexp: '^Listen '
+    insertafter: '^#Listen '
+    line: Listen 80
+  notify: restart httpd
+  when: frontend == "apache"
+
+
 # - name: tune mpm_event
 #   blockinfile:
 #     path: /etc/httpd/conf/httpd.conf
@@ -167,6 +186,23 @@
     dest: /etc/httpd/conf.d/{{ vhost }}.conf
   notify: restart httpd
 
+- name: Ensure the default Apache site port is 8080
+  lineinfile:
+    path: /etc/httpd/conf.d/{{ vhost }}.conf
+    regexp: '^<VirtualHost'
+    line: '<VirtualHost 127.0.0.1:8080>'
+  notify: restart httpd
+  when: frontend == "nginx"
+
+- name: Ensure the default Apache site port is 8080
+  lineinfile:
+    path: /etc/httpd/conf.d/{{ vhost }}.conf
+    regexp: '^<VirtualHost'
+    line: '<VirtualHost 127.0.0.1:8080>'
+  notify: restart httpd
+  when: frontend == "nginx"
+
+
 - name: copy index file into virtualhost root
   copy:
     src: index.php
@@ -185,3 +221,29 @@
   loop:
     - http
     - https
+
+
+- name: add php handler block for nginx
+  blockinfile:
+    marker: ' '
+    path: /etc/nginx/vhosts/{{ vhost }}.conf
+    insertafter: '## handler ##'
+    block: |
+      location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_redirect off;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        #httpoxy vulnerability fix
+        proxy_set_header Proxy "";
+
+        proxy_read_timeout 300;
+        client_max_body_size 256m;
+
+        proxy_buffer_size 16k;
+        proxy_buffers 32 16k;
+      }
+  notify: restart nginx
+  when: frontend == "nginx"
+
