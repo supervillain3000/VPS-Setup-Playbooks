@@ -10,8 +10,8 @@
     - nginx
     - apache2
     - mysql
+    - wordpress
     - phpmyadmin
     - sftp
     - fail2ban
-    - wordpress
     - certbot
