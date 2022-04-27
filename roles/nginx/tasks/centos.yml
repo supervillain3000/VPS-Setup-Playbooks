@@ -45,6 +45,7 @@
     insertafter: '^\[Service\]'
     path: /etc/systemd/system/multi-user.target.wants/nginx.service
     line: 'ExecStartPre=/bin/sleep 10'
+    state: present
 
 - name: Fix httproxy vulnerability
   blockinfile:
