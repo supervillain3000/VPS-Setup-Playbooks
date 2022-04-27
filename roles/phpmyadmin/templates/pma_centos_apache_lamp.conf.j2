@@ -10,9 +10,9 @@
 	<Directory "/usr/share/phpmyadmin/">
 		Options -Indexes +FollowSymLinks
 		AllowOverride None
-#		Require all granted
-                ## handler ##
+		AuthType Basic
+		AuthName "Speak, friend, and enter."
+		AuthUserFile /etc/httpd/.htpasswd
+		Require valid-user
 	</Directory>
-
-
 </VirtualHost>

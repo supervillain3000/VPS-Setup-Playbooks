@@ -1,5 +1,5 @@
-<VirtualHost {{ ansible_default_ipv4.address }}:8080>
-	ServerName "{{ ansible_default_ipv4.address }}"
+<VirtualHost 127.0.0.1:8080>
+	ServerName "127.0.0.1"
 	UseCanonicalName Off
 
 	Alias "/phpmyadmin" "/usr/share/phpmyadmin/"
@@ -10,6 +10,7 @@
 	<Directory "/usr/share/phpmyadmin/">
 		Options -Indexes +FollowSymLinks
 		AllowOverride None
+		Require all granted
 	</Directory>
 
 
