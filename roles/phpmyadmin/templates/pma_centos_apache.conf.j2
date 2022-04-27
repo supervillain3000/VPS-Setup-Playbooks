@@ -1,0 +1,16 @@
+<VirtualHost {{ ansible_default_ipv4.address }}:80>
+	ServerName "{{ ansible_default_ipv4.address }}"
+	UseCanonicalName Off
+
+	Alias "/phpmyadmin" "/usr/share/phpmyadmin/"
+	ErrorLog "/var/log/httpd/pma_error.log"
+
+	DirectoryIndex "index.html" "index.php" "index.xhtml" "index.htm" "index.shtml"
+
+	<Directory "/usr/share/phpmyadmin/">
+		Options -Indexes +FollowSymLinks
+		AllowOverride None
+	</Directory>
+
+
+</VirtualHost>
