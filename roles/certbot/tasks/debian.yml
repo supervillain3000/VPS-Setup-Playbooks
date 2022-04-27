@@ -119,7 +119,7 @@
   service:
     name: nginx
     state: restarted
-  when: frontend == "apache"
+  when: frontend == "nginx"
 
 - name: Restart apache2
   service:
