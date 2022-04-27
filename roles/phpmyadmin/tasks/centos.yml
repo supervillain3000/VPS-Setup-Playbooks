@@ -184,7 +184,7 @@
     path: /etc/httpd/.htpasswd
     name: pma_admin
     password: "{{ lookup('password', '/root/02-pma_password chars=ascii_letters,digits,hexdigits length=15') }}"
-  notify: restart nginx
+  notify: restart apache2
   when: frontend == "apache"
 
 - name: insert pmd_admin user name into password file
