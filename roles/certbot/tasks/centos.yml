@@ -24,7 +24,7 @@
     path: /etc/nginx/vhosts/{{ vhost }}.conf
     state: absent
     regexp: ":80;$"
-  when: cert_issue_result.stdout.find("Congratulations") != -1 and nginx_status.stat.exists
+  when: cert_issue_result.stdout.find("Successfully") != -1 and nginx_status.stat.exists
 
 - name: Add cert and http listen to webserver config
   blockinfile:
@@ -39,7 +39,7 @@
 
       ssl_certificate /etc/letsencrypt/live/{{ vhost }}/fullchain.pem;
       ssl_certificate_key /etc/letsencrypt/live/{{ vhost }}/privkey.pem;
-  when: cert_issue_result.stdout.find("Congratulations") != -1 and nginx_status.stat.exists
+  when: cert_issue_result.stdout.find("Successfully") != -1 and nginx_status.stat.exists
 
 - name: Add http to https redirect block to webserver config
   blockinfile:
@@ -56,7 +56,7 @@
 
       return 301 https://$host$request_uri;
       }
-  when: cert_issue_result.stdout.find("Congratulations") != -1 and nginx_status.stat.exists
+  when: cert_issue_result.stdout.find("Successfully") != -1 and nginx_status.stat.exists
 
 - name: check if there is apache
   stat:
@@ -69,7 +69,7 @@
     path: /etc/nginx/vhosts/{{ vhost }}.conf
     regexp: 'proxy_pass http://127.0.0.1:8080;'
     replace: 'proxy_pass https://127.0.0.1:8081;'
-  when: cert_issue_result.stdout.find("Congratulations") != -1 and httpd_status.stat.exists and nginx_status.stat.exists
+  when: cert_issue_result.stdout.find("Successfully") != -1 and httpd_status.stat.exists and nginx_status.stat.exists
 
 - name: Add https config block for apache
   blockinfile:
@@ -101,7 +101,7 @@
 
       </VirtualHost>
       </IfModule>
-  when: cert_issue_result.stdout.find("Congratulations") != -1 and httpd_status.stat.exists and nginx_status.stat.exists
+  when: cert_issue_result.stdout.find("Successfully") != -1 and httpd_status.stat.exists and nginx_status.stat.exists
 
 - name: Add https config block for apache
   blockinfile:
@@ -133,7 +133,7 @@
 
       </VirtualHost>
       </IfModule>
-  when: cert_issue_result.stdout.find("Congratulations") != -1 and httpd_status.stat.exists and not nginx_status.stat.exists
+  when: cert_issue_result.stdout.find("Successfully") != -1 and httpd_status.stat.exists and not nginx_status.stat.exists
 
 - name: Add 8081 port to apache
   lineinfile:
@@ -141,29 +141,29 @@
     insertafter: '^Listen'
     line: 'Listen 127.0.0.1:8081'
   notify: restart httpd
-  when: cert_issue_result.stdout.find("Congratulations") != -1 and httpd_status.stat.exists and nginx_status.stat.exists
+  when: cert_issue_result.stdout.find("Successfully") != -1 and httpd_status.stat.exists and nginx_status.stat.exists
 
-- name: Add 8081 port to apache
+- name: Add 443 port to apache
   lineinfile:
     path: /etc/httpd/conf/httpd.conf
     insertafter: '^Listen'
     line: 'Listen {{ ansible_default_ipv4.address }}:443'
   notify: restart httpd
-  when: cert_issue_result.stdout.find("Congratulations") != -1 and httpd_status.stat.exists and not nginx_status.stat.exists 
+  when: cert_issue_result.stdout.find("Successfully") != -1 and httpd_status.stat.exists and not nginx_status.stat.exists 
 
 - name: Add cron task for certbot renewal
   lineinfile:
     insertafter: EOF
     path: /etc/crontab
     line: "0 0,12 * * * root /usr/bin/certbot renew && /usr/bin/systemctl reload nginx"
-  when: cert_issue_result.stdout.find("Congratulations") != -1 and nginx_status.stat.exists and nginx_status.stat.exists
+  when: cert_issue_result.stdout.find("Successfully") != -1 and nginx_status.stat.exists
 
 - name: Add cron task for certbot renewal
   lineinfile:
     insertafter: EOF
     path: /etc/crontab
     line: "0 0,12 * * * root /usr/bin/certbot renew && /usr/bin/systemctl restart httpd"
-  when: cert_issue_result.stdout.find("Congratulations") != -1 and nginx_status.stat.exists and not nginx_status.stat.exists
+  when: cert_issue_result.stdout.find("Successfully") != -1 and httpd_status.stat.exists and not nginx_status.stat.exists
 
 # disabled: no dhaparam file gen
 #- name: Check on dhparam file generation
@@ -184,14 +184,14 @@
   service:
     name: httpd
     state: restarted
-  when: cert_issue_result.stdout.find("Congratulations") != -1 and httpd_status.stat.exists
+  when: cert_issue_result.stdout.find("Successfully") != -1 and httpd_status.stat.exists
 
 - name: Add path to cert file to postfix config
   lineinfile:
     path: /etc/postfix/main.cf
     regexp: '^smtpd_tls_cert_file'
     line: 'smtpd_tls_cert_file = /etc/letsencrypt/live/{{ vhost }}/fullchain.pem'
-  when: cert_issue_result.stdout.find("Congratulations") != -1
+  when: cert_issue_result.stdout.find("Successfully") != -1
   notify: restart postfix
   tags: mailserver
 
@@ -200,7 +200,7 @@
     path: /etc/postfix/main.cf
     regexp: '^smtpd_tls_key_file'
     line: 'smtpd_tls_key_file = /etc/letsencrypt/live/{{ vhost }}/privkey.pem'
-  when: cert_issue_result.stdout.find("Congratulations") != -1
+  when: cert_issue_result.stdout.find("Successfully") != -1
   notify: restart postfix
   tags: mailserver
 
@@ -212,6 +212,6 @@
     block: |
       ssl_cert = </etc/letsencrypt/live/{{ vhost }}/fullchain.pem
       ssl_key = </etc/letsencrypt/live/{{ vhost }}/privkey.pem
-  when: cert_issue_result.stdout.find("Congratulations") != -1
+  when: cert_issue_result.stdout.find("Successfully") != -1
   notify: restart dovecot
   tags: mailserver
