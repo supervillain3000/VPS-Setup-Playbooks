@@ -1,7 +1,7 @@
 ---
 - name: Add node.js user
   user:
-    name: nodejs
+    name: apache
     #    home: /var/www/{{ vhost }}
     shell: /usr/sbin/nologin
     password: "{{ lookup('password', '/tmp/pagsnagt chars=ascii_letters,digits,hexdigits length=15') }}"
@@ -13,8 +13,8 @@
 - name: Ensure that the application file permissions are set properly
   file: path=/var/www/{{ vhost }}
         recurse=yes
-        owner=nodejs
-        group=nodejs
+        owner=apache
+        group=apache
         state=directory
 
 - name: Ensure dependencies are present.
