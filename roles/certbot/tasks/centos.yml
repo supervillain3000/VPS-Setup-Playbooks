@@ -1,4 +1,9 @@
 ---
+- name: check if there is nginx
+  stat:
+    path: /etc/nginx
+  register: nginx_status
+
 - name: Install with dependencies on CentOS
   yum:
     name: "{{ certbot_packages }}"
@@ -19,7 +24,7 @@
     path: /etc/nginx/vhosts/{{ vhost }}.conf
     state: absent
     regexp: ":80;$"
-  when: cert_issue_result.stdout.find("Congratulations") != -1
+  when: cert_issue_result.stdout.find("Congratulations") != -1 and nginx_status.stat.exists
 
 - name: Add cert and http listen to webserver config
   blockinfile:
@@ -34,7 +39,7 @@
 
       ssl_certificate /etc/letsencrypt/live/{{ vhost }}/fullchain.pem;
       ssl_certificate_key /etc/letsencrypt/live/{{ vhost }}/privkey.pem;
-  when: cert_issue_result.stdout.find("Congratulations") != -1
+  when: cert_issue_result.stdout.find("Congratulations") != -1 and nginx_status.stat.exists
 
 - name: Add http to https redirect block to webserver config
   blockinfile:
@@ -51,19 +56,20 @@
 
       return 301 https://$host$request_uri;
       }
-  when: cert_issue_result.stdout.find("Congratulations") != -1
+  when: cert_issue_result.stdout.find("Congratulations") != -1 and nginx_status.stat.exists
 
 - name: check if there is apache
   stat:
     path: /usr/sbin/httpd
   register: httpd_status
 
+
 - name: Change proxy pass schema in nginx vhost conf
   replace:
     path: /etc/nginx/vhosts/{{ vhost }}.conf
     regexp: 'proxy_pass http://127.0.0.1:8080;'
     replace: 'proxy_pass https://127.0.0.1:8081;'
-  when: cert_issue_result.stdout.find("Congratulations") != -1 and httpd_status.stat.exists
+  when: cert_issue_result.stdout.find("Congratulations") != -1 and httpd_status.stat.exists and nginx_status.stat.exists
 
 - name: Add https config block for apache
   blockinfile:
@@ -95,7 +101,39 @@
 
       </VirtualHost>
       </IfModule>
-  when: cert_issue_result.stdout.find("Congratulations") != -1 and httpd_status.stat.exists
+  when: cert_issue_result.stdout.find("Congratulations") != -1 and httpd_status.stat.exists and nginx_status.stat.exists
+
+- name: Add https config block for apache
+  blockinfile:
+    path: /etc/httpd/conf.d/{{ vhost }}.conf
+    marker: "# {mark} https block"
+    insertafter: EOF
+    block: |
+      <IfModule mod_ssl.c>
+      <VirtualHost  {{ ansible_default_ipv4.address }}:443>
+        ServerName "{{ vhost }}"
+        ServerAlias "www.{{ vhost }}"
+        ServerAdmin "admin@{{ vhost }}"
+        UseCanonicalName Off
+
+        SSLEngine on
+        SSLVerifyClient none
+        SSLCertificateFile "/etc/letsencrypt/live/{{ vhost }}/fullchain.pem"
+        SSLCertificateKeyFile "/etc/letsencrypt/live/{{ vhost }}/privkey.pem"
+
+        DocumentRoot "/var/www/{{ vhost }}"
+        ErrorLog "/var/log/httpd/{{ vhost }}_error.log"
+
+        DirectoryIndex "index.html" "index.php" "index.xhtml" "index.htm" "index.shtml"
+
+        <Directory /var/www/{{ vhost }}/>
+          Options -Indexes +FollowSymLinks
+          AllowOverride All
+        </Directory>
+
+      </VirtualHost>
+      </IfModule>
+  when: cert_issue_result.stdout.find("Congratulations") != -1 and httpd_status.stat.exists and not nginx_status.stat.exists
 
 - name: Add 8081 port to apache
   lineinfile:
@@ -103,14 +141,29 @@
     insertafter: '^Listen'
     line: 'Listen 127.0.0.1:8081'
   notify: restart httpd
-  when: cert_issue_result.stdout.find("Congratulations") != -1 and httpd_status.stat.exists
+  when: cert_issue_result.stdout.find("Congratulations") != -1 and httpd_status.stat.exists and nginx_status.stat.exists
+
+- name: Add 8081 port to apache
+  lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    insertafter: '^Listen'
+    line: 'Listen {{ ansible_default_ipv4.address }}:443'
+  notify: restart httpd
+  when: cert_issue_result.stdout.find("Congratulations") != -1 and httpd_status.stat.exists and not nginx_status.stat.exists 
 
 - name: Add cron task for certbot renewal
   lineinfile:
     insertafter: EOF
     path: /etc/crontab
     line: "0 0,12 * * * root /usr/bin/certbot renew && /usr/bin/systemctl reload nginx"
-  when: cert_issue_result.stdout.find("Congratulations") != -1
+  when: cert_issue_result.stdout.find("Congratulations") != -1 and nginx_status.stat.exists and nginx_status.stat.exists
+
+- name: Add cron task for certbot renewal
+  lineinfile:
+    insertafter: EOF
+    path: /etc/crontab
+    line: "0 0,12 * * * root /usr/bin/certbot renew && /usr/bin/systemctl restart httpd"
+  when: cert_issue_result.stdout.find("Congratulations") != -1 and nginx_status.stat.exists and not nginx_status.stat.exists
 
 # disabled: no dhaparam file gen
 #- name: Check on dhparam file generation
@@ -125,7 +178,7 @@
   service:
     name: nginx
     state: restarted
-  when: frontend == "nginx"
+  when: nginx_status.stat.exists
 
 - name: Restart apache2
   service:
