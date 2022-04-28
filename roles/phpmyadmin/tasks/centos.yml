@@ -63,6 +63,11 @@
     path: /usr/sbin/httpd
   register: httpd_status
 
+- name: check if there is nginx
+  stat:
+    path: /etc/nginx
+  register: nginx_status
+
 - name: check if there is php-fpm
   stat:
     path: /opt/remi/php{{ php_version }}/root/usr/sbin/php-fpm
@@ -140,21 +145,21 @@
       }
 
     path: /etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf
-  when: httpd_status.stat.exists and frontend == "nginx"
+  when: httpd_status.stat.exists and nginx_status.stat.exists
   notify: restart nginx
 
 - name: copy httpd vhost config frontend nginx 
   template:
     src: pma_centos_apache.conf.j2
     dest: /etc/httpd/conf.d/{{ ansible_default_ipv4.address }}.conf
-  when: httpd_status.stat.exists and frontend == "nginx"
+  when: httpd_status.stat.exists and nginx_status.stat.exists
   notify: restart httpd
 
 - name: copy httpd vhost config frontend apache
   template:
     src: pma_centos_apache_lamp.conf.j2
     dest: /etc/httpd/conf.d/{{ ansible_default_ipv4.address }}.conf
-  when: httpd_status.stat.exists and frontend == "apache"
+  when: httpd_status.stat.exists and not nginx_status.stat.exists
   notify: restart httpd
 
 - name: Ensure the default Apache site port is 8080
@@ -163,7 +168,7 @@
     regexp: '^<VirtualHost'
     line: '<VirtualHost 127.0.0.1:8080>'
   notify: restart httpd
-  when: frontend == "nginx"
+  when: nginx_status.stat.exists and httpd_status.stat.exists 
 
 - name: add http auth for pma
   htpasswd:
@@ -171,7 +176,7 @@
     name: pma_admin
     password: "{{ lookup('password', '/root/02-pma_password chars=ascii_letters,digits,hexdigits length=15') }}"
   notify: restart nginx
-  when: frontend == "nginx"
+  when: nginx_status.stat.exists
 
 - name: add http auth for pma
   htpasswd:
@@ -179,7 +184,7 @@
     name: pma_admin
     password: "{{ lookup('password', '/root/02-pma_password chars=ascii_letters,digits,hexdigits length=15') }}"
   notify: restart httpd
-  when: frontend == "apache"
+  when: not nginx_status.stat.exists and httpd_status.stat.exists
 
 - name: insert pmd_admin user name into password file
   blockinfile:
