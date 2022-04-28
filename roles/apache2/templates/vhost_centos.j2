@@ -3,6 +3,7 @@
 	ServerAlias "www.{{ vhost }}"
 	ServerAdmin "admin@{{ vhost }}"
 	UseCanonicalName Off
+        Alias /.well-known/acme-challenge/ "/var/www/{{ vhost }}/.well-known/acme-challenge/"
 
 	DocumentRoot "/var/www/{{ vhost }}"
 	ErrorLog "/var/log/httpd/{{ vhost }}_error.log"
