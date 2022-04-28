@@ -103,7 +103,7 @@
 
     path: /etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf
   notify: restart nginx
-  when: php_fpm_status.stat.exists and frontend == "nginx"
+  when: php_fpm_status.stat.exists
 
 - name: copy modphp nginx handler config
   blockinfile:
@@ -143,14 +143,14 @@
   when: httpd_status.stat.exists and frontend == "nginx"
   notify: restart nginx
 
-- name: copy httpd vhost config
+- name: copy httpd vhost config frontend nginx 
   template:
     src: pma_centos_apache.conf.j2
     dest: /etc/httpd/conf.d/{{ ansible_default_ipv4.address }}.conf
   when: httpd_status.stat.exists and frontend == "nginx"
   notify: restart httpd
 
-- name: copy httpd vhost config
+- name: copy httpd vhost config frontend apache
   template:
     src: pma_centos_apache_lamp.conf.j2
     dest: /etc/httpd/conf.d/{{ ansible_default_ipv4.address }}.conf
