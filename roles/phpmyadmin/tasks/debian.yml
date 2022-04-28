@@ -63,6 +63,11 @@
     path: /etc/apache2/apache2.conf
   register: apache2_status
 
+- name: check if there is nginx
+  stat:
+    path: /etc/nginx
+  register: nginx_status
+
 - name: check if there is php-fpm
   stat:
     path: /usr/sbin/php-fpm{{ php_version_u }}
@@ -139,23 +144,22 @@
       }
 
     path: /etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf
-  when: apache2_status.stat.exists and frontend == "nginx"
+  when: apache2_status.stat.exists and nginx_status.stat.exists
   notify: restart nginx
 
 - name: copy apache vhost config
   template:
     src: pma_debian_apache.conf.j2
     dest: /etc/apache2/sites-available/{{ ansible_default_ipv4.address }}.conf
-  when: apache2_status.stat.exists and frontend == "nginx"
+  when: apache2_status.stat.exists and nginx_status.stat.exists
   notify: restart apache2
 
 - name: copy apache vhost config
   template:
     src: pma_debian_apache_lamp.conf.j2
     dest: /etc/apache2/sites-available/{{ ansible_default_ipv4.address }}.conf
-  when: apache2_status.stat.exists and frontend == "apache"
+  when: apache2_status.stat.exists and not nginx_status.stat.exists
   notify: restart apache2
-
 
 - name: Ensure the default Apache port is 8080
   lineinfile:
@@ -163,7 +167,7 @@
     regexp: '^<VirtualHost'
     line: '<VirtualHost 127.0.0.1:8080>'
   notify: restart apache2
-  when: frontend == "nginx"
+  when: nginx_status.stat.exists and apache2_status.stat.exists
 
 - name: create apache vhost file symlink
   file:
@@ -179,7 +183,7 @@
     name: pma_admin
     password: "{{ lookup('password', '/root/02-pma_password chars=ascii_letters,digits,hexdigits length=15') }}"
   notify: restart nginx
-  when: frontend == "nginx"
+  when: nginx_status.stat.exists
 
 - name: add http auth for pma
   htpasswd:
@@ -187,7 +191,7 @@
     name: pma_admin
     password: "{{ lookup('password', '/root/02-pma_password chars=ascii_letters,digits,hexdigits length=15') }}"
   notify: restart apache2
-  when: frontend == "apache"
+  when: not nginx_status.stat.exists and apache2_status.stat.exists
 
 - name: insert pmd_admin user name into password file
   blockinfile:
