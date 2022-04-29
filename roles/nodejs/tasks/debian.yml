@@ -63,6 +63,3 @@
 - name: Install npm package from package.json.
   npm:
     path: /var/www/{{ vhost }}
-
-- name: Start todo APP
-  shell: cd /var/www/{{ vhost }} ; pm2 start server.js --name node-todo
