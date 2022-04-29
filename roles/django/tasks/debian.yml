@@ -22,7 +22,7 @@
     mode: 0644
 
 - name: Install python3-setuptools
-  yum:
+  apt:
     name: python3-setuptools
     state: latest
 
