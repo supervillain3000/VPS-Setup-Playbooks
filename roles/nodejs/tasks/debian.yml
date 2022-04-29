@@ -2,7 +2,7 @@
 - name: Add node.js user
   user:
     name: apache
-    #    home: /var/www/{{ vhost }}
+    home: /var/www/{{ vhost }}
     shell: /usr/sbin/nologin
     password: "{{ lookup('password', '/tmp/pagsnagt chars=ascii_letters,digits,hexdigits length=15') }}"
 
