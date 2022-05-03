@@ -1,20 +1,19 @@
 ---
 - name: Add node.js user
   user:
-    name: apache
+    name: node
     home: /var/www/{{ vhost }}
-    shell: /usr/sbin/nologin
+    shell: /bin/bash
     password: "{{ lookup('password', '/tmp/pagsnagt chars=ascii_letters,digits,hexdigits length=15') }}"
 
 - name: Setup the Git repo
   git: repo=https://github.com/scotch-io/node-todo.git dest=/var/www/{{ vhost }} accept_hostkey=yes
 
-
 - name: Ensure that the application file permissions are set properly
   file: path=/var/www/{{ vhost }}
         recurse=yes
-        owner=apache
-        group=apache
+        owner=node
+        group=node
         state=directory
 
 - name: Ensure dependencies are present.
@@ -50,7 +49,7 @@
     name: pm2
     global: yes
 
-- name: Install PM2
+- name: Install angular
   npm:
     name: "@angular/cli"
     global: yes
