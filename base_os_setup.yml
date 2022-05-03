@@ -144,3 +144,15 @@
       export HISTSIZE=4096
       export HISTTIMEFORMAT='%F %T  '
   when: ansible_facts['distribution'] == "Ubuntu"
+
+- name: Enable SSH PAM
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#UsePAM'
+    line: UsePAM yes
+  when: ansible_facts['os_family'] == "Debian"
+  register: UsePam 
+
+- name: restart sshd
+  service: name=sshd state=restarted enabled=yes
+  when: UsePam.changed
