@@ -1,13 +1,13 @@
 ---
+- name: Setup the Git repo
+  git: repo=https://github.com/scotch-io/node-todo.git dest=/var/www/{{ vhost }} accept_hostkey=yes
+
 - name: Add node.js user
   user:
     name: node
     home: /var/www/{{ vhost }}
     shell: /bin/bash
     password: "{{ lookup('password', '/tmp/pagsnagt chars=ascii_letters,digits,hexdigits length=15') }}"
-
-- name: Setup the Git repo
-  git: repo=https://github.com/scotch-io/node-todo.git dest=/var/www/{{ vhost }} accept_hostkey=yes
 
 - name: Ensure that the application file permissions are set properly
   file: path=/var/www/{{ vhost }}
