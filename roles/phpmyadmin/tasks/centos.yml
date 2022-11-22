@@ -83,7 +83,7 @@
 - name: copy phpmyadmin nginx conf block
   blockinfile:
     marker: ''
-    regexp: '^\t## pma'
+    insertbefore: '^\t## pma'
     block: |
       rewrite ^/pma/?(.*)$ /phpmyadmin/$1 redirect;
 
@@ -113,7 +113,7 @@
 - name: copy modphp nginx handler config
   blockinfile:
     marker: ''
-    regexp: '^\t## pma'
+    insertbefore: '^\t## pma'
     block: |
       rewrite ^/pma/?(.*)$ /phpmyadmin/$1 redirect;
 
