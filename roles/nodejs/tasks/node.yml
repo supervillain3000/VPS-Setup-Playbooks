@@ -1,4 +1,8 @@
 ---
+
+- name: Clear dir /var/www/
+  shell: rm -rf /var/www/*
+
 - name: Setup the Git repo
   git: repo=https://github.com/scotch-io/node-todo.git dest=/var/www/{{ vhost }} accept_hostkey=yes
 
