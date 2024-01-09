@@ -76,7 +76,7 @@
 - name: add website db
   mysql_db:
     state: present
-    name: wordpress
+    name: "{{ short_vhost }}"
     collation: utf8_unicode_ci
   tags: website_stack
 
@@ -86,7 +86,7 @@
     name: "{{ short_vhost }}"
     host: localhost
     password: "{{ lookup('password', '/root/03-mysql_password chars=ascii_letters,digits,hexdigits length=15') }}"
-    priv: 'wordpress.*:ALL'
+    priv: '{{ short_vhost }}.*:ALL'
   tags: website_stack
 
 - name: Set dbuser password
@@ -100,7 +100,7 @@
     block: |
 
       Данные для доступа к базе данных:
-      Имя БД: wordpress
+      Имя БД: {{ short_vhost }}
       Пользователь: {{ short_vhost }}
   tags: website_stack
 
