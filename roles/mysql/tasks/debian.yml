@@ -76,7 +76,7 @@
 - name: add website db
   mysql_db:
     state: present
-    name: "`{{ short_vhost }}`"
+    name: wordpress
     collation: utf8_unicode_ci
   tags: website_stack
 
