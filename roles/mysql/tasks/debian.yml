@@ -86,7 +86,7 @@
     name: "{{ short_vhost }}"
     host: localhost
     password: "{{ lookup('password', '/root/03-mysql_password chars=ascii_letters,digits,hexdigits length=15') }}"
-    priv: '{{ short_vhost }}.*:ALL'
+    priv: 'wordpress.*:ALL'
   tags: website_stack
 
 - name: Set dbuser password
@@ -100,7 +100,7 @@
     block: |
 
       Данные для доступа к базе данных:
-      Имя БД: {{ short_vhost }}
+      Имя БД: wordpress
       Пользователь: {{ short_vhost }}
   tags: website_stack
 
