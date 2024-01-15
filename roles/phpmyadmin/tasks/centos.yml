@@ -36,8 +36,8 @@
     mv /usr/share/phpMyAdmin-*-all-languages/ /usr/share/phpmyadmin/
     cp /usr/share/phpmyadmin/config.sample.inc.php /usr/share/phpmyadmin/config.inc.php
     rm /usr/share/phpMyAdmin-*-all-languages.zip
-  args:
-    warn: false
+#  args:
+#    warn: false
 
 - name: generate pma secret
   lineinfile:
