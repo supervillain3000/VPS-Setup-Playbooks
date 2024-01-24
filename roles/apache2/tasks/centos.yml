@@ -31,7 +31,7 @@
     state: latest
     enablerepo: remi-php{{ php_version }}
   notify: restart httpd
-  when: ansible_facts['distribution_major_version'] >= "8"
+  when: ansible_facts['distribution_major_version'] == "8"
 
 - name: Install mod_ssl for httpd
   yum:
@@ -51,18 +51,18 @@
     state: latest
     enablerepo: remi-php{{ php_version }}
   notify: restart httpd
-  when: ansible_facts['distribution_major_version'] >= "8"
+  when: ansible_facts['distribution_major_version'] == "8"
 
 - name: Enabled powertools repo # needed by libedit-devel on centos8
   shell: dnf config-manager --set-enabled powertools
-  when: ansible_facts['distribution_major_version'] >= "8"
+  when: ansible_facts['distribution_major_version'] == "8"
 
 - name: install libedit-devel # needed by php-devel package on centos8
   yum:
     name: libedit-devel
     enablerepo: PowerTools
     state: present
-  when: ansible_facts['distribution_major_version'] >= "8"
+  when: ansible_facts['distribution_major_version'] == "8"
 
 - name: install php modules for php version lower than 8
   yum:
@@ -93,7 +93,7 @@
     regexp: 'LoadModule mpm_event_module modules/mod_mpm_event.so'
     line: 'LoadModule mpm_prefork_module modules/mod_mpm_prefork.so'
   notify: restart httpd
-  when: ansible_facts['distribution_major_version'] >= "8"
+  when: ansible_facts['distribution_major_version'] == "8"
 
 - name: tune mpm_prefork
   blockinfile:
