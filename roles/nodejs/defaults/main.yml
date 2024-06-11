@@ -12,3 +12,5 @@ nodejs_npm_global_packages:
 - name: "express"
 - name: "@angular/cli"
 nodejs_package_json_path: "/var/www/{{ vhost }}/"
+
+nodejs_install_npm_user: root
