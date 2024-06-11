@@ -37,6 +37,12 @@
     name: pymongo==4.5
     state: present
 
+- name: Ensure passlib is installed and up-to-date
+  become: yes
+  pip:
+    name: passlib
+    state: present
+
 - name: Set nproc to mongod user to 5000
   lineinfile: 
     dest: /etc/security/limits.conf 
