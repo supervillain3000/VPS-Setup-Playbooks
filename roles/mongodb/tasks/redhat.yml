@@ -1,27 +1,29 @@
 ---
-- name: Import GPG key for Ubuntu
-  apt_key:
-    url: https://www.mongodb.org/static/pgp/server-7.0.asc
-    state: present
+- name: Set MongoDB repository base URL
+  set_fact:
+    mongodb_repo_baseurl: >
+      https://repo.mongodb.org/yum/redhat/{{ ansible_distribution_major_version }}/mongodb-org/7.0/x86_64/
 
 - name: Add MongoDB repository
-  apt_repository: 
-    repo: 'deb https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse' 
+  copy:
+    content: |
+      [mongodb-org-7.0]
+      name=MongoDB Repository
+      baseurl={{ mongodb_repo_baseurl }}
+      gpgcheck=1
+      enabled=1
+      gpgkey=https://pgp.mongodb.com/server-7.0.asc
+    dest: /etc/yum.repos.d/mongodb-org-7.0.repo
+
+- name: Install MongoDB
+  yum:
+    name: mongodb-org
     state: present
-
-- name: Install mongo on Ubuntu
-  apt: 
-    name: mongodb-org 
-    update_cache: yes
-
-- name: Make sure mongod is started and enabled
-  service:
-    name: mongod
-    state: started
-    enabled: yes
+  notify:
+    - start mongodb
 
 - name: Install pip3
-  apt: 
+  yum: 
     name: python3-pip
     state: present
 
@@ -34,25 +36,25 @@
 - name: Ensure pymongo is installed and up-to-date
   become: yes
   pip:
-    name: pymongo==4.5
-    state: present
+    name: pymongo
+    state: latest
+    extra_args: '--user'
 
 - name: Set nproc to mongod user to 5000
   lineinfile: 
     dest: /etc/security/limits.conf 
     line: "mongod soft nproc 5000"
+
 - name: Create MongoDB root user
-  community.mongodb.mongodb_user:
-    login_host: "localhost"
+  mongodb_user:
     login_port: "27017"
     database: "admin"
     name: "admin"
-    password: "{{ lookup('password', '/root/04-mongo_admin_password chars=ascii_letters,digits length=15') }}"
-    roles: ["root"]
+    password: "{{ lookup('password', '/root/04-mongo_admin_password chars=ascii_letters,digits,hexdigits length=15') }}"
+    roles: "root"
 
 - name: Create MongoDB site user
-  community.mongodb.mongodb_user:
-    login_host: "localhost"
+  mongodb_user:
     login_user: "admin"
     login_password: "{{ lookup('file', '/root/04-mongo_admin_password') }}"
     login_port: "27017"
