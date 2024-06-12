@@ -6,15 +6,15 @@
 
 - name: Add MongoDB repository Ubuntu
   apt_repository: 
-    repo: 'deb https://repo.mongodb.org/apt/ubuntu  {{ ansible_distribution_release }}/mongodb-org/7.0 multiverse' 
+    repo: 'deb https://repo.mongodb.org/apt/ubuntu {{ ansible_distribution_release }}/mongodb-org/7.0 multiverse' 
     state: present
-  when: ansible_facts['ansible_distribution']|lower == 'ubuntu'
+  when: ansible_distribution == 'Ubuntu'
 
 - name: Add MongoDB repository Debian
   apt_repository: 
     repo: 'deb https://repo.mongodb.org/apt/ubuntu  {{ ansible_distribution_release }}/mongodb-org/7.0 multiverse' 
     state: present
-  when: ansible_facts['ansible_distribution']|lower == 'debian'
+  when: ansible_distribution == 'Debian'
 
 - name: Install mongo on Ubuntu
   apt: 
