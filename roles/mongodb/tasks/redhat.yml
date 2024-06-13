@@ -34,7 +34,6 @@
     enabled: yes
 
 - name: Ensure pymongo is installed and up-to-date
-  become: yes
   pip:
     name: pymongo
     state: latest
@@ -70,7 +69,6 @@
     dest: /root/04-mongo_admin_password
     insertbefore: BOF
     block: |
-
       Админ-пользователь MongoDB:
       Логин: admin
 
@@ -79,7 +77,6 @@
     dest: /root/03-mongo_password
     insertbefore: BOF
     block: |
-
       Данные для доступа к базе данных:
       Имя БД: {{ short_vhost }}
       Пользователь: {{ short_vhost }}
