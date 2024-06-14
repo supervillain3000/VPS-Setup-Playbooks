@@ -1,33 +1,35 @@
 ---
 - name: Install python modules
-  apt:
-    pkg:
-      - python3-venv 
-      - uwsgi 
-      - uwsgi-plugin-python3 
-      - gcc 
+  yum:
+    name:
+      - python3-venv
+      - gcc
+      - python3-devel
+      - uwsgi
+      - uwsgi-plugin-python3
+    state: present
 
 - name: Add the user Django
   user:
     name: django
     password: "{{ lookup('password', '/tmp/pagsnagt chars=ascii_letters,digits,hexdigits length=15') }}"
     home: /var/www/django
-    shell: /usr/sbin/nologin
-    group: www-data
+    shell: /sbin/nologin
+    group: nginx
 
 - name: Add uwsgi conf
   template:
     src: uwsgi.ini.j2
-    dest: /etc/uwsgi/apps-available/django-{{ vhost }}.ini
+    dest: /etc/uwsgi.d/django-{{ vhost }}.ini
     mode: 0644
 
 - name: Install python3-setuptools
-  apt:
+  yum:
     name: python3-setuptools
-    state: latest
+    state: present
 
 - name: Install venv and django
-  pip: 
+  pip:
     name: "{{ item }}"
     virtualenv: /var/www/django/{{ vhost }}
     virtualenv_command: '/usr/bin/python3 -m venv'
@@ -43,7 +45,7 @@
     path: /var/www/django/{{ vhost }}/project/
     state: directory
     owner: django
-    group: www-data
+    group: nginx
   when: venv_install.changed
 
 - name: Install Django
@@ -66,21 +68,21 @@
   when: venv_install.changed
 
 - name: Django collectstatic
-  shell:  /var/www/django/{{ vhost }}/bin/python /var/www/django/{{ vhost }}/project/manage.py collectstatic
+  shell: /var/www/django/{{ vhost }}/bin/python /var/www/django/{{ vhost }}/project/manage.py collectstatic
   become: true
   become_user: django
   when: venv_install.changed
 
-- name: Add uwcgi config
+- name: Add uwsgi config
   template:
     src: "uwsgi.ini.j2"
-    dest: "/etc/uwsgi/apps-available/{{ vhost }}.ini"
+    dest: "/etc/uwsgi.d/{{ vhost }}.ini"
     mode: 0644
 
 - name: Create uwsgi ini symbolic link
   file:
-    src: "/etc/uwsgi/apps-available/{{ vhost }}.ini"
-    dest: "/etc/uwsgi/apps-enabled/{{ vhost }}.ini"
+    src: "/etc/uwsgi.d/{{ vhost }}.ini"
+    dest: "/etc/uwsgi.d/{{ vhost }}.ini"
     state: link
 
 - name: Restart and enable uwsgi
@@ -92,8 +94,10 @@
 - name: Add nginx vhost config
   template:
     src: "vhost.conf.j2"
-    dest: "/etc/nginx/vhosts/{{ vhost }}.conf"
+    dest: "/etc/nginx/conf.d/{{ vhost }}.conf"
     mode: 0644
 
-- name: restart nginx
-  service: name=nginx state=restarted
+- name: Restart nginx
+  service:
+    name: nginx
+    state: restarted

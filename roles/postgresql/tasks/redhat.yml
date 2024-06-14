@@ -1,6 +1,6 @@
 ---
 - name: Install required packages
-  apt:
+  yum:
     name:
       - wget
       - python3-psycopg2
@@ -9,39 +9,51 @@
 
 - name: Set up Postgres 14 repo
   shell: |
-    echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list
-    wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+    dnf install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-$(rpm -E %{rhel})-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+    dnf -qy module disable postgresql
   args:
     warn: no
 
 - name: Install postgresql
-  apt:
-    name: postgresql-14
-    update_cache: yes
+  yum:
+    name: postgresql14-server
+    state: present
   notify:
     - Enable Postgresql
 
+- name: Initialize PostgreSQL database
+  shell: /usr/pgsql-14/bin/postgresql-14-setup initdb
+  args:
+    creates: /var/lib/pgsql/14/data/PG_VERSION
+  notify: Start and Enable Postgresql
+
 - name: Ensure PostgreSQL is listening on *
   lineinfile:
-    dest: /etc/postgresql/14/main/postgresql.conf
-    regexp: '^listen_addresses\s*='
-    line: "listen_addresses='*'"
+    dest: /var/lib/pgsql/14/data/postgresql.conf
+    regexp: '^#listen_addresses\s*='
+    line: "listen_addresses = '*'"
     state: present
   notify: Restart Postgresql
 
 - name: Add new configuration to "pg_hba.conf"
   blockinfile:
-    dest: /etc/postgresql/14/main/pg_hba.conf
+    dest: /var/lib/pgsql/14/data/pg_hba.conf
     block: |
       host    all             all             0.0.0.0/0                md5
       host    all             all             ::/0                     md5
   notify: Restart Postgresql
 
 - name: Change peer identification to trust
-  shell: /bin/sed -i '/^local/s/peer/trust/' /etc/postgresql/14/main/pg_hba.conf
+  shell: /bin/sed -i 's/ident/trust/' /var/lib/pgsql/14/data/pg_hba.conf
   args:
     warn: no
   notify: Restart Postgresql
+
+- name: Start and Enable PostgreSQL
+  systemd:
+    name: postgresql-14
+    state: started
+    enabled: yes
 
 - name: Create a Superuser PostgreSQL database user
   become: true
@@ -53,7 +65,7 @@
     encrypted: yes
     state: present
 
-- name: insert postgres superuser name into user password file
+- name: Insert postgres superuser name into user password file
   blockinfile:
     dest: /root/04-postgres_admin_password
     insertbefore: BOF
@@ -61,14 +73,14 @@
       Админ-пользователь postgres:
       Логин: postgres
 
-- name: "Create app database"
+- name: Create app database
   postgresql_db:
     state: present
     name: "{{ short_vhost }}"
   become: true
   become_user: postgres
 
-- name: "Create db user"
+- name: Create db user
   postgresql_user:
     state: present
     name: "{{ short_vhost }}"
@@ -76,7 +88,7 @@
   become: true
   become_user: postgres
 
-- name: insert postgres user name into user password file
+- name: Insert postgres user name into user password file
   blockinfile:
     dest: /root/03-postgres_password
     insertbefore: BOF
@@ -85,7 +97,7 @@
       Имя БД: {{ short_vhost }}
       Пользователь: {{ short_vhost }}
 
-- name: "Grant db user access to app db"
+- name: Grant db user access to app db
   postgresql_privs:
     type: database
     database: "{{ short_vhost }}"
@@ -95,9 +107,9 @@
   become: true
   become_user: postgres
 
-- name: "Allow md5 connection for the db user"
+- name: Allow md5 connection for the db user
   postgresql_pg_hba:
-    dest: "/etc/postgresql/14/main/pg_hba.conf"
+    dest: "/var/lib/pgsql/14/data/pg_hba.conf"
     contype: host
     databases: all
     method: md5
@@ -107,3 +119,13 @@
   become_user: postgres
   notify: Restart Postgresql
   tags: md5
+
+- name: Enable Postgresql
+  systemd:
+    name: postgresql-14
+    enabled: yes
+
+- name: Restart Postgresql
+  systemd:
+    name: postgresql-14
+    state: restarted
