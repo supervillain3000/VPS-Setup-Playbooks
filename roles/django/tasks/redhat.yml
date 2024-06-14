@@ -2,7 +2,7 @@
 - name: Install python modules
   yum:
     name:
-      - python3-venv
+      - python3-virtualenv
       - gcc
       - python3-devel
       - uwsgi

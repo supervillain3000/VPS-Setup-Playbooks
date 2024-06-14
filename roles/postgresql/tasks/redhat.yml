@@ -7,12 +7,15 @@
       - acl
     state: latest
 
-- name: Set up Postgres 14 repo
-  shell: |
-    dnf install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-$(rpm -E %{rhel})-x86_64/pgdg-redhat-repo-latest.noarch.rpm
-    dnf -qy module disable postgresql
-  args:
-    warn: no
+- name: Install the PostgreSQL repository
+  yum_repository:
+    name: pgdg
+    description: "PostgreSQL Repository"
+    baseurl: "https://download.postgresql.org/pub/repos/yum/14/redhat/rhel-$releasever-$basearch"
+    enabled: yes
+    gpgcheck: yes
+    gpgkey: https://download.postgresql.org/pub/repos/yum/RPM-GPG-KEY-PGDG-14
+    state: present
 
 - name: Install postgresql
   yum:
