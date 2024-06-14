@@ -78,13 +78,7 @@
     src: "uwsgi.ini.j2"
     dest: "/etc/uwsgi.d/{{ vhost }}.ini"
     mode: 0644
-
-- name: Create uwsgi ini symbolic link
-  file:
-    src: "/etc/uwsgi.d/{{ vhost }}.ini"
-    dest: "/etc/uwsgi.d/{{ vhost }}.ini"
-    state: link
-
+    
 - name: Restart and enable uwsgi
   systemd:
     name: uwsgi
