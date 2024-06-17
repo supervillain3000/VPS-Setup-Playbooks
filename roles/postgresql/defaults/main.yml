@@ -1,6 +1,6 @@
 ---
 #redhat
-postgresql_version: 14
+postgresql_version: "14"
 postgresql_enablerepo: "https://download.postgresql.org/pub/repos/yum/{{ postgresql_version }}/redhat/rhel-{{ ansible_distribution_major_version }}-x86_64"
 postgresql_rpm_key: "https://download.postgresql.org/pub/repos/yum/keys/PGDG-RPM-GPG-KEY-RHEL"
 postgresql_packages:
