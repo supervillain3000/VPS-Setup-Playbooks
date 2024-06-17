@@ -1,5 +1,5 @@
 django_python_modules_redhat:
-  - python3-virtualenv
+#  - python3-virtualenv
   - gcc
   - python3-devel
   - uwsgi

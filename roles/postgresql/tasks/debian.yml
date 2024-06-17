@@ -2,9 +2,7 @@
 - name: Install required packages
   apt:
     name:
-      - wget
       - python3-psycopg2
-      - acl
     state: latest
 
 - name: Set up Postgres 14 repo
