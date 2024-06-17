@@ -3,20 +3,21 @@
   apt:
     name:
       - python3-psycopg2
-    state: latest
+      - gnupg
+    state: present
+    
+- name: Add PostgreSQL repository key
+  command: |
+    wget -qO- https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/postgresql-archive-keyring.gpg
+  args:
+    creates: /usr/share/keyrings/postgresql-archive-keyring.gpg
 
 - name: Set up Postgres 14 repo
   apt_repository:
-    repo: "deb http://apt.postgresql.org/pub/repos/apt {{ ansible_distribution_release }}-pgdg main"
+    repo: "deb [signed-by=/usr/share/keyrings/postgresql-archive-keyring.gpg] http://apt.postgresql.org/pub/repos/apt {{ ansible_distribution_release }}-pgdg main"
     state: present
     filename: 'pgdg'
     update_cache: yes
-
-- name: Add PostgreSQL repository key
-  apt_key:
-    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
-    state: present
-
 - name: Install postgresql
   apt:
     name: postgresql-14
