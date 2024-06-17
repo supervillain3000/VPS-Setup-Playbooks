@@ -76,6 +76,8 @@
     src: "uwsgi.ini.j2"
     dest: "/etc/uwsgi.d/{{ vhost }}.ini"
     mode: 0644
+    owner: django
+    group: nginx
     
 - name: Restart and enable uwsgi
   systemd:
