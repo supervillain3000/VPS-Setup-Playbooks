@@ -1,12 +1,7 @@
 ---
 - name: Install python modules
   yum:
-    name:
-      - python3-virtualenv
-      - gcc
-      - python3-devel
-      - uwsgi
-      - uwsgi-plugin-python3
+    name: "{{ django_python_modules_redhat }}"
     state: present
 
 - name: Add the user Django
@@ -17,15 +12,9 @@
     shell: /sbin/nologin
     group: nginx
 
-- name: Add uwsgi conf
-  template:
-    src: uwsgi.ini.j2
-    dest: /etc/uwsgi.d/django-{{ vhost }}.ini
-    mode: 0644
-
 - name: Install python3-setuptools
   yum:
-    name: python3-setuptools
+    name: python3-setuptools  
     state: present
 
 - name: Install venv and django
@@ -36,9 +25,18 @@
   become: true
   become_user: django
   loop:
-    - Django
+    - django
     - path
   register: venv_install
+
+- name: Set permissions for virtual environment
+  file:
+    path: /var/www/django/{{ vhost }}
+    state: directory
+    owner: django
+    group: nginx
+    mode: '0775'  
+  when: venv_install.changed
 
 - name: Creates Project directory
   file:
@@ -90,8 +88,4 @@
     src: "vhost.conf.j2"
     dest: "/etc/nginx/conf.d/{{ vhost }}.conf"
     mode: 0644
-
-- name: Restart nginx
-  service:
-    name: nginx
-    state: restarted
+  notify: restart nginx

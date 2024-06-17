@@ -1,11 +1,8 @@
 ---
 - name: Install python modules
   apt:
-    pkg:
-      - python3-venv 
-      - uwsgi 
-      - uwsgi-plugin-python3 
-      - gcc 
+    name: "{{ django_python_modules_debian }}"
+    state: present
 
 - name: Add the user Django
   user:
@@ -14,12 +11,6 @@
     home: /var/www/django
     shell: /usr/sbin/nologin
     group: www-data
-
-- name: Add uwsgi conf
-  template:
-    src: uwsgi.ini.j2
-    dest: /etc/uwsgi/apps-available/django-{{ vhost }}.ini
-    mode: 0644
 
 - name: Install python3-setuptools
   apt:
@@ -94,6 +85,4 @@
     src: "vhost.conf.j2"
     dest: "/etc/nginx/vhosts/{{ vhost }}.conf"
     mode: 0644
-
-- name: restart nginx
-  service: name=nginx state=restarted
+  notify: restart nginx
