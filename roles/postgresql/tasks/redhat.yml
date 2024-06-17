@@ -30,7 +30,7 @@
     
 - name: Ensure PostgreSQL is listening on *
   lineinfile:
-    dest: /var/lib/pgsql/15/data/postgresql.conf
+    dest: /var/lib/pgsql/data/postgresql.conf
     regexp: '^#listen_addresses\s*='
     line: "listen_addresses = '*'"
     state: present
@@ -38,14 +38,14 @@
 
 - name: Add new configuration to "pg_hba.conf"
   blockinfile:
-    dest: /var/lib/pgsql/{{ postgresql_version }}/data/pg_hba.conf
+    dest: /var/lib/pgsql/data/pg_hba.conf
     block: |
       host    all             all             0.0.0.0/0                md5
       host    all             all             ::/0                     md5
   notify: Restart Postgresql
 
 - name: Change peer identification to trust
-  ansible.builtin.shell: /bin/sed -i 's/ident/trust/' /var/lib/pgsql/{{ postgresql_version }}/data/pg_hba.conf
+  ansible.builtin.shell: /bin/sed -i 's/ident/trust/' /var/lib/pgsql/data/pg_hba.conf
   notify: Restart Postgresql
 
 - name: Create a Superuser PostgreSQL database user
@@ -102,7 +102,7 @@
 
 - name: Allow md5 connection for the db user
   postgresql_pg_hba:
-    dest: "/var/lib/pgsql/{{ postgresql_version }}/data/pg_hba.conf"
+    dest: "/var/lib/pgsql/data/pg_hba.conf"
     contype: host
     databases: all
     method: md5
