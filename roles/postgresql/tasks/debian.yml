@@ -5,10 +5,15 @@
       - python3-psycopg2
       - gnupg
     state: present
-    
-- name: Add PostgreSQL repository key
-  command: |
-    wget -qO- https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/postgresql-archive-keyring.gpg
+
+- name: Download PostgreSQL repository key
+  get_url:
+    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    dest: /usr/share/keyrings/postgresql-archive-keyring.gpg
+    mode: '0644'
+
+- name: Convert the key to the required format
+  command: gpg --dearmor -o /usr/share/keyrings/postgresql-archive-keyring.gpg /usr/share/keyrings/postgresql-archive-keyring.gpg
   args:
     creates: /usr/share/keyrings/postgresql-archive-keyring.gpg
 
@@ -18,12 +23,6 @@
     state: present
     filename: 'pgdg'
     update_cache: yes
-- name: Install postgresql
-  apt:
-    name: postgresql-14
-    update_cache: yes
-  notify:
-    - Enable Postgresql
 
 - name: Ensure PostgreSQL is listening on *
   lineinfile:
