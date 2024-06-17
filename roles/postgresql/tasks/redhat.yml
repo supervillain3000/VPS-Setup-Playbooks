@@ -2,28 +2,23 @@
 - name: Install required packages
   yum:
     name:
-      - wget
       - python3-psycopg2
-      - acl
     state: latest
 
 - name: Import the PostgreSQL GPG key
-  ansible.builtin.rpm_key:
+  rpm_key:
     state: present
-    key: https://download.postgresql.org/pub/repos/yum/keys/PGDG-RPM-GPG-KEY-RHEL
+    key: "{{ postgresql_rpm_key }}"
 
 - name: Install PostgreSQL
   ansible.builtin.yum:
-    name: 
-    - postgresql
-    - postgresql-server
-    - postgresql-contrib
+    name: "{{ postgresql_packages }}"
     state: present
     enablerepo: "{{ postgresql_enablerepo | default(omit, true) }}"
 
 - name: Initialize PostgreSQL database
   ansible.builtin.command:
-    cmd: /usr/pgsql-{{ postgresql_version }}/bin/postgresql-{{ postgresql_version }}-setup initdb
+    cmd: postgresql-setup initdb
   args:
     creates: /var/lib/pgsql/{{ postgresql_version }}/data/PG_VERSION
 
@@ -117,13 +112,3 @@
   become_user: postgres
   notify: Restart Postgresql
   tags: md5
-
-- name: Enable Postgresql
-  systemd:
-    name: postgresql-{{ postgresql_version }}
-    enabled: yes
-
-- name: Restart Postgresql
-  systemd:
-    name: postgresql-{{ postgresql_version }}
-    state: restarted
