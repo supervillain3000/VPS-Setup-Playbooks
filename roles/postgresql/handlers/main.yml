@@ -1,19 +1,19 @@
 - name: Restart Postgresql
   systemd:
-    name: postgresql
+    name: postgresql-{{ postgresql_version }}
     state: restarted
 
 - name: Start Postgresql
   systemd:
-    name: postgresql
+    name: postgresql-{{ postgresql_version }}
     state: started
 
 - name: Stop Postgresql
   systemd:
-    name: postgresql
+    name: postgresql-{{ postgresql_version }}
     state: stopped
 
 - name: Enable Postgresql
   systemd:
-    name: postgresql
+    name: postgresql-{{ postgresql_version }}
     enabled: yes

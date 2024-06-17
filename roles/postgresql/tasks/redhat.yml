@@ -7,32 +7,35 @@
       - acl
     state: latest
 
-- name: Install the PostgreSQL repository
-  yum_repository:
-    name: pgdg
-    description: "PostgreSQL Repository"
-    baseurl: "https://download.postgresql.org/pub/repos/yum/14/redhat/rhel-$releasever-$basearch"
-    enabled: yes
-    gpgcheck: yes
-    gpgkey: https://download.postgresql.org/pub/repos/yum/RPM-GPG-KEY-PGDG-14
+- name: Import the PostgreSQL GPG key
+  ansible.builtin.rpm_key:
     state: present
+    key: https://download.postgresql.org/pub/repos/yum/keys/PGDG-RPM-GPG-KEY-RHEL
 
-- name: Install postgresql
-  yum:
-    name: postgresql14-server
+- name: Install PostgreSQL
+  ansible.builtin.yum:
+    name: 
+    - postgresql
+    - postgresql-server
+    - postgresql-contrib
     state: present
-  notify:
-    - Enable Postgresql
+    enablerepo: "{{ postgresql_enablerepo | default(omit, true) }}"
 
 - name: Initialize PostgreSQL database
-  shell: /usr/pgsql-14/bin/postgresql-14-setup initdb
+  ansible.builtin.command:
+    cmd: /usr/pgsql-{{ postgresql_version }}/bin/postgresql-{{ postgresql_version }}-setup initdb
   args:
-    creates: /var/lib/pgsql/14/data/PG_VERSION
-  notify: Start and Enable Postgresql
+    creates: /var/lib/pgsql/{{ postgresql_version }}/data/PG_VERSION
 
+- name: Ensure PostgreSQL is enabled and started
+  ansible.builtin.service:
+    name: "postgresql-{{ postgresql_version }}"
+    enabled: yes
+    state: started
+    
 - name: Ensure PostgreSQL is listening on *
   lineinfile:
-    dest: /var/lib/pgsql/14/data/postgresql.conf
+    dest: /var/lib/pgsql/15/data/postgresql.conf
     regexp: '^#listen_addresses\s*='
     line: "listen_addresses = '*'"
     state: present
@@ -40,23 +43,15 @@
 
 - name: Add new configuration to "pg_hba.conf"
   blockinfile:
-    dest: /var/lib/pgsql/14/data/pg_hba.conf
+    dest: /var/lib/pgsql/{{ postgresql_version }}/data/pg_hba.conf
     block: |
       host    all             all             0.0.0.0/0                md5
       host    all             all             ::/0                     md5
   notify: Restart Postgresql
 
 - name: Change peer identification to trust
-  shell: /bin/sed -i 's/ident/trust/' /var/lib/pgsql/14/data/pg_hba.conf
-  args:
-    warn: no
+  ansible.builtin.shell: /bin/sed -i 's/ident/trust/' /var/lib/pgsql/{{ postgresql_version }}/data/pg_hba.conf
   notify: Restart Postgresql
-
-- name: Start and Enable PostgreSQL
-  systemd:
-    name: postgresql-14
-    state: started
-    enabled: yes
 
 - name: Create a Superuser PostgreSQL database user
   become: true
@@ -112,7 +107,7 @@
 
 - name: Allow md5 connection for the db user
   postgresql_pg_hba:
-    dest: "/var/lib/pgsql/14/data/pg_hba.conf"
+    dest: "/var/lib/pgsql/{{ postgresql_version }}/data/pg_hba.conf"
     contype: host
     databases: all
     method: md5
@@ -125,10 +120,10 @@
 
 - name: Enable Postgresql
   systemd:
-    name: postgresql-14
+    name: postgresql-{{ postgresql_version }}
     enabled: yes
 
 - name: Restart Postgresql
   systemd:
-    name: postgresql-14
+    name: postgresql-{{ postgresql_version }}
     state: restarted
