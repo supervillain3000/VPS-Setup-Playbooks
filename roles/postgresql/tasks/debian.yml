@@ -5,16 +5,16 @@
       - python3-psycopg2
     state: present
 
-- name: Install pgdg package signing key (Debian/pgdg)
+- name: Install pgdg package signing key
   get_url:
     url: "{{ postgresql_pgdg_key_url }}"
     dest: "{{ postgresql_pgdg_key_dest }}"
     mode: "0644"
 
-- name: Install pgdg repository (Debian/pgdg)
+- name: Install pgdg repository
   apt_repository:
-  repo: "{{ postgresql_pgdg_repo }}"
-  update_cache: true
+    repo: "{{ postgresql_pgdg_repo }}"
+    update_cache: true
 
 - name: Install postgresql
   apt:
