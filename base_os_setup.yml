@@ -49,7 +49,7 @@
 
 - name: Add nginx mainline debian nginx repo # to get the latest nginx (not the most stable) version
   apt_repository:
-    repo: deb http://nginx.org/packages/mainline/debian {{ ansible_facts['distribution_release'] }} nginx
+    repo: deb https://nginx.org/packages/mainline/debian {{ ansible_facts['distribution_release'] }} nginx
   when: ansible_facts['distribution'] == "Debian" and ansible_facts['distribution_major_version'] != "10"
 
 - name: Add apt-key for ondrej php repo
