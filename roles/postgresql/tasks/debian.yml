@@ -5,23 +5,27 @@
       - python3-psycopg2
     state: present
 
-- name: Set up Postgres 14 repo
-  shell: |
-    echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list
-    wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-  args:
-    warn: no
+- name: Install pgdg package signing key (Debian/pgdg)
+  get_url:
+    url: "{{ postgresql_pgdg_key_url }}"
+    dest: "{{ postgresql_pgdg_key_dest }}"
+    mode: "0644"
+
+- name: Install pgdg repository (Debian/pgdg)
+  apt_repository:
+  repo: "{{ postgresql_pgdg_repo }}"
+  update_cache: true
 
 - name: Install postgresql
   apt:
-    name: postgresql-14
+    name: postgresql-{{ postgresql_version }}
     update_cache: yes
   notify:
     - Enable Postgresql
 
 - name: Ensure PostgreSQL is listening on *
   lineinfile:
-    dest: /etc/postgresql/14/main/postgresql.conf
+    dest: /etc/postgresql/{{ postgresql_version }}/main/postgresql.conf
     regexp: '^listen_addresses\s*='
     line: "listen_addresses='*'"
     state: present
@@ -29,14 +33,14 @@
 
 - name: Add new configuration to "pg_hba.conf"
   blockinfile:
-    dest: /etc/postgresql/14/main/pg_hba.conf
+    dest: /etc/postgresql/{{ postgresql_version }}/main/pg_hba.conf
     block: |
       host    all             all             0.0.0.0/0                md5
       host    all             all             ::/0                     md5
   notify: Restart Postgresql
 
 - name: Change peer identification to trust
-  shell: /bin/sed -i '/^local/s/peer/trust/' /etc/postgresql/14/main/pg_hba.conf
+  shell: /bin/sed -i '/^local/s/peer/trust/' /etc/postgresql/{{ postgresql_version }}/main/pg_hba.conf
   args:
     warn: no
   notify: Restart Postgresql
@@ -95,7 +99,7 @@
 
 - name: "Allow md5 connection for the db user"
   postgresql_pg_hba:
-    dest: "/etc/postgresql/14/main/pg_hba.conf"
+    dest: "/etc/postgresql/{{ postgresql_version }}/main/pg_hba.conf"
     contype: host
     databases: all
     method: md5
