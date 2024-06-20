@@ -107,7 +107,7 @@
     name: nginx-official-repo
     description: Official NGINX yum repository
     gpgcheck: no
-    baseurl: http://nginx.org/packages/centos/$releasever/$basearch/
+    baseurl: https://nginx.org/packages/centos/$releasever/$basearch/
   when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] != "8"
 
 - name: Tune bash history for CentOS and Debian
