@@ -3,6 +3,11 @@
   apt_key:
     url: https://www.mongodb.org/static/pgp/server-7.0.asc
     state: present
+    
+- name: Install community.mongodb collection
+  ansible.builtin.ansible.builtin.collection:
+    name: community.mongodb
+    state: present
 
 - name: Add MongoDB repository Ubuntu (non-noble)
   apt_repository:
@@ -63,6 +68,7 @@
   lineinfile: 
     dest: /etc/security/limits.conf 
     line: "mongod soft nproc 5000"
+
 - name: Create MongoDB root user
   community.mongodb.mongodb_user:
     login_host: "localhost"
