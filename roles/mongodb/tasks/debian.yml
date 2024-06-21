@@ -43,9 +43,11 @@
     state: started
     enabled: yes
 
-- name: Install pip3
+- name: Install dependencies
   apt: 
-    name: python3-pip
+    name: 
+    - python3-pymongo
+    - python3-passlib
     state: present
 
 - name: Make sure mongod is started and enabled
@@ -54,15 +56,15 @@
     state: started
     enabled: yes
 
-- name: Ensure pymongo is installed and up-to-date
-  pip:
-    name: pymongo==4.5
-    state: present
+# - name: Ensure pymongo is installed and up-to-date
+#   pip:
+#     name: pymongo==4.5
+#     state: present
 
-- name: Ensure passlib is installed and up-to-date
-  pip:
-    name: passlib
-    state: present
+# - name: Ensure passlib is installed and up-to-date
+#   pip:
+#     name: passlib
+#     state: present
 
 - name: Set nproc to mongod user to 5000
   lineinfile: 
