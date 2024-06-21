@@ -43,28 +43,45 @@
     state: started
     enabled: yes
 
-- name: Install dependencies
-  apt: 
-    name: 
-    - python3-pymongo
-    - python3-passlib
-    state: present
-
 - name: Make sure mongod is started and enabled
   service:
     name: mongod
     state: started
     enabled: yes
 
-# - name: Ensure pymongo is installed and up-to-date
-#   pip:
-#     name: pymongo==4.5
-#     state: present
+- name: Ensure pyhon3-pip and python3-venv is installed
+  apt:
+    name: 
+    - python3-pip
+    - python3-venv
+    state: present
 
-# - name: Ensure passlib is installed and up-to-date
-#   pip:
-#     name: passlib
-#     state: present
+- name: Create a virtual environment
+  command: python3 -m venv /root/venv
+  args:
+    creates: /root/venv/bin/activate
+
+- name: Ensure pip is up-to-date in the virtual environment
+  command: /root/venv/bin/pip install --upgrade pip
+
+- name: Ensure pymongo is installed and up-to-date in the virtual environment
+  command: /root/venv/bin/pip install pymongo==4.5
+
+- name: Create MongoDB root user
+  community.mongodb.mongodb_user:
+    login_host: "localhost"
+    login_port: "27017"
+    database: "admin"
+    name: "admin"
+    password: "{{ lookup('password', '/root/04-mongo_admin_password chars=ascii_letters,digits length=15') }}"
+    roles: ["root"]
+  environment:
+    PATH: "/root/venv/bin:{{ ansible_env.PATH }}"
+
+- name: Remove virtual environment directory
+  file:
+    path: /root/venv
+    state: absent
 
 - name: Set nproc to mongod user to 5000
   lineinfile: 
