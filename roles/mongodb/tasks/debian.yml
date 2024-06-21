@@ -16,6 +16,12 @@
     state: present
   when: ansible_distribution == 'Debian'
 
+- name: Add MongoDB repository Ubuntu
+  apt_repository: 
+    repo: 'deb https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse' 
+    state: present
+  when: ansible_distribution_release == 'noble'
+
 - name: Install mongo on Ubuntu
   apt: 
     name: mongodb-org 
