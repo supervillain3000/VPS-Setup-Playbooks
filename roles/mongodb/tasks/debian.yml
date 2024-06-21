@@ -3,33 +3,19 @@
   apt_key:
     url: https://www.mongodb.org/static/pgp/server-7.0.asc
     state: present
-    
-- name: Install community.mongodb collection
-  ansible.builtin.ansible.builtin.collection:
-    name: community.mongodb
-    state: present
 
-- name: Add MongoDB repository Ubuntu (non-noble)
+- name: Add MongoDB repository Ubuntu
   apt_repository:
     repo: 'deb https://repo.mongodb.org/apt/ubuntu {{ ansible_distribution_release }}/mongodb-org/7.0 multiverse'
     state: present
   when: 
     - ansible_distribution == 'Ubuntu'
-    - ansible_distribution_release != 'noble'
 
 - name: Add MongoDB repository Debian
   apt_repository:
     repo: 'deb http://repo.mongodb.org/apt/debian {{ ansible_distribution_release }}/mongodb-org/7.0 main'
     state: present
   when: ansible_distribution == 'Debian'
-
-- name: Add MongoDB repository Ubuntu (noble)
-  apt_repository:
-    repo: 'deb https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse'
-    state: present
-  when: 
-    - ansible_distribution == 'Ubuntu'
-    - ansible_distribution_release == 'noble'
 
 - name: Install mongo on Ubuntu
   apt: 
@@ -43,45 +29,26 @@
     state: started
     enabled: yes
 
+- name: Install pip3
+  apt: 
+    name: python3-pip
+    state: present
+
 - name: Make sure mongod is started and enabled
   service:
     name: mongod
     state: started
     enabled: yes
 
-- name: Ensure pyhon3-pip and python3-venv is installed
-  apt:
-    name: 
-    - python3-pip
-    - python3-venv
+- name: Ensure pymongo is installed and up-to-date
+  pip:
+    name: pymongo==4.5
     state: present
 
-- name: Create a virtual environment
-  command: python3 -m venv /root/venv
-  args:
-    creates: /root/venv/bin/activate
-
-- name: Ensure pip is up-to-date in the virtual environment
-  command: /root/venv/bin/pip install --upgrade pip
-
-- name: Ensure pymongo is installed and up-to-date in the virtual environment
-  command: /root/venv/bin/pip install pymongo==4.5
-
-- name: Create MongoDB root user
-  community.mongodb.mongodb_user:
-    login_host: "localhost"
-    login_port: "27017"
-    database: "admin"
-    name: "admin"
-    password: "{{ lookup('password', '/root/04-mongo_admin_password chars=ascii_letters,digits length=15') }}"
-    roles: ["root"]
-  environment:
-    PATH: "/root/venv/bin:{{ ansible_env.PATH }}"
-
-- name: Remove virtual environment directory
-  file:
-    path: /root/venv
-    state: absent
+- name: Ensure passlib is installed and up-to-date
+  pip:
+    name: passlib
+    state: present
 
 - name: Set nproc to mongod user to 5000
   lineinfile: 
