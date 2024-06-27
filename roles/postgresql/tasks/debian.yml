@@ -5,6 +5,12 @@
       - python3-psycopg2
     state: present
 
+- name: Ensure /etc/apt/keyrings directory exists
+  file:
+    path: "{{ postgresql_apt_keys_dir }}"
+    state: directory
+    mode: "0755"
+
 - name: Install pgdg package signing key
   get_url:
     url: "{{ postgresql_pgdg_key_url }}"
