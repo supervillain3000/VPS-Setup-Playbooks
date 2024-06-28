@@ -3,7 +3,12 @@
   yum:
     name: nginx
     state: latest
-  notify: restart nginx
+
+- name: Ensure nginx service is started and enabled
+  service: 
+    name: nginx 
+    state: started
+    enabled: yes
 
 - name: Change nginx.conf file
   copy: dest=/etc/nginx/nginx.conf src=nginx_centos.conf owner=root group=root
