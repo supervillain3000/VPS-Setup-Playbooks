@@ -1,13 +1,4 @@
-- name: restart ssh service
-  block:
-    - name: Restart sshd on RedHat family
-      service:
-        name: sshd
-        state: restarted
-      when: ansible_os_family == 'RedHat
-
-    - name: Restart ssh on Debian family
-      service:
-        name: ssh
-        state: restarted
-      when: ansible_os_family == 'Debian'
+- name: Restart sshd on RedHat family
+  service:
+    name: sshd
+    state: restarted
