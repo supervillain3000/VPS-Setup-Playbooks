@@ -17,7 +17,7 @@
     mysql_packages:
     - mysql-server
     - python3-mysqldb
-  when: ansible_facts['distribution'] == "Ubuntu" and ansible_facts['distribution_major_version'] not in ["20", "22", "24"]
+  when: ansible_facts['distribution'] == "Ubuntu"
 
 - name: Install mysql for Debian
   apt:
@@ -35,8 +35,7 @@
   apt:
     state: latest
     name: python3-mysqldb
-  when: ansible_facts['distribution'] == "Debian" and ansible_facts['distribution_major_version'] not in ["11", "12"]
-
+  when: ansible_facts['distribution'] == "Debian"
 
 - name: change mysql bind-address
   lineinfile:
