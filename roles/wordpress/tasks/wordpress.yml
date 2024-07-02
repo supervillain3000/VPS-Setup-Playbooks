@@ -6,6 +6,10 @@
     dest: "/var/www/{{ vhost }}"
     creates: "/var/www/{{ vhost }}/wordpress"
     remote_src: yes
+  until: success
+  retries: 5
+  delay: 10
+
 
 - name: Copy wordpress to vhosts dir
   copy:
