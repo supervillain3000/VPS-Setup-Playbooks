@@ -11,11 +11,6 @@
     state: latest
   when: ansible_facts['distribution_major_version'] == "8"
 
-- name: check a php version and register a var
-  shell: php -v | grep 5.6
-  register: php_version_for_pma
-  ignore_errors: true
-
 - name: download phpmyadmin latest 
   get_url:
     url: https://files.phpmyadmin.net/phpMyAdmin/5.1.1/phpMyAdmin-5.1.1-all-languages.zip
