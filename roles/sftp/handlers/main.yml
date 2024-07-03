@@ -1,6 +1,4 @@
 - name: restart sshd
-  vars:
-    service_name: "{{ 'sshd' if ansible_os_family == 'RedHat' else 'ssh' }}"
   service:
-    name: "{{ service_name }}"
+    name: sshd
     state: restarted
