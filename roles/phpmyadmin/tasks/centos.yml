@@ -15,7 +15,7 @@
 - name: Set backend fact to httpd if both nginx and httpd services are running
   set_fact:
     backend: "httpd"
-  when: "'nginx.service' in ansible_facts.services and 'httpd.service' in ansible_facts.services and ansible_facts.services['nginx.service'].state == 'running' and ansible_facts.services['httpd.service'].state == 'running' and (frontend is defined and frontend == 'nginx')"
+  when: "'nginx.service' in ansible_facts.services and 'httpd.service' in ansible_facts.services and ansible_facts.services['nginx.service'].state == 'running' and (frontend is defined and frontend == 'nginx')"
 
 - name: install python-passlib for centos7
   yum:
@@ -94,45 +94,14 @@
 
     path: /etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf
   notify: restart nginx
-  when: frontend == "nginx"
+  when: php_fpm_status.stat.exists
 
 - name: copy modphp nginx handler config
-  blockinfile:
-    marker: ''
-    insertbefore: '^\t## pma'
-    block: |
-      rewrite ^/pma/?(.*)$ /phpmyadmin/$1 redirect;
-
-      location /phpmyadmin/setup {
-        deny all;
-      }
-
-      location /phpmyadmin/ {
-        root /usr/share;
-
-        auth_basic "Speak, friend, and enter.";
-        auth_basic_user_file conf.d/htpasswd;
-
-        proxy_pass http://127.0.0.1:8080;
-        proxy_redirect off;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-
-        proxy_read_timeout 300;
-        client_max_body_size 256m;
-
-        proxy_buffer_size 16k;
-        proxy_buffers 32 16k;
-
-        location ~* ^.+\.(jpg|jpeg|gif|png|ico|css|zip|tgz|gz|rar|bz2|doc|xls|exe|pdf|ppt|txt|tar|mid|midi|wav|bmp|rtf|js|swf|flv|avi|djvu|mp3)$ {
-          expires max;
-        }
-      }
-
-    path: /etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf
-  when: frontend == "nginx" and backend == "httpd"
+  template:
+    src: pma_centos_nginx.conf.j2
+    dest: /etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf
   notify: restart nginx
+  when: frontend == "nginx" and backend == "httpd"
 
 - name: copy httpd vhost config frontend nginx 
   template:
