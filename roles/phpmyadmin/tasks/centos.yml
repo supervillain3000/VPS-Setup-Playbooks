@@ -15,7 +15,7 @@
 - name: Set backend fact to httpd if both nginx and httpd services are running
   set_fact:
     backend: "httpd"
-  when: "'nginx.service' in ansible_facts.services and 'httpd.service' in ansible_facts.services and ansible_facts.services['nginx.service'].state == 'running' and ansible_facts.services['httpd.service'].state == 'running' and (frontend is defined and frontend == 'httpd')"
+  when: "'nginx.service' in ansible_facts.services and 'httpd.service' in ansible_facts.services and ansible_facts.services['nginx.service'].state == 'running' and ansible_facts.services['httpd.service'].state == 'running' and (frontend is defined and frontend == 'nginx')"
 
 - name: install python-passlib for centos7
   yum:
