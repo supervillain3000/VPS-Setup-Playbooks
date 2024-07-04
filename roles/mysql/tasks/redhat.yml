@@ -30,12 +30,6 @@
         disablerepo: AppStream
       when: ansible_facts['distribution_major_version'] in ["8", "9"]
 
-- name: Install mariadb-server for RHEL/Derivatives 8
-  dnf:
-    name: MariaDB-server
-    disablerepo: AppStream
-  when: ansible_facts['distribution_major_version'] in ["8", "9"]
-
 - name: Configure MariaDB
   block:
     - name: Change mariadb bind-address

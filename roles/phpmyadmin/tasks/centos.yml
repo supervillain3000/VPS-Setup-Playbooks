@@ -10,7 +10,7 @@
 - name: Set frontend fact to httpd if httpd service is running and nginx is not
   set_fact:
     frontend: "httpd"
-  when: "'httpd.service' in ansible_facts.services and ansible_facts.services['httpd.service'].state == 'running' and (frontend is not defined or frontend != 'nginx')"
+  when: "'httpd.service' in ansible_facts.services and (frontend is not defined)"
 
 - name: Set backend fact to httpd if both nginx and httpd services are running
   set_fact:
@@ -126,7 +126,7 @@
     path: /etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf
   when: frontend == "nginx" and backend == "httpd"
   notify: restart nginx
-  
+
 - name: copy httpd vhost config frontend nginx
   template:
     src: pma_centos_apache.conf.j2
@@ -163,7 +163,7 @@
     name: pma_admin
     password: "{{ lookup('password', '/root/02-pma_password chars=ascii_letters,digits,hexdigits length=15') }}"
   notify: restart httpd
-  when: frontend == "httpd"
+  when: frontend == "httpd" and (backend is not defined)
 
 - name: insert pmd_admin user name into password file
   blockinfile:

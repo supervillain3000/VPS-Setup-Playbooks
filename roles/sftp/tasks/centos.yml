@@ -51,7 +51,7 @@
   user:
     name: "{{ short_vhost }}"
     uid: 48
-    group: httpd
+    group: apache
     non_unique: yes
   when: frontend == "httpd"
 
@@ -60,7 +60,7 @@
     state: directory
     path: /var/www
     owner: root
-    group: httpd
+    group: apache
     mode: 0775
   when: frontend == "httpd"
 
