@@ -1,5 +1,4 @@
 ---
----
 - name: install python-passlib for centos7
   yum:
     name: python-passlib
