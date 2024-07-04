@@ -3,60 +3,13 @@
   yum:
     name: python-passlib
     state: latest
-  when: ansible_facts['distribution_major_version'] != "8"
+  when: ansible_facts['distribution_major_version'] not in ["8", "9"]
 
 - name: install python3-passlib for centos8
   yum:
     name: python3-passlib
     state: latest
-  when: ansible_facts['distribution_major_version'] == "8"
-
-- name: check a php version and register a var
-  shell: php -v | grep 5.6
-  register: php_version_for_pma
-  ignore_errors: true
-
-- name: download phpmyadmin latest 
-  get_url:
-    url: https://files.phpmyadmin.net/phpMyAdmin/5.1.1/phpMyAdmin-5.1.1-all-languages.zip
-    dest: /usr/share/phpMyAdmin-latest-all-languages.zip
-    validate_certs: false
-  when: php_version_for_pma.rc != 0
-
-- name: download phpmyadmin with old php support
-  get_url:
-    url: https://files.phpmyadmin.net/phpMyAdmin/4.9.5/phpMyAdmin-4.9.5-all-languages.zip
-    dest: /usr/share/phpMyAdmin-4.9.5-all-languages.zip
-    validate_certs: false
-  when: php_version_for_pma.rc == 0
-
-- name: install phpmyadmin
-  shell: |
-    unzip /usr/share/phpMyAdmin-*-all-languages.zip -d /usr/share/
-    mv /usr/share/phpMyAdmin-*-all-languages/ /usr/share/phpmyadmin/
-    cp /usr/share/phpmyadmin/config.sample.inc.php /usr/share/phpmyadmin/config.inc.php
-    rm /usr/share/phpMyAdmin-*-all-languages.zip
-#  args:
-#    warn: false
-
-- name: generate pma secret
-  lineinfile:
-    path: /usr/share/phpmyadmin/config.inc.php
-    line: "$cfg['blowfish_secret'] = '{{ lookup('password', 'chars=ascii_letters,digits,hexdigits,punctuation length=32') }}';"
-    regexp: '.*blowfish_secret.*'
-
-- name: add mysqli extension line into config
-  lineinfile:
-    path: /usr/share/phpmyadmin/config.inc.php
-    line: "$cfg['Servers'][$i]['extension'] = 'mysqli';"
-    insertafter: '.*auth_type.*'
-
-- name: create pma temp dir
-  file:
-    state: directory
-    path: /usr/share/phpmyadmin/tmp/
-    group: apache
-    mode: 0770
+  when: ansible_facts['distribution_major_version'] in ["8", "9"]
 
 - name: check if there is apache
   stat:
@@ -68,17 +21,12 @@
     path: /etc/nginx
   register: nginx_status
 
-- name: Check if PHP-FPM service is running
-  command: systemctl is-active php{{ php_version }}-php-fpm
-  register: php_fpm_status
-  ignore_errors: true
-
-- name: copy fpm nginx config
-  copy:
-    src: pma_centos_fpm.conf
-    dest: /etc/opt/remi/php{{ php_version }}/php-fpm.d/phpmyadmin.conf
-  notify: restart php-fpm centos
-  when: php_fpm_status.stat.exists
+- name: Ensure phpMyAdmin is installed.
+  yum:
+    name: phpmyadmin
+    state: present
+    enablerepo: epel
+  notify: restart webserver
 
 - name: copy phpmyadmin nginx conf block
   blockinfile:
@@ -108,7 +56,7 @@
 
     path: /etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf
   notify: restart nginx
-  when: php_fpm_status.stat.exists
+  when: nginx_status.stat.exists
 
 - name: copy modphp nginx handler config
   blockinfile:

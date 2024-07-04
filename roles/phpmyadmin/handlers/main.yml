@@ -9,12 +9,28 @@
     name: php{{ php_version_u }}-fpm
     state: restarted
 
+- name: restart apache
+  service:
+    name: httpd
+    state: restarted
+  when: httpd_status.stat.exists
+
 - name: restart nginx
   service:
     name: nginx
     state: restarted
+  when: nginx_status.stat.exists
 
-- name: restart apache2
-  service:
-    name: apache2
-    state: restarted
+- name: restart webserver
+  block:
+    - name: restart apache if it exists
+      service:
+        name: httpd
+        state: restarted
+      when: httpd_status.stat.exists
+
+    - name: restart nginx if it exists
+      service:
+        name: nginx
+        state: restarted
+      when: nginx_status.stat.exists

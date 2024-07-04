@@ -42,7 +42,6 @@
   notify: restart apache2
   when: frontend == "apache"
 
-  when: frontend == "apache"
 - name: ensure apache2 is enabled
   service:
     name: apache2
