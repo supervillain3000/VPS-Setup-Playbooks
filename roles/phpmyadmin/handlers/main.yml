@@ -12,8 +12,8 @@
   service:
     name: httpd
     state: restarted
-  when: httpd_status.stat.exists
-
+  when: apache2_status.stat.exists
+  
 - name: restart nginx
   service:
     name: nginx
