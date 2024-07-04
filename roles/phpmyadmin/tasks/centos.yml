@@ -1,4 +1,22 @@
 ---
+- name: Gather service facts
+  service_facts:
+
+- name: Set frontend fact to nginx if nginx service is running
+  set_fact:
+    frontend: "nginx"
+  when: "'nginx.service' in ansible_facts.services and ansible_facts.services['nginx.service'].state == 'running'"
+
+- name: Set frontend fact to httpd if httpd service is running and nginx is not
+  set_fact:
+    frontend: "httpd"
+  when: "'httpd.service' in ansible_facts.services and ansible_facts.services['httpd.service'].state == 'running' and (frontend is not defined or frontend != 'nginx')"
+
+- name: Set backend fact to httpd if both nginx and httpd services are running
+  set_fact:
+    backend: "httpd"
+  when: "'nginx.service' in ansible_facts.services and 'httpd.service' in ansible_facts.services and ansible_facts.services['nginx.service'].state == 'running' and ansible_facts.services['httpd.service'].state == 'running' and (frontend is defined and frontend == 'httpd')"
+
 - name: install python-passlib for centos7
   yum:
     name: python-passlib
@@ -10,16 +28,6 @@
     name: python3-passlib
     state: latest
   when: ansible_facts['distribution_major_version'] in ["8", "9"]
-
-- name: check if there is apache
-  stat:
-    path: /usr/sbin/httpd
-  register: httpd_status
-
-- name: check if there is nginx
-  stat:
-    path: /etc/nginx
-  register: nginx_status
 
 - name: Extract phpMyAdmin
   unarchive:
@@ -51,27 +59,12 @@
     group: apache
     mode: 0770
 
-- name: check if there is apache
-  stat:
-    path: /usr/sbin/httpd
-  register: httpd_status
-
-- name: check if there is nginx
-  stat:
-    path: /etc/nginx
-  register: nginx_status
-
-- name: check if there is php-fpm
-  stat:
-    path: /opt/remi/php{{ php_version }}/root/usr/sbin/php-fpm
-  register: php_fpm_status
-
 - name: copy fpm nginx config
   copy:
     src: pma_centos_fpm.conf
     dest: /etc/opt/remi/php{{ php_version }}/php-fpm.d/phpmyadmin.conf
   notify: restart php-fpm centos
-  when: nginx_status.stat.exists
+  when: frontend == "nginx"
 
 - name: copy phpmyadmin nginx conf block
   blockinfile:
@@ -101,7 +94,7 @@
 
     path: /etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf
   notify: restart nginx
-  when: nginx_status.stat.exists
+  when: frontend == "nginx"
 
 - name: copy modphp nginx handler config
   blockinfile:
@@ -138,7 +131,7 @@
       }
 
     path: /etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf
-  when: httpd_status.stat.exists and nginx_status.stat.exists
+  when: frontend == "nginx" and backend == "httpd"
   notify: restart nginx
 
 - name: copy httpd vhost config frontend nginx 
@@ -152,7 +145,7 @@
   template:
     src: pma_centos_apache_lamp.conf.j2
     dest: /etc/httpd/conf.d/{{ ansible_default_ipv4.address }}.conf
-  when: httpd_status.stat.exists and not nginx_status.stat.exists
+  when: frontend == "httpd"
   notify: restart httpd
 
 - name: Ensure the default Apache site port is 8080
@@ -161,7 +154,7 @@
     regexp: '^<VirtualHost'
     line: '<VirtualHost 127.0.0.1:8080>'
   notify: restart httpd
-  when: nginx_status.stat.exists and httpd_status.stat.exists 
+  when: frontend == "nginx" and backend == "httpd" 
 
 - name: add http auth for pma
   htpasswd:
@@ -169,7 +162,7 @@
     name: pma_admin
     password: "{{ lookup('password', '/root/02-pma_password chars=ascii_letters,digits,hexdigits length=15') }}"
   notify: restart nginx
-  when: nginx_status.stat.exists
+  when: frontend == "nginx"
 
 - name: add http auth for pma
   htpasswd:
@@ -177,7 +170,7 @@
     name: pma_admin
     password: "{{ lookup('password', '/root/02-pma_password chars=ascii_letters,digits,hexdigits length=15') }}"
   notify: restart httpd
-  when: not nginx_status.stat.exists and httpd_status.stat.exists
+  when: frontend == "httpd"
 
 - name: insert pmd_admin user name into password file
   blockinfile:
