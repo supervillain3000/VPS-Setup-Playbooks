@@ -1,4 +1,22 @@
 ---
+- name: Gather service facts
+  service_facts:
+
+- name: Set frontend fact to nginx if nginx service is running
+  set_fact:
+    frontend: "nginx"
+  when: "'nginx.service' in ansible_facts.services and ansible_facts.services['nginx.service'].state == 'running'"
+
+- name: Set frontend fact to httpd if httpd service is running and nginx is not
+  set_fact:
+    frontend: "httpd"
+  when: "'httpd.service' in ansible_facts.services and (frontend is not defined)"
+
+- name: Set backend fact to httpd if both nginx and httpd services are running
+  set_fact:
+    backend: "httpd"
+  when: "'nginx.service' in ansible_facts.services and 'httpd.service' in ansible_facts.services and ansible_facts.services['nginx.service'].state == 'running' and (frontend is defined and frontend == 'nginx')"
+
 - name: add remi repository
   yum:
     disable_gpg_check: True
@@ -123,7 +141,7 @@
     insertafter: '^#Listen '
     line: Listen 80
   notify: restart httpd
-  when: frontend == "apache"
+  when: frontend == "httpd"
 
 
 # - name: tune mpm_event
