@@ -12,16 +12,13 @@
   service:
     name: httpd
     state: restarted
-  when: apache2_status.stat.exists
-  
+
 - name: restart nginx
   service:
     name: nginx
     state: restarted
-  when: nginx_status.stat.exists
 
 - name: restart httpd
   service:
     name: httpd
     state: restarted
-  when: httpd_status.stat.exists
