@@ -98,11 +98,12 @@
   notify: restart httpd
   when: php_version == "80"
 
-- name: enable apache2 mod_rewrite
-  apache2_module:
+- name: Ensure mod_rewrite is enabled
+  lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    regexp: '^#?LoadModule rewrite_module modules/mod_rewrite.so'
+    line: 'LoadModule rewrite_module modules/mod_rewrite.so'
     state: present
-    name: rewrite
-  notify: restart httpd
 
 - name: switch from mpm_event to mpm_prefork on centos8 # as event is not compatible with prefork
   lineinfile:
