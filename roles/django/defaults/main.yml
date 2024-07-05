@@ -1,0 +1,12 @@
+django_python_modules_redhat:
+#  - python3-virtualenv
+  - gcc
+  - python3-devel
+  - uwsgi
+  - uwsgi-plugin-python3
+
+django_python_modules_debian:
+  - python3-venv 
+  - uwsgi 
+  - uwsgi-plugin-python3 
+  - gcc 

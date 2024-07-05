@@ -26,6 +26,19 @@
     state: latest
     update_cache: yes
 
+- name: Gather service facts
+  service_facts:
+
+- name: Set frontend fact to nginx if nginx service is running
+  set_fact:
+    frontend: "nginx"
+  when: "'nginx.service' in ansible_facts.services and ansible_facts.services['nginx.service'].state == 'running'"
+
+- name: Set frontend fact to httpd if httpd service is running and nginx is not
+  set_fact:
+    frontend: "apache"
+  when: "'apache2.service' in ansible_facts.services and (frontend is not defined)"
+
 - name: change listened port
   replace:
     path: /etc/apache2/apache2.conf
@@ -42,7 +55,6 @@
   notify: restart apache2
   when: frontend == "apache"
 
-  when: frontend == "apache"
 - name: ensure apache2 is enabled
   service:
     name: apache2

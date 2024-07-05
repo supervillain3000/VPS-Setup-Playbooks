@@ -1,0 +1,15 @@
+---
+postgresql_version: "14"
+#redhat
+postgresql_enablerepo: "https://download.postgresql.org/pub/repos/yum/{{ postgresql_version }}/redhat/rhel-{{ ansible_distribution_major_version }}-x86_64"
+postgresql_rpm_key: "https://download.postgresql.org/pub/repos/yum/keys/PGDG-RPM-GPG-KEY-RHEL"
+postgresql_packages:
+  - postgresql
+  - postgresql-server
+  - postgresql-contrib
+
+#debian
+postgresql_apt_keys_dir: "/etc/apt/keyrings"
+postgresql_pgdg_key_dest: "{{ postgresql_apt_keys_dir }}/pgdg.asc"
+postgresql_pgdg_key_url: "https://www.postgresql.org/media/keys/ACCC4CF8.asc"
+postgresql_pgdg_repo: "deb [signed-by={{ postgresql_pgdg_key_dest }}] http://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg main"

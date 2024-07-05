@@ -16,6 +16,10 @@
   shell: dnf config-manager --set-enabled powertools
   when: ansible_facts['distribution_major_version'] == "8"
 
+- name: Enabled crb repo # needed by libedit-devel on centos8
+  shell: dnf config-manager --set-enabled crb
+  when: ansible_facts['distribution_major_version'] == "9"
+
 - name: install libedit-devel # needed by php-devel package on centos8
   yum:
     name: libedit-devel

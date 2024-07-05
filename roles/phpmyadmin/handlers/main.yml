@@ -1,4 +1,3 @@
----
 - name: restart php-fpm centos
   service:
     name: php{{ php_version }}-php-fpm
@@ -9,12 +8,17 @@
     name: php{{ php_version_u }}-fpm
     state: restarted
 
+- name: restart apache
+  service:
+    name: httpd
+    state: restarted
+
 - name: restart nginx
   service:
     name: nginx
     state: restarted
 
-- name: restart apache2
+- name: restart httpd
   service:
-    name: apache2
+    name: httpd
     state: restarted

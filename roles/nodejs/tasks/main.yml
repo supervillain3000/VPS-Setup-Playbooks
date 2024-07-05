@@ -1,5 +1,70 @@
 ---
-- import_tasks: node.yml
-  when: ansible_os_family == 'Debian'
+- import_tasks: debian.yml
+  when: ansible_facts['os_family']|lower == 'debian'
+- import_tasks: redhat.yml
+  when: ansible_facts['os_family']|lower == 'redhat'
 
-- import_tasks: nginx.yml
+- name: Clear dir /var/www/
+  shell: rm -rf /var/www/*
+
+- name: Setup the Git repo
+  git: repo=https://github.com/scotch-io/node-todo.git dest=/var/www/{{ vhost }} accept_hostkey=yes
+
+- name: Add node.js user
+  user:
+    name: node
+    home: /var/www/{{ vhost }}
+    shell: /bin/bash
+    password: "{{ lookup('password', '/tmp/pagsnagt chars=ascii_letters,digits,hexdigits length=15') }}"
+
+- name: Ensure that the application file permissions are set properly
+  file: path=/var/www/{{ vhost }}
+        recurse=yes
+        owner=node
+        group=node
+        state=directory
+
+- name: Define nodejs_install_npm_user
+  set_fact:
+    nodejs_install_npm_user: "{{ ansible_user | default(lookup('env', 'USER')) }}"
+  when: nodejs_install_npm_user is not defined
+
+- name: Create npm global directory
+  file:
+    path: "{{ npm_config_prefix }}"
+    owner: "{{ nodejs_install_npm_user }}"
+    group: "{{ nodejs_install_npm_user }}"
+    state: directory
+    mode: 0755
+
+- name: Add npm_config_prefix bin directory to global $PATH.
+  template:
+    src: npm.sh.j2
+    dest: /etc/profile.d/npm.sh
+    mode: 0644
+  when: nodejs_generate_etc_profile
+
+- name: Ensure npm global packages are installed.
+  npm:
+    name: "{{ item.name | default(item) }}"
+    version: "{{ item.version | default(omit) }}"
+    global: true
+    state: "{{ item.state | default('present') }}"
+  environment:
+    NPM_CONFIG_PREFIX: "{{ npm_config_prefix }}"
+    NODE_PATH: "{{ npm_config_prefix }}/lib/node_modules"
+    NPM_CONFIG_UNSAFE_PERM: "{{ npm_config_unsafe_perm }}"
+  with_items: "{{ nodejs_npm_global_packages }}"
+
+- name: Add nginx vhost config
+  template:
+    src: "vhost.conf.j2"
+    dest: "/etc/nginx/vhosts/{{ vhost }}.conf"
+    mode: 0644
+  register: vhosts
+
+- name: restart nginx
+  service: 
+    name: nginx 
+    state: restarted
+  when: vhosts.changed

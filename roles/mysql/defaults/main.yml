@@ -1,2 +1,13 @@
 ---
-#
+mariadb_version: 11.0
+
+# RHEL/Derivatives
+mariadb_packages_7:
+  - mariadb-server
+  - MySQL-python
+mariadb_packages_8_9:
+  - boost-program-options
+  - python3-PyMySQL
+
+
+mariadb_log_file: "/var/log/mariadb/mariadb.log"
