@@ -24,7 +24,6 @@
   service:
     name: httpd
     enabled: yes
-    state: started
 
 - name: Gather service facts
   service_facts:
@@ -261,4 +260,3 @@
       }
   notify: restart nginx
   when: frontend == "nginx"
-
