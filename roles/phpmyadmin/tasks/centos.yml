@@ -124,14 +124,14 @@
       }
 
     path: /etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf
-  when: frontend == "nginx" and backend == "httpd"
+  when: frontend == "nginx" and (backend is defined and backend == 'httpd')
   notify: restart nginx
 
 - name: copy httpd vhost config frontend nginx
   template:
     src: pma_centos_apache.conf.j2
     dest: /etc/httpd/conf.d/{{ ansible_default_ipv4.address }}.conf
-  when: frontend == "nginx" and backend == "httpd"
+  when: frontend == "nginx" and (backend is defined and backend == 'httpd')
   notify: restart httpd
 
 - name: copy httpd vhost config frontend apache
@@ -147,7 +147,7 @@
     regexp: '^<VirtualHost'
     line: '<VirtualHost 127.0.0.1:8080>'
   notify: restart httpd
-  when: frontend == "nginx" and backend == "httpd"
+  when: frontend == "nginx" and (backend is defined and backend == 'httpd')
 
 - name: add http auth for pma
   htpasswd:
