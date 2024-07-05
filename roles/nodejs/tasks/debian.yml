@@ -1,0 +1,39 @@
+---
+- name: Ensure dependencies are present.
+  apt:
+    name:
+      - apt-transport-https
+      - python3-debian
+      - gnupg2
+    state: present
+
+- name: Download NodeSource's signing key.
+  get_url:
+    url: https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key
+    dest: /etc/apt/signing-key-nodesource-repo.asc
+    owner: root
+    group: root
+    mode: '0444'
+  register: node_signing_key
+
+- name: Add NodeSource's signing key.
+  apt_key:
+    file: "{{ node_signing_key.dest }}"
+    state: present
+
+- name: Add NodeSource repositories for Node.js.
+  apt_repository:
+    repo: "deb https://deb.nodesource.com/node_{{ nodejs_version }} nodistro main"
+    state: present
+    filename: "nodesource_{{ nodejs_version }}"
+  register: node_repo
+  
+- name: Update apt cache if repo was added.
+  apt: 
+    update_cache: yes
+  when: node_repo is changed
+
+- name: Ensure Node.js and npm are installed.
+  apt:
+    name: "nodejs={{ nodejs_version | regex_replace('x', '') }}*"
+    state: present

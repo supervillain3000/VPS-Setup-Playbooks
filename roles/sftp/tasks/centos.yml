@@ -1,10 +1,31 @@
 ---
+- name: Gather service facts
+  service_facts:
+
+- name: Set frontend fact to nginx if nginx service is running
+  set_fact:
+    frontend: "nginx"
+  when: "'nginx.service' in ansible_facts.services and ansible_facts.services['nginx.service'].state == 'running'"
+
+- name: Set frontend fact to httpd if httpd service is running and nginx is not
+  set_fact:
+    frontend: "httpd"
+  when: "'httpd.service' in ansible_facts.services and ansible_facts.services['httpd.service'].state == 'running' and (frontend is not defined or frontend != 'nginx')"
+
 - name: create site user
   user:
     name: "{{ short_vhost }}"
     password: "{{ lookup('password', '/root/01-sftp_password chars=ascii_letters,digits,hexdigits length=15') | password_hash('sha512') }}"
     shell: /sbin/nologin
     home: /var/www/
+
+- name: Create /root/01-sftp_password if it doesn't exist
+  file:
+    path: /root/01-sftp_password
+    state: touch
+    owner: root
+    group: root
+    mode: '0600'
 
 - name: insert site user name into user password file
   blockinfile:
@@ -22,8 +43,35 @@
   user:
     name: "{{ short_vhost }}"
     uid: 48
+    group: nginx
+    non_unique: yes
+  when: frontend == "nginx"
+
+- name: create user uid
+  user:
+    name: "{{ short_vhost }}"
+    uid: 48
     group: apache
     non_unique: yes
+  when: frontend == "httpd"
+
+- name: Change /var/www group and perm
+  file:
+    state: directory
+    path: /var/www
+    owner: root
+    group: apache
+    mode: 0775
+  when: frontend == "httpd"
+
+- name: Change /var/www group and perm
+  file:
+    state: directory
+    path: /var/www
+    owner: root
+    group: nginx
+    mode: 0775
+  when: frontend == "nginx"
 
 - name: add user to sshd config
   blockinfile:
@@ -40,11 +88,3 @@
       AllowTcpForwarding no
       X11Forwarding no
   notify: restart sshd
-
-- name: Change /var/www group and perm
-  file:
-    state: directory
-    path: /var/www
-    owner: root
-    group: apache
-    mode: 0775

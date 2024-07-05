@@ -1,52 +1,51 @@
 ---
 - name: Install required packages
-  apt:
+  yum:
     name:
       - python3-psycopg2
+    state: latest
+
+- name: Import the PostgreSQL GPG key
+  rpm_key:
     state: present
+    key: "{{ postgresql_rpm_key }}"
 
-- name: Ensure /etc/apt/keyrings directory exists
-  file:
-    path: "{{ postgresql_apt_keys_dir }}"
-    state: directory
-    mode: "0755"
+- name: Install PostgreSQL
+  ansible.builtin.yum:
+    name: "{{ postgresql_packages }}"
+    state: present
+    enablerepo: "{{ postgresql_enablerepo | default(omit, true) }}"
 
-- name: Install pgdg package signing key
-  get_url:
-    url: "{{ postgresql_pgdg_key_url }}"
-    dest: "{{ postgresql_pgdg_key_dest }}"
-    mode: "0644"
+- name: Initialize PostgreSQL database
+  ansible.builtin.command:
+    cmd: postgresql-setup initdb
+  args:
+    creates: /var/lib/pgsql/{{ postgresql_version }}/data/PG_VERSION
 
-- name: Install pgdg repository
-  apt_repository:
-    repo: "{{ postgresql_pgdg_repo }}"
-    update_cache: true
-
-- name: Install postgresql
-  apt:
-    name: postgresql-{{ postgresql_version }}
-    update_cache: yes
-  notify:
-    - Enable Postgresql
-
+- name: Ensure PostgreSQL is enabled and started
+  ansible.builtin.service:
+    name: "postgresql"
+    enabled: yes
+    state: started
+    
 - name: Ensure PostgreSQL is listening on *
   lineinfile:
-    dest: /etc/postgresql/{{ postgresql_version }}/main/postgresql.conf
-    regexp: '^listen_addresses\s*='
-    line: "listen_addresses='*'"
+    dest: /var/lib/pgsql/data/postgresql.conf
+    regexp: '^#listen_addresses\s*='
+    line: "listen_addresses = '*'"
     state: present
   notify: Restart Postgresql
 
 - name: Add new configuration to "pg_hba.conf"
   blockinfile:
-    dest: /etc/postgresql/{{ postgresql_version }}/main/pg_hba.conf
+    dest: /var/lib/pgsql/data/pg_hba.conf
     block: |
       host    all             all             0.0.0.0/0                md5
       host    all             all             ::/0                     md5
   notify: Restart Postgresql
 
 - name: Change peer identification to trust
-  shell: /bin/sed -i '/^local/s/peer/trust/' /etc/postgresql/{{ postgresql_version }}/main/pg_hba.conf
+  ansible.builtin.shell: /bin/sed -i 's/ident/trust/' /var/lib/pgsql/data/pg_hba.conf
   notify: Restart Postgresql
 
 - name: Create a Superuser PostgreSQL database user
@@ -59,7 +58,7 @@
     encrypted: yes
     state: present
 
-- name: insert postgres superuser name into user password file
+- name: Insert postgres superuser name into user password file
   blockinfile:
     dest: /root/04-postgres_admin_password
     insertbefore: BOF
@@ -67,14 +66,14 @@
       Админ-пользователь postgres:
       Логин: postgres
 
-- name: "Create app database"
+- name: Create app database
   postgresql_db:
     state: present
     name: "{{ short_vhost }}"
   become: true
   become_user: postgres
 
-- name: "Create db user"
+- name: Create db user
   postgresql_user:
     state: present
     name: "{{ short_vhost }}"
@@ -82,7 +81,7 @@
   become: true
   become_user: postgres
 
-- name: insert postgres user name into user password file
+- name: Insert postgres user name into user password file
   blockinfile:
     dest: /root/03-postgres_password
     insertbefore: BOF
@@ -91,7 +90,7 @@
       Имя БД: {{ short_vhost }}
       Пользователь: {{ short_vhost }}
 
-- name: "Grant db user access to app db"
+- name: Grant db user access to app db
   postgresql_privs:
     type: database
     database: "{{ short_vhost }}"
@@ -101,9 +100,9 @@
   become: true
   become_user: postgres
 
-- name: "Allow md5 connection for the db user"
+- name: Allow md5 connection for the db user
   postgresql_pg_hba:
-    dest: "/etc/postgresql/{{ postgresql_version }}/main/pg_hba.conf"
+    dest: "/var/lib/pgsql/data/pg_hba.conf"
     contype: host
     databases: all
     method: md5
