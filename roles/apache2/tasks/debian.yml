@@ -9,25 +9,6 @@
     #    state: stopped
     #  when: "'nginx' in ansible_facts.packages"
 
-- name: Gather service facts
-  service_facts:
-
-- name: Set frontend fact to nginx if nginx service is running
-  set_fact:
-    frontend: "nginx"
-  when: "'nginx.service' in ansible_facts.services and ansible_facts.services['nginx.service'].state == 'running'"
-
-- name: Set frontend fact to httpd if httpd service is running and nginx is not
-  set_fact:
-    frontend: "apache"
-  when: "'httpd.service' in ansible_facts.services and (frontend is not defined)"
-
-- name: Set backend fact to httpd if both nginx and httpd services are running
-  set_fact:
-    backend: "apache"
-  when: "'nginx.service' in ansible_facts.services and 'httpd.service' in ansible_facts.services and ansible_facts.services['nginx.service'].state == 'running' and (frontend is defined and frontend == 'nginx')"
-
-
 - name: enable ssh and http(s) on ufw
   ufw:
     state: enabled
@@ -44,6 +25,19 @@
     name: apache2
     state: latest
     update_cache: yes
+
+- name: Gather service facts
+  service_facts:
+
+- name: Set frontend fact to nginx if nginx service is running
+  set_fact:
+    frontend: "nginx"
+  when: "'nginx.service' in ansible_facts.services and ansible_facts.services['nginx.service'].state == 'running'"
+
+- name: Set frontend fact to httpd if httpd service is running and nginx is not
+  set_fact:
+    frontend: "apache"
+  when: "'apache2.service' in ansible_facts.services and (frontend is not defined)"
 
 - name: change listened port
   replace:
