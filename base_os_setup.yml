@@ -1,5 +1,4 @@
 ---
-
 - name: Install debian base packages
   apt:
     name: "{{ package_list }}"
@@ -54,13 +53,13 @@
 
 - name: Add apt-key for ondrej php repo
   apt_key:
-    url: https://packages.sury.org/php/apt.gpg
+    url: https://mirror.ps.kz/sury/packages.sury.org/php/apt.gpg
   when: ansible_facts['distribution'] == "Debian"
 
 - name: Add packages.sury.org/php debian php repo
   apt_repository:
     update_cache: yes
-    repo: deb https://packages.sury.org/php {{ ansible_facts['distribution_release'] }} main
+    repo: deb https://mirror.ps.kz/sury/packages.sury.org/php {{ ansible_facts['distribution_release'] }} main
   when: ansible_facts['distribution'] == "Debian"
 
 - name: Add ubuntu nginx mainline repo
