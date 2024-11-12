@@ -1,0 +1,3 @@
+---
+postgresql_admin_password: "{{ lookup('password', '/root/04-postgres_admin_password chars=ascii_letters,digits,hexdigits length=15') }}"
+postgresql_user_password: "{{ lookup('password', '/root/03-postgres_password chars=ascii_letters,digits,hexdigits length=15') }}"

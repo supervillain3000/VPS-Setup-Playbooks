@@ -1,0 +1,2 @@
+---
+wordpress__database_password: "{{ lookup('file', '/root/03-mysql_password') }}"

@@ -1,0 +1,156 @@
+---
+- name: Set php_fpm_daemon var
+  ansible.builtin.set_fact:
+    __php_fpm_daemon: "php{{ php_default_version }}-fpm"
+  when: php_enable_php_fpm
+
+- name: Add apt-key for ondrej php repo
+  ansible.builtin.apt_key:
+    url: "{{ php_apt_repo_gpg_key }}"
+  when: ansible_facts['distribution'] == "Debian"
+
+- name: Add packages.sury.org/php debian php repo
+  ansible.builtin.apt_repository:
+    update_cache: true
+    repo: "{{ php_sury_repo }}"
+  when: ansible_facts['distribution'] == "Debian"
+
+- name: Add ppa:ondrej/php php ubuntu repo
+  ansible.builtin.apt_repository:
+    update_cache: true
+    repo: ppa:ondrej/php
+  when: ansible_facts['distribution'] == "Ubuntu"
+
+- name: Ensure PHP packages are installed.
+  ansible.builtin.apt:
+    name: "{{ php_packages }}"
+    state: present
+    install_recommends: true
+    update_cache: true
+  register: php_package_install
+  notify: Restart webserver
+
+- name: Check if nginx are installed
+  ansible.builtin.stat:
+    path: /etc/nginx
+  register: _php_nginx_check
+
+- name: Set fact that webserver is nginx
+  ansible.builtin.set_fact:
+    __php_webserver_daemon: "nginx"
+  when: _php_nginx_check.stat.exists
+
+- name: Check if apache2 are installed
+  ansible.builtin.stat:
+    path: /etc/apache2
+  register: _php_apache2_check
+
+- name: Set fact that webserver is apache2
+  ansible.builtin.set_fact:
+    __php_webserver_daemon: "apache2"
+  when: not _php_nginx_check.stat.exists and _php_apache2_check.stat.exists
+
+- name: Disable mpm_event and mpm_worker
+  community.general.apache2_module:
+    state: absent
+    name: "{{ item }}"
+  loop:
+    - mpm_event
+    - mpm_worker
+  notify: Restart webserver
+  when: _php_apache2_check.stat.exists
+
+- name: Enable mpm_prefork
+  community.general.apache2_module:
+    state: present
+    name: mpm_prefork
+  notify: Restart webserver
+  when: _php_apache2_check.stat.exists
+
+- name: Enable apache2 mod_rewrite
+  community.general.apache2_module:
+    state: present
+    name: rewrite
+  notify: Restart webserver
+  when: _php_apache2_check.stat.exists
+
+- name: Tune mpm_prefork
+  ansible.builtin.blockinfile:
+    marker: ''
+    path: /etc/apache2/apache2.conf
+    insertafter: '^.*KeepAliveTimeout'
+    block: |
+      MaxClients 256
+      StartServers 3
+      MinSpareServers 3
+      MaxSpareServers 16
+      MaxRequestsPerChild 4096
+  notify: Restart webserver
+  when: _php_apache2_check.stat.exists
+
+- name: Tune some php.ini vars
+  community.general.ini_file:
+    path: /etc/php/{{ php_default_version }}/apache2/php.ini
+    section: PHP
+    option: "{{ item.options }}"
+    value: "{{ item.value }}"
+    mode: "0644"
+  loop:
+    - { options: 'post_max_size', value: '64M' }
+    - { options: 'upload_max_filesize', value: '64M' }
+    - { options: 'short_open_tag', value: 'On' }
+    - { options: 'date.timezone', value: 'Asia/Almaty' }
+  notify: Restart webserver
+
+- name: Create /var/www vhost subdir
+  ansible.builtin.file:
+    state: directory
+    path: /var/www/{{ vhost }}
+    owner: www-data
+    group: www-data
+    mode: "0755"
+
+- name: Copy index file into virtualhost root
+  ansible.builtin.copy:
+    src: index.php
+    dest: /var/www/{{ vhost }}/index.php
+    owner: www-data
+    group: www-data
+    mode: "0644"
+
+- name: Configure php-fpm
+  when: php_enable_php_fpm and _php_nginx_check.stat.exists
+  block:
+    - name: Clear default pool file
+      ansible.builtin.copy:
+        content: '; disabled, use separate vhost pools'
+        dest: /etc/php/{{ php_default_version }}/fpm/pool.d/www.conf
+        mode: "0644"
+      notify: restart debian php-fpm
+
+    - name: Create pool for a virtual host
+      ansible.builtin.template:
+        dest: /etc/php/{{ php_default_version }}/fpm/pool.d/{{ vhost }}.conf
+        src: vhost_pool_debian.j2
+        mode: "0644"
+      notify: restart debian php-fpm
+
+    - name: Add fpm handler block for nginx
+      ansible.builtin.blockinfile:
+        marker: ' '
+        path: /etc/nginx/vhosts/{{ vhost }}.conf
+        insertafter: '## handler ##'
+        block: |
+          location ~ \.php$ {
+                  fastcgi_index index.php;
+                  fastcgi_param PHP_ADMIN_VALUE "sendmail_path = /usr/sbin/sendmail -t -i -f webmaster@{{ vhost }}";
+                  fastcgi_pass unix:/var/run/php/{{ vhost }}.sock;
+                  fastcgi_split_path_info ^((?U).+\.ph(?:p\d*|tml))(/?.+)$;
+                  try_files $uri =404;
+                  fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+                  include fastcgi_params;
+                  fastcgi_read_timeout 300;
+                  fastcgi_busy_buffers_size 16k;
+                  fastcgi_buffers 32 16k;
+          }
+      notify: Restart webserver

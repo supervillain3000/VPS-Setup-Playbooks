@@ -1,4 +1,0 @@
----
-- hosts: vps
-  roles:
-    - certbot

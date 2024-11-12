@@ -1,0 +1,2 @@
+---
+sftp_site_username: "{{ short_vhost }}"

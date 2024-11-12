@@ -1,0 +1,2 @@
+mongodb_password: "{{ lookup('password', '/root/03-mongo_password chars=ascii_letters,digits,hexdigits length=15') }}"
+mongodb_admin_password: "{{ lookup('password', '/root/04-mongo_admin_password chars=ascii_letters,digits length=15') }}"

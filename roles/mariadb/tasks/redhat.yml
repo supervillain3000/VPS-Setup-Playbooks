@@ -1,0 +1,82 @@
+---
+- name: Install MariaDB
+  ansible.builtin.dnf:
+    name: mariadb-server
+
+- name: Change mariadb bind-address
+  ansible.builtin.lineinfile:
+    path: /etc/my.cnf.d/server.cnf
+    regexp: '^#bind-address'
+    line: 'bind-address = 127.0.0.1'
+  notify: Restart mariadb
+
+- name: Add log-error
+  ansible.builtin.blockinfile:
+    path: /etc/my.cnf.d/server.cnf
+    insertafter: '[mysqld]'
+    block: |
+      log-error = /var/log/mariadb/mariadb.log
+  notify: Restart mariadb
+
+- name: Change root password
+  community.mysql.mysql_user:
+    state: present
+    name: root
+    host: localhost
+    login_unix_socket: /var/lib/mysql/mysql.sock
+    password: "{{ lookup('password', '/root/04-mysql_root_password chars=ascii_letters,digits,hexdigits length=15') }}"
+
+- name: Copy root mysql password file
+  ansible.builtin.copy:
+    dest: /root/.my.cnf
+    src: root_my_cnf
+    owner: root
+    group: root
+    mode: "0640"
+
+- name: Add root password to root homedir my.cnf file
+  ansible.builtin.replace:
+    path: /root/.my.cnf
+    regexp: '^password'
+    replace: 'password={{ lookup("file", "/root/04-mysql_root_password") }}'
+
+- name: Add website db
+  community.mysql.mysql_db:
+    state: present
+    name: "{{ mariadb_database_name }}"
+    collation: utf8_unicode_ci
+
+- name: Add db user
+  community.mysql.mysql_user:
+    state: present
+    name: "{{ mariadb_database_name }}"
+    host: localhost
+    password: "{{ lookup('password', '/root/03-mysql_password chars=ascii_letters,digits,hexdigits length=15') }}"
+    priv: '{{ mariadb_database_name }}.*:ALL'
+
+- name: Insert mysql user name into user password file
+  ansible.builtin.blockinfile:
+    dest: /root/03-mysql_password
+    insertbefore: BOF
+    block: |
+      Данные для доступа к базе данных:
+      Имя БД: {{ mariadb_database_name }}
+      Пользователь: {{ mariadb_database_name }}
+
+- name: Remove anonymous users
+  community.mysql.mysql_user:
+    state: absent
+    name: ''
+    host_all: true
+
+- name: Remove test db
+  community.mysql.mysql_db:
+    state: absent
+    name: test
+
+- name: Insert root mysql user name into root password file
+  ansible.builtin.blockinfile:
+    dest: /root/04-mysql_root_password
+    insertbefore: BOF
+    block: |
+      Пароль от mysql root-пользователя:

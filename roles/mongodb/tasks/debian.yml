@@ -1,97 +1,28 @@
 ---
 - name: Import GPG key for Ubuntu
-  apt_key:
-    url: https://www.mongodb.org/static/pgp/server-7.0.asc
+  ansible.builtin.apt_key:
+    url: https://www.mongodb.org/static/pgp/server-{{ mongodb_version }}.asc
     state: present
 
 - name: Add MongoDB repository Ubuntu
-  apt_repository:
-    repo: 'deb https://repo.mongodb.org/apt/ubuntu {{ ansible_distribution_release }}/mongodb-org/7.0 multiverse'
+  ansible.builtin.apt_repository:
+    repo: 'deb https://repo.mongodb.org/apt/{{ ansible_distribution | lower }} {{ ansible_distribution_release }}/mongodb-org/{{ mongodb_version }} multiverse'
     state: present
-  when: 
-    - ansible_distribution == 'Ubuntu'
-
-- name: Add MongoDB repository Debian
-  apt_repository:
-    repo: 'deb http://repo.mongodb.org/apt/debian {{ ansible_distribution_release }}/mongodb-org/7.0 main'
-    state: present
-  when: ansible_distribution == 'Debian'
 
 - name: Install mongo on Ubuntu
-  apt: 
-    name: mongodb-org 
-    update_cache: yes
+  ansible.builtin.apt:
+    name: mongodb-org
+    update_cache: true
     state: present
-
-- name: Make sure mongod is started and enabled
-  service:
-    name: mongod
-    state: started
-    enabled: yes
+  notify:
+    - start mongodb
 
 - name: Install pip3
-  apt: 
+  ansible.builtin.apt:
     name: python3-pip
     state: present
 
-- name: Make sure mongod is started and enabled
-  service:
-    name: mongod
-    state: started
-    enabled: yes
-
 - name: Ensure pymongo is installed and up-to-date
-  pip:
+  ansible.builtin.pip:
     name: pymongo==4.5
     state: present
-
-- name: Ensure passlib is installed and up-to-date
-  pip:
-    name: passlib
-    state: present
-
-- name: Set nproc to mongod user to 5000
-  lineinfile: 
-    dest: /etc/security/limits.conf 
-    line: "mongod soft nproc 5000"
-
-- name: Create MongoDB root user
-  community.mongodb.mongodb_user:
-    login_host: "localhost"
-    login_port: "27017"
-    database: "admin"
-    name: "admin"
-    password: "{{ lookup('password', '/root/04-mongo_admin_password chars=ascii_letters,digits length=15') }}"
-    roles: ["root"]
-
-- name: Create MongoDB site user
-  community.mongodb.mongodb_user:
-    login_host: "localhost"
-    login_user: "admin"
-    login_password: "{{ lookup('file', '/root/04-mongo_admin_password') }}"
-    login_port: "27017"
-    state: present
-    database: "{{ short_vhost }}"
-    name: "{{ short_vhost }}"
-    password:  "{{ lookup('password', '/root/03-mongo_password chars=ascii_letters,digits,hexdigits length=15') }}"
-    roles:
-      - { db: "{{ short_vhost }}", role: "readWrite" }
-
-- name: insert MongoDB superuser name into user password file
-  blockinfile:
-    dest: /root/04-mongo_admin_password
-    insertbefore: BOF
-    block: |
-
-      Админ-пользователь MongoDB:
-      Логин: admin
-
-- name: insert mongo user name into user password file
-  blockinfile:
-    dest: /root/03-mongo_password
-    insertbefore: BOF
-    block: |
-
-      Данные для доступа к базе данных:
-      Имя БД: {{ short_vhost }}
-      Пользователь: {{ short_vhost }}

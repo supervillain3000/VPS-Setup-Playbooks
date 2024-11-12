@@ -1,20 +1,23 @@
 ---
 - name: Install required packages
-  yum:
+  ansible.builtin.dnf:
     name:
       - python3-psycopg2
-    state: latest
+    state: present
 
 - name: Import the PostgreSQL GPG key
-  rpm_key:
+  ansible.builtin.rpm_key:
     state: present
     key: "{{ postgresql_rpm_key }}"
 
 - name: Install PostgreSQL
   ansible.builtin.yum:
-    name: "{{ postgresql_packages }}"
+    name:
+      - postgresql
+      - postgresql-server
+      - postgresql-contrib
     state: present
-    enablerepo: "{{ postgresql_enablerepo | default(omit, true) }}"
+    enablerepo: "{{ postgresql_enablerepo }}"
 
 - name: Initialize PostgreSQL database
   ansible.builtin.command:
@@ -25,11 +28,11 @@
 - name: Ensure PostgreSQL is enabled and started
   ansible.builtin.service:
     name: "postgresql"
-    enabled: yes
+    enabled: true
     state: started
-    
+
 - name: Ensure PostgreSQL is listening on *
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: /var/lib/pgsql/data/postgresql.conf
     regexp: '^#listen_addresses\s*='
     line: "listen_addresses = '*'"
@@ -37,29 +40,33 @@
   notify: Restart Postgresql
 
 - name: Add new configuration to "pg_hba.conf"
-  blockinfile:
+  ansible.builtin.blockinfile:
     dest: /var/lib/pgsql/data/pg_hba.conf
     block: |
       host    all             all             0.0.0.0/0                md5
       host    all             all             ::/0                     md5
   notify: Restart Postgresql
 
-- name: Change peer identification to trust
-  ansible.builtin.shell: /bin/sed -i 's/ident/trust/' /var/lib/pgsql/data/pg_hba.conf
+- name: Update pg_hba.conf to use trust authentication
+  ansible.builtin.replace:
+    path: /var/lib/pgsql/data/pg_hba.conf
+    regexp: 'ident'
+    replace: 'trust'
+    backup: true
   notify: Restart Postgresql
 
 - name: Create a Superuser PostgreSQL database user
   become: true
   become_user: postgres
-  postgresql_user:
+  community.posgresql.postgresql_user:
     name: 'postgres'
     password: "{{ lookup('password', '/root/04-postgres_admin_password chars=ascii_letters,digits,hexdigits length=15') }}"
     role_attr_flags: CREATEDB,SUPERUSER,CREATEROLE
-    encrypted: yes
+    encrypted: true
     state: present
 
 - name: Insert postgres superuser name into user password file
-  blockinfile:
+  ansible.builtin.blockinfile:
     dest: /root/04-postgres_admin_password
     insertbefore: BOF
     block: |
@@ -67,46 +74,46 @@
       Логин: postgres
 
 - name: Create app database
-  postgresql_db:
+  community.posgresql.postgresql_db:
     state: present
-    name: "{{ short_vhost }}"
+    name: "{{ postgresql_domain_short }}"
   become: true
   become_user: postgres
 
 - name: Create db user
-  postgresql_user:
+  community.posgresql.postgresql_user:
     state: present
-    name: "{{ short_vhost }}"
+    name: "{{ postgresql_domain_short }}"
     password: "{{ lookup('password', '/root/03-postgres_password chars=ascii_letters,digits,hexdigits length=15') }}"
   become: true
   become_user: postgres
 
 - name: Insert postgres user name into user password file
-  blockinfile:
+  ansible.builtin.blockinfile:
     dest: /root/03-postgres_password
     insertbefore: BOF
     block: |
       Данные для доступа к базе данных:
-      Имя БД: {{ short_vhost }}
-      Пользователь: {{ short_vhost }}
+      Имя БД: {{ postgresql_domain_short }}
+      Пользователь: {{ postgresql_domain_short }}
 
 - name: Grant db user access to app db
-  postgresql_privs:
+  community.posgresql.postgresql_privs:
     type: database
-    database: "{{ short_vhost }}"
-    roles: "{{ short_vhost }}"
-    grant_option: no
+    database: "{{ postgresql_domain_short }}"
+    roles: "{{ postgresql_domain_short }}"
+    grant_option: false
     privs: all
   become: true
   become_user: postgres
 
 - name: Allow md5 connection for the db user
-  postgresql_pg_hba:
+  community.posgresql.postgresql_pg_hba:
     dest: "/var/lib/pgsql/data/pg_hba.conf"
     contype: host
     databases: all
     method: md5
-    users: "{{ short_vhost }}"
+    users: "{{ postgresql_domain_short }}"
     create: true
   become: true
   become_user: postgres

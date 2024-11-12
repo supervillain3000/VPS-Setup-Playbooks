@@ -3,9 +3,9 @@ server {
         server_name {{ vhost }} www.{{ vhost }};
 
         listen {{ ansible_default_ipv4.address }}:80;
-        {% if ansible_default_ipv6.address is defined %}
-listen [{{ ansible_default_ipv6.address }}]:80;
-        {% endif %}
+        {%- if ansible_default_ipv6.address is defined %}
+        listen [{{ ansible_default_ipv6.address }}]:80;
+        {%- endif %}
 
         index index.php index.html;
 

@@ -1,0 +1,9 @@
+---
+- name: Install Django with NGINX web-server
+  roles:
+    - base
+    - nginx
+    - django
+    - postgresql
+    - sftp
+    - fail2ban

@@ -1,61 +1,26 @@
 ---
-- name: install fail2ban and dependencies Debian/Ubuntu
-  apt: name={{ f2b_packages }} state=latest
-  vars:
-    f2b_packages:
-    - fail2ban
-    - iptables-persistent
-  when:
-    - ansible_facts['distribution'] == "Ubuntu" or ansible_facts['distribution'] == "Debian"
+- name: Install fail2ban and dependencies
+  ansible.builtin.apt:
+    name:
+      - fail2ban
+      - iptables-persistent
+    state: present
+  when: ansible_facts['os_family']|lower == 'debian'
 
-- name: install fail2ban and dependencies on CentOS
-  yum: name=fail2ban state=latest
-  when:
-    - ansible_facts['os_family']|lower == 'redhat'
-
-- name: duplicate jail.conf as jail.local and push key parameters
-  blockinfile:
-    create: yes
-    insertafter: EOF
-    path: /etc/fail2ban/jail.local
-    marker: ''
-    block: |
-      [DEFAULT]
-      ignoreip = 127.0.0.1/8
-      bantime  = 1800
-      findtime  = 600
-      maxretry = 5
-
-      [sshd]
-      enabled = true
-
-      #[recidive]
-      #action = iptables-multiport[name="recidive", port="ssh"]
-      #maxretry = 10
-      #bantime = 86400
-      #findtime = 43200
-      #enabled = true
-      #logpath = /var/log/fail2ban.log
-  notify: restart fail2ban
-
-- name: add postfix and dovecot jails for mailserver role
-  blockinfile:
-    create: yes
-    insertafter: EOF
-    path: /etc/fail2ban/jail.local
-    marker: ''
-    block: |
-      [dovecot]
-      enabled = true
-      action = iptables-multiport[name="email", port="imap,imap3,imaps,pop3,pop3s,smtp,smtps,submission"]
-
-      [postfix-sasl]
-      enabled = true
-      action = iptables-multiport[name="email", port="imap,imap3,imaps,pop3,pop3s,smtp,smtps,submission"]
-  notify: restart fail2ban
-  tags: mailserver
-
-- name: ensure f2b is enabled
-  service:
+- name: Install fail2ban and dependencies
+  ansible.builtin.dnf:
     name: fail2ban
-    enabled: yes
+    state: present
+  when: ansible_facts['os_family']|lower == 'redhat'
+
+- name: Duplicate jail.conf as jail.local and push key parameters
+  ansible.builtin.copy:
+    src: jail.local
+    dest: /etc/fail2ban/jail.local
+    mode: "0644"
+  notify: Restart fail2ban
+
+- name: Ensure f2b is enabled
+  ansible.builtin.service:
+    name: fail2ban
+    enabled: true

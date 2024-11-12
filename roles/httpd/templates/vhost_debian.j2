@@ -1,0 +1,18 @@
+<VirtualHost {{ ansible_default_ipv4.address }}:80>
+	ServerName "{{ httpd_domain_name }}"
+	ServerAlias "www.{{ httpd_domain_name }}"
+	ServerAdmin "admin@{{ httpd_domain_name }}"
+	UseCanonicalName Off
+        Alias /.well-known/acme-challenge/ "/var/www/{{ httpd_domain_name }}/.well-known/acme-challenge/"
+
+	DocumentRoot "/var/www/{{ httpd_domain_name }}/"
+	ErrorLog "/var/log/apache2/{{ httpd_domain_name }}_error.log"
+
+	DirectoryIndex "index.html" "index.php" "index.xhtml" "index.htm" "index.shtml"
+
+	<Directory /var/www/{{ httpd_domain_name }}/>
+		Options -Indexes +FollowSymLinks
+		AllowOverride All
+	</Directory>
+
+</VirtualHost>

@@ -1,2 +1,88 @@
 ---
-- import_tasks: wordpress.yml
+- name: Download and unpack latest WordPress
+  ansible.builtin.unarchive:
+    src: https://wordpress.org/latest.tar.gz
+    dest: "/var/www/{{ vhost }}"
+    creates: "/var/www/{{ vhost }}/wordpress"
+    remote_src: true
+  register: result
+  until: result is succeeded
+  retries: 5
+  delay: 10
+
+- name: Copy wordpress to vhosts dir
+  ansible.builtin.copy:
+    src: /var/www/{{ vhost }}/wordpress/
+    dest: /var/www/{{ vhost }}/
+    remote_src: true
+    directory_mode: true
+    mode: "0755"
+
+- name: Remove temp dir
+  ansible.builtin.file:
+    state: absent
+    path: /var/www/{{ vhost }}/wordpress/
+
+- name: Import task if RedHat-based OS OS
+  ansible.builtin.import_tasks: redhat.yml
+  when: ansible_facts['os_family']|lower == 'redhat'
+
+- name: Import task if Debian-based OS
+  ansible.builtin.import_tasks: debian.yml
+  when: ansible_facts['os_family']|lower == 'debian'
+
+- name: Find all directories
+  ansible.builtin.find:
+    paths: /var/www/{{ vhost }}/
+    recurse: true
+    file_type: directory
+  register: _wordpress_directories
+
+- name: Set permissions for directories
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    mode: '0755'
+  loop: "{{ _wordpress_directories.files }}"
+  when: _wordpress_directories.matched > 0
+
+- name: Find all files
+  ansible.builtin.find:
+    paths: /var/www/{{ vhost }}/
+    recurse: true
+    file_type: file
+  register: _wordpress_files
+
+- name: Set permissions for files
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    mode: '0644'
+  loop: "{{ _wordpress_files.files }}"
+  when: _wordpress_files.matched > 0
+
+- name: Install WP-cli
+  ansible.builtin.get_url:
+    url: "{{ wordpress_cli_url }}"
+    dest: /usr/local/bin/wp
+    mode: "755"
+    owner: "root"
+    group: "root"
+
+- name: Ensure /etc/bash_completion.d/ exists
+  ansible.builtin.file:
+    path: /etc/bash_completion.d/
+    state: directory
+    mode: "0755"
+
+- name: Install WP-cli bash comletion
+  ansible.builtin.get_url:
+    url: "{{ wordpress_cli_completion_url }}"
+    dest: /etc/bash_completion.d/
+    mode: "0644"
+
+- name: Add wp-completion.bash to .bashrc
+  ansible.builtin.lineinfile:
+    path: ~/.bashrc
+    line: 'source /etc/bash_completion.d/wp-completion.bash'
+    state: present
+    create: true
+    mode: '0600'

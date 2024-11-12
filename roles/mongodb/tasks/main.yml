@@ -1,5 +1,62 @@
 ---
-- import_tasks: debian.yml
-  when: ansible_facts['os_family']|lower == 'debian'
-- import_tasks: redhat.yml
+- name: Import task if RedHat-based OS OS
+  ansible.builtin.import_tasks: redhat.yml
   when: ansible_facts['os_family']|lower == 'redhat'
+
+- name: Import task if Debian-based OS
+  ansible.builtin.import_tasks: debian.yml
+  when: ansible_facts['os_family']|lower == 'debian'
+
+- name: Ensure passlib is installed and up-to-date
+  ansible.builtin.pip:
+    name: passlib
+    state: present
+
+- name: Set nproc to mongod user to 5000
+  ansible.builtin.lineinfile:
+    dest: /etc/security/limits.conf
+    line: "mongod soft nproc 5000"
+
+- name: Create MongoDB root user
+  community.mongodb.mongodb_user:
+    login_host: "localhost"
+    login_port: "27017"
+    database: "admin"
+    name: "admin"
+    password: "{{ mongodb_admin_password }}"
+    roles:
+      - "root"
+
+- name: Create MongoDB site user
+  community.mongodb.mongodb_user:
+    login_host: "localhost"
+    login_user: "admin"
+    login_password: "{{ lookup('file', '/root/04-mongo_admin_password') }}"
+    login_port: "27017"
+    state: present
+    database: "{{ mongodb_domain_name_short }}"
+    name: "{{ mongodb_domain_name_short }}"
+    password: "{{ mongodb_password }}"
+    roles:
+      - db: "{{ mongodb_domain_name_short }}"
+        role: "readWrite"
+
+- name: Insert MongoDB superuser name into user password file
+  ansible.builtin.blockinfile:
+    dest: /root/04-mongo_admin_password
+    insertbefore: BOF
+    block: |
+
+      Админ-пользователь MongoDB:
+      Логин: admin
+
+- name: Insert mongo user name into user password file
+  ansible.builtin.blockinfile:
+    dest: /root/03-mongo_password
+    insertbefore: BOF
+    block: |
+
+      Данные для доступа к базе данных:
+      Имя БД: {{ mongodb_domain_name_short }}
+      Пользователь: {{ mongodb_domain_name_short }}
+      Password: {{ mongodb_password }}\

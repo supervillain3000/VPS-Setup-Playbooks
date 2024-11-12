@@ -1,0 +1,21 @@
+---
+base_debian_package_list:
+  - lsb-release
+  - apt-transport-https
+  - ca-certificates
+  - sudo
+  - vim
+  - wget
+  - curl
+  - atop
+  - htop
+  - ufw
+
+base_redhat_package_list:
+  - yum-utils
+  - firewalld
+  - curl
+  - vim
+  - htop
+  - atop
+  - wget

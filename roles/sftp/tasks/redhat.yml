@@ -1,0 +1,65 @@
+---
+- name: Enable SSH service in firewalld
+  ansible.posix.firewalld:
+    service: ssh
+    permanent: true
+    state: enabled
+
+- name: Check if there is apache
+  ansible.builtin.stat:
+    path: /etc/apache2
+  register: _phpmyadmin_apache2_status
+
+- name: Check if there is nginx
+  ansible.builtin.stat:
+    path: /etc/nginx
+  register: _phpmyadmin_nginx_status
+
+- name: Create site user for nginx
+  ansible.builtin.user:
+    name: "{{ sftp_site_username }}"
+    password: "{{ lookup('password', '/root/01-sftp_password chars=ascii_letters,digits,hexdigits length=15') | password_hash('sha512') }}"
+    shell: /sbin/nologin
+    home: /var/www
+    groups:
+      - nginx
+  when: _phpmyadmin_nginx_status.stat.exists
+
+- name: Create site user for httpd
+  ansible.builtin.user:
+    name: "{{ sftp_site_username }}"
+    password: "{{ lookup('password', '/root/01-sftp_password chars=ascii_letters,digits,hexdigits length=15') | password_hash('sha512') }}"
+    shell: /sbin/nologin
+    home: /var/www
+    groups:
+      - apache
+  when: not _phpmyadmin_nginx_status.stat.exists and _phpmyadmin_apache2_status.stat.exists
+
+- name: Insert site user name into user password file
+  ansible.builtin.blockinfile:
+    dest: /root/01-sftp_password
+    insertbefore: BOF
+    block: |
+
+      Доступ для загрузки файлов сайта (SFTP)
+      ip-адрес: {{ ansible_default_ipv4.address }}
+      Тип подключений: SFTP
+      Порт: 22
+      Папка сайта: /var/www/{{ vhost }}
+      Пользователь: {{ sftp_site_username }}
+
+- name: Add user to sshd config
+  ansible.builtin.blockinfile:
+    marker: ''
+    path: /etc/ssh/sshd_config
+    insertafter: EOF
+    block: |
+      Match User {{ sftp_site_username }}
+      ForceCommand internal-sftp
+      PasswordAuthentication yes
+      #ChrootDirectory /var/www/{{ vhost }}/
+      PermitTunnel no
+      AllowAgentForwarding no
+      AllowTcpForwarding no
+      X11Forwarding no
+  notify: Restart sshd

@@ -1,5 +1,2 @@
 ---
-#pma_php_modules: ['php-xml','php-phpseclib','php-pear','php-mbstring','php-gettext','php-mysql']
-
-phpmyadmin_version: "5.1.1"
 phpmyadmin_install_dir: "/usr/share/phpmyadmin"

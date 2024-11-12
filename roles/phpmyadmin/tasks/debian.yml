@@ -1,85 +1,90 @@
 ---
-- name: install python-passlib
-  apt:
-    name: python-passlib
-    state: latest
-  when: ansible_facts['distribution'] == "Ubuntu" and ansible_facts['distribution_major_version'] not in ["20", "22", "24"] or ansible_facts['distribution'] == "Debian" and ansible_facts['distribution_major_version'] not in ["11", "12"]
-
-- name: install python3-passlib for Ubuntu 20 and Debian 11
-  apt:
-    name: python3-passlib
-    state: latest
-  when: ansible_facts['distribution'] == "Ubuntu" and ansible_facts['distribution_major_version'] in ["20", "22", "24"] or ansible_facts['distribution'] == "Debian" and ansible_facts['distribution_major_version'] in ["11", "12"]
-
-- name: check a php version and register a var
-  shell: php -v | grep 5.6
-  register: php_version_for_pma
+- name: Get PHP version
+  ansible.builtin.command: /usr/bin/php -v
+  register: _phpmyadmin_php_version_output
   ignore_errors: true
+  changed_when: false
 
-- name: download phpmyadmin latest 
-  get_url:
-    url: https://files.phpmyadmin.net/phpMyAdmin/5.1.1/phpMyAdmin-5.1.1-all-languages.zip
+- name: Extract PHP version
+  ansible.builtin.set_fact:
+    _phpmyadmin_php_version: "{{ _phpmyadmin_php_version_output.stdout | regex_search('PHP ([0-9]+\\.[0-9]+)', '\\1') }}"
+  when: _phpmyadmin_php_version_output.rc == 0
+
+- name: Install python3-passlib for Ubuntu 20 and Debian 11
+  ansible.builtin.apt:
+    name: python3-passlib
+    state: present
+
+- name: Download phpmyadmin latest
+  ansible.builtin.get_url:
+    url: https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.zip
     dest: /usr/share/phpMyAdmin-latest-all-languages.zip
-    validate_certs: false
-  when: php_version_for_pma.rc != 0
+    mode: "0644"
 
-- name: download phpmyadmin with old php support
-  get_url:
-    url: https://files.phpmyadmin.net/phpMyAdmin/4.9.5/phpMyAdmin-4.9.5-all-languages.zip
-    dest: /usr/share/phpMyAdmin-4.9.5-all-languages.zip
-    validate_certs: false
-  when: php_version_for_pma.rc == 0
+- name: Unarchive a file that is already on the remote machine
+  ansible.builtin.unarchive:
+    src: /usr/share/phpMyAdmin-latest-all-languages.zip
+    dest: /usr/share/phpmyadmin/
+    remote_src: true
 
-- name: install phpmyadmin
-  shell: |
-    unzip /usr/share/phpMyAdmin-*-all-languages.zip -d /usr/share/
-    mv /usr/share/phpMyAdmin-*-all-languages/ /usr/share/phpmyadmin/
-    cp /usr/share/phpmyadmin/config.sample.inc.php /usr/share/phpmyadmin/config.inc.php
-    rm /usr/share/phpMyAdmin-*-all-languages.zip
+- name: Copy file with owner and permissions
+  ansible.builtin.copy:
+    src: /usr/share/phpmyadmin/config.sample.inc.php
+    dest: /usr/share/phpmyadmin/config.inc.php
+    owner: root
+    group: root
+    mode: '0644'
+    remote_src: true
 
-- name: generate pma secret
-  lineinfile:
+- name: Remove archive
+  ansible.builtin.file:
+    path: /usr/share/phpMyAdmin-latest-all-languages.zip
+    state: absent
+
+- name: Generate pma secret
+  ansible.builtin.lineinfile:
     path: /usr/share/phpmyadmin/config.inc.php
     line: "$cfg['blowfish_secret'] = '{{ lookup('password', 'chars=ascii_letters,digits,hexdigits,punctuation length=32') }}';"
     regexp: '.*blowfish_secret.*'
 
-- name: add mysqli extension line into config
-  lineinfile:
+- name: Add mysqli extension line into config
+  ansible.builtin.lineinfile:
     path: /usr/share/phpmyadmin/config.inc.php
     line: "$cfg['Servers'][$i]['extension'] = 'mysqli';"
     insertafter: '.*auth_type.*'
 
-- name: create pma temp dir
-  file:
+- name: Create pma temp dir
+  ansible.builtin.file:
     state: directory
     path: /usr/share/phpmyadmin/tmp/
     group: www-data
-    mode: 0770
+    mode: "0770"
 
-- name: check if there is apache
-  stat:
-    path: /etc/apache2/apache2.conf
-  register: apache2_status
+- name: Check if there is apache
+  ansible.builtin.stat:
+    path: /etc/apache2
+  register: _phpmyadmin_apache2_status
 
-- name: check if there is nginx
-  stat:
+- name: Check if there is nginx
+  ansible.builtin.stat:
     path: /etc/nginx
-  register: nginx_status
+  register: _phpmyadmin_nginx_status
 
-- name: check if there is php-fpm
-  stat:
-    path: /usr/sbin/php-fpm{{ php_version_u }}
-  register: php_fpm_status
+- name: Check if there is php-fpm
+  ansible.builtin.stat:
+    path: /usr/sbin/php-fpm{{ _phpmyadmin_php_version }}
+  register: _phpmyadmin_php_fpm_status
 
-- name: copy fpm pool
-  copy:
+- name: Copy fpm pool
+  ansible.builtin.copy:
     src: pma_debian_fpm.conf
-    dest: /etc/php/{{ php_version_u }}/fpm/pool.d/phpmyadmin.conf
-  when: php_fpm_status.stat.exists
-  notify: restart php-fpm debian
+    dest: /etc/php/{{ _phpmyadmin_php_version }}/fpm/pool.d/phpmyadmin.conf
+    mode: "0644"
+  when: _phpmyadmin_php_fpm_status.stat.exists
+  notify: Restart php-fpm debian
 
-- name: copy fpm nginx config
-  blockinfile:
+- name: Copy fpm nginx config
+  ansible.builtin.blockinfile:
     marker: ''
     insertafter: '^\t## pma'
     block: |
@@ -105,11 +110,11 @@
       }
 
     path: /etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf
-  when: php_fpm_status.stat.exists
-  notify: restart nginx
+  when: _phpmyadmin_php_fpm_status.stat.exists
+  notify: Restart nginx
 
-- name: copy modphp nginx handler confing
-  blockinfile:
+- name: Copy modphp nginx handler confing
+  ansible.builtin.blockinfile:
     marker: ''
     insertafter: '^\t## pma'
     block: |
@@ -142,57 +147,61 @@
       }
 
     path: /etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf
-  when: apache2_status.stat.exists and nginx_status.stat.exists
-  notify: restart nginx
+  when: apache2_status.stat.exists and nginx_status.stat.exists and not _phpmyadmin_php_fpm_status.stat.exists
+  notify: Restart nginx
 
-- name: copy apache vhost config
-  template:
+- name: Copy apache vhost config
+  ansible.builtin.template:
     src: pma_debian_apache.conf.j2
     dest: /etc/apache2/sites-available/{{ ansible_default_ipv4.address }}.conf
+    mode: "0644"
   when: apache2_status.stat.exists and nginx_status.stat.exists
-  notify: restart apache2
+  notify: Restart apache2
 
-- name: copy apache vhost config
-  template:
+- name: Copy apache vhost config
+  ansible.builtin.template:
     src: pma_debian_apache_lamp.conf.j2
     dest: /etc/apache2/sites-available/{{ ansible_default_ipv4.address }}.conf
+    mode: "0644"
   when: apache2_status.stat.exists and not nginx_status.stat.exists
-  notify: restart apache2
+  notify: Restart apache2
 
 - name: Ensure the default Apache port is 8080
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/apache2/sites-available/{{ vhost }}.conf
     regexp: '^<VirtualHost'
     line: '<VirtualHost 127.0.0.1:8080>'
-  notify: restart apache2
+  notify: Restart apache2
   when: nginx_status.stat.exists and apache2_status.stat.exists
 
-- name: create apache vhost file symlink
-  file:
+- name: Create apache vhost file symlink
+  ansible.builtin.file:
     state: link
     path: /etc/apache2/sites-enabled/{{ ansible_default_ipv4.address }}.conf
     src: /etc/apache2/sites-available/{{ ansible_default_ipv4.address }}.conf
   when: apache2_status.stat.exists
-  notify: restart apache2
+  notify: Restart apache2
 
-- name: add http auth for pma
-  htpasswd:
+- name: Add http auth for pma
+  community.general.htpasswd:
     path: /etc/nginx/conf.d/htpasswd
     name: pma_admin
     password: "{{ lookup('password', '/root/02-pma_password chars=ascii_letters,digits,hexdigits length=15') }}"
-  notify: restart nginx
+    mode: "0600"
+  notify: Restart nginx
   when: nginx_status.stat.exists
 
-- name: add http auth for pma
-  htpasswd:
+- name: Add http auth for pma
+  community.general.htpasswd:
     path: /etc/apache2/.htpasswd
     name: pma_admin
     password: "{{ lookup('password', '/root/02-pma_password chars=ascii_letters,digits,hexdigits length=15') }}"
-  notify: restart apache2
+    mode: "0600"
+  notify: Restart apache2
   when: not nginx_status.stat.exists and apache2_status.stat.exists
 
-- name: insert pmd_admin user name into password file
-  blockinfile:
+- name: Insert pmd_admin user name into password file
+  ansible.builtin.blockinfile:
     dest: /root/02-pma_password
     insertbefore: BOF
     block: |

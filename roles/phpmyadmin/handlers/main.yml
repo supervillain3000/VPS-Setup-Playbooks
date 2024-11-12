@@ -1,24 +1,24 @@
-- name: restart php-fpm centos
-  service:
-    name: php{{ php_version }}-php-fpm
+- name: Restart php-fpm centos
+  ansible.builtin.service:
+    name: php{{ _phpmyadmin_php_version }}-php-fpm
     state: restarted
 
-- name: restart php-fpm debian
-  service:
-    name: php{{ php_version_u }}-fpm
+- name: Restart php-fpm debian
+  ansible.builtin.service:
+    name: php{{ _phpmyadmin_php_version }}-fpm
     state: restarted
 
-- name: restart apache
-  service:
-    name: httpd
+- name: Restart apache2
+  ansible.builtin.service:
+    name: apache2
     state: restarted
 
-- name: restart nginx
-  service:
+- name: Restart nginx
+  ansible.builtin.service:
     name: nginx
     state: restarted
 
-- name: restart httpd
-  service:
+- name: Restart httpd
+  ansible.builtin.service:
     name: httpd
     state: restarted

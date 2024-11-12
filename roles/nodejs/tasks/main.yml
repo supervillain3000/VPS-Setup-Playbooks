@@ -1,70 +1,57 @@
 ---
-- import_tasks: debian.yml
-  when: ansible_facts['os_family']|lower == 'debian'
-- import_tasks: redhat.yml
+- name: Import task if redhat base OS
+  ansible.builtin.import_tasks: redhat.yml
   when: ansible_facts['os_family']|lower == 'redhat'
 
-- name: Clear dir /var/www/
-  shell: rm -rf /var/www/*
+- name: Import task if debian base OS
+  ansible.builtin.import_tasks: debian.yml
+  when: ansible_facts['os_family']|lower == 'debian'
 
-- name: Setup the Git repo
-  git: repo=https://github.com/scotch-io/node-todo.git dest=/var/www/{{ vhost }} accept_hostkey=yes
+- name: Delete all files and subdirectories inside a directory /var/www
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  with_fileglob:
+    - "/var/www/*"
 
 - name: Add node.js user
-  user:
+  ansible.builtin.user:
     name: node
-    home: /var/www/{{ vhost }}
+    home: /var/www/{{ nodejs_domain }}
     shell: /bin/bash
-    password: "{{ lookup('password', '/tmp/pagsnagt chars=ascii_letters,digits,hexdigits length=15') }}"
 
 - name: Ensure that the application file permissions are set properly
-  file: path=/var/www/{{ vhost }}
-        recurse=yes
-        owner=node
-        group=node
-        state=directory
-
-- name: Define nodejs_install_npm_user
-  set_fact:
-    nodejs_install_npm_user: "{{ ansible_user | default(lookup('env', 'USER')) }}"
-  when: nodejs_install_npm_user is not defined
+  ansible.builtin.file:
+    path: /var/www/{{ nodejs_domain }}
+    recurse: true
+    owner: node
+    group: node
+    state: directory
 
 - name: Create npm global directory
-  file:
-    path: "{{ npm_config_prefix }}"
-    owner: "{{ nodejs_install_npm_user }}"
-    group: "{{ nodejs_install_npm_user }}"
+  ansible.builtin.file:
+    path: "{{ nodejs_npm_config_prefix }}"
+    owner: root
+    group: root
     state: directory
-    mode: 0755
+    mode: "0755"
 
 - name: Add npm_config_prefix bin directory to global $PATH.
-  template:
+  ansible.builtin.template:
     src: npm.sh.j2
     dest: /etc/profile.d/npm.sh
-    mode: 0644
-  when: nodejs_generate_etc_profile
+    mode: "0644"
 
 - name: Ensure npm global packages are installed.
-  npm:
-    name: "{{ item.name | default(item) }}"
-    version: "{{ item.version | default(omit) }}"
+  comminity.general.npm:
+    name: "{{ item }}"
     global: true
-    state: "{{ item.state | default('present') }}"
+    state: "present"
   environment:
-    NPM_CONFIG_PREFIX: "{{ npm_config_prefix }}"
-    NODE_PATH: "{{ npm_config_prefix }}/lib/node_modules"
-    NPM_CONFIG_UNSAFE_PERM: "{{ npm_config_unsafe_perm }}"
+    NPM_CONFIG_PREFIX: "{{ nodejs_npm_config_prefix }}"
+    NODE_PATH: "{{ nodejs_npm_config_prefix }}/lib/node_modules"
+    NPM_CONFIG_UNSAFE_PERM: "false"
   with_items: "{{ nodejs_npm_global_packages }}"
 
-- name: Add nginx vhost config
-  template:
-    src: "vhost.conf.j2"
-    dest: "/etc/nginx/vhosts/{{ vhost }}.conf"
-    mode: 0644
-  register: vhosts
-
-- name: restart nginx
-  service: 
-    name: nginx 
-    state: restarted
-  when: vhosts.changed
+- name: Include website setup task
+  ansible.builtin.include_task: setup_website.yml

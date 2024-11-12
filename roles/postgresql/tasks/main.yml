@@ -1,8 +1,8 @@
 ---
+- name: Import task if RedHat-based OS OS
+  ansible.builtin.import_tasks: redhat.yml
+  when: ansible_facts['os_family']|lower == 'redhat'
 
-- include_tasks: debian.yml
-  when: ansible_os_family == "Debian"
-
-- include_tasks: redhat.yml
-  when: ansible_os_family == "RedHat"
-
+- name: Import task if Debian-based OS
+  ansible.builtin.import_tasks: debian.yml
+  when: ansible_facts['os_family']|lower == 'debian'

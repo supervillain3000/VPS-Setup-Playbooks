@@ -1,0 +1,168 @@
+---
+- name: Install python3-passlib for centos8
+  ansible.builtin.dnf:
+    name: python3-passlib
+    state: present
+
+- name: Download phpmyadmin latest
+  ansible.builtin.get_url:
+    url: https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.zip
+    dest: /usr/share/phpMyAdmin-latest-all-languages.zip
+    mode: "0644"
+
+- name: Unarchive a file that is already on the remote machine
+  ansible.builtin.unarchive:
+    src: /usr/share/phpMyAdmin-latest-all-languages.zip
+    dest: /usr/share/phpmyadmin/
+    remote_src: true
+
+- name: Copy file with owner and permissions
+  ansible.builtin.copy:
+    src: /usr/share/phpmyadmin/config.sample.inc.php
+    dest: /usr/share/phpmyadmin/config.inc.php
+    owner: root
+    group: root
+    mode: '0644'
+    remote_src: true
+
+- name: Generate pma secret
+  ansible.builtin.lineinfile:
+    path: /usr/share/phpmyadmin/config.inc.php
+    line: "$cfg['blowfish_secret'] = '{{ lookup('password', 'chars=ascii_letters,digits,hexdigits,punctuation length=32') }}';"
+    regexp: '.*blowfish_secret.*'
+
+- name: Add mysqli extension line into config
+  ansible.builtin.lineinfile:
+    path: /usr/share/phpmyadmin/config.inc.php
+    line: "$cfg['Servers'][$i]['extension'] = 'mysqli';"
+    insertafter: '.*auth_type.*'
+
+- name: Create PMA temp dir
+  ansible.builtin.file:
+    state: directory
+    path: /usr/share/phpmyadmin/tmp/
+    group: apache
+    mode: "0770"
+
+- name: Check if there is apache
+  ansible.builtin.stat:
+    path: /etc/httpd
+  register: _phpmyadmin_httpd_status
+
+- name: Check if there is nginx
+  ansible.builtin.stat:
+    path: /etc/nginx
+  register: _phpmyadmin_nginx_status
+
+- name: Copy phpmyadmin nginx conf block
+  ansible.builtin.blockinfile:
+    marker: ''
+    insertbefore: '^\t## pma'
+    block: |
+      rewrite ^/pma/?(.*)$ /phpmyadmin/$1 redirect;
+
+      location /phpmyadmin/setup {
+          deny all;
+      }
+
+      location /phpmyadmin/ {
+        auth_basic "Speak, friend, and enter.";
+        auth_basic_user_file conf.d/htpasswd;
+
+        root /usr/share;
+        fastcgi_index index.php;
+        fastcgi_pass unix:/var/run/phpmyadmin.sock;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+
+        location ~* ^.+\.(jpg|jpeg|gif|png|ico|css|zip|tgz|gz|rar|bz2|doc|xls|exe|pdf|ppt|txt|tar|mid|midi|wav|bmp|rtf|js|swf|flv|avi|djvu|mp3)$ {
+          expires max;
+        }
+      }
+
+    path: /etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf
+  notify: Restart nginx
+  when: _phpmyadmin_nginx_status.stat.exists and not _phpmyadmin_httpd_status.stat.exists
+
+- name: Copy modphp nginx handler config
+  ansible.builtint.blockinfile:
+    marker: ''
+    insertbefore: '^\t## pma'
+    block: |
+      rewrite ^/pma/?(.*)$ /phpmyadmin/$1 redirect;
+
+      location /phpmyadmin/setup {
+        deny all;
+      }
+
+      location /phpmyadmin/ {
+        root /usr/share;
+
+        auth_basic "Speak, friend, and enter.";
+        auth_basic_user_file conf.d/htpasswd;
+
+        proxy_pass http://127.0.0.1:8080;
+        proxy_redirect off;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+        proxy_read_timeout 300;
+        client_max_body_size 256m;
+
+        proxy_buffer_size 16k;
+        proxy_buffers 32 16k;
+
+        location ~* ^.+\.(jpg|jpeg|gif|png|ico|css|zip|tgz|gz|rar|bz2|doc|xls|exe|pdf|ppt|txt|tar|mid|midi|wav|bmp|rtf|js|swf|flv|avi|djvu|mp3)$ {
+          expires max;
+        }
+      }
+
+    path: /etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf
+  when: _phpmyadmin_httpd_status.stat.exists and _phpmyadmin_nginx_status.stat.exists
+  notify: Restart nginx
+
+- name: Copy httpd vhost config frontend nginx
+  ansible.builtin.template:
+    src: pma_centos_apache.conf.j2
+    dest: /etc/httpd/conf.d/{{ ansible_default_ipv4.address }}.conf
+    mode: "0644"
+  when: _phpmyadmin_httpd_status.stat exists and _phpmyadmin_nginx_status.stat.exists
+  notify: Restart httpd
+
+- name: Copy httpd vhost config frontend apache
+  ansible.builtin.template:
+    src: pma_centos_apache_lamp.conf.j2
+    dest: /etc/httpd/conf.d/{{ ansible_default_ipv4.address }}.conf
+    mode: "0644"
+  when: _phpmyadmin_httpd_status.stat.exists and not _phpmyadmin_nginx_status.stat.exists
+  notify: Restart httpd
+
+- name: Add http auth for pma
+  community.general.htpasswd:
+    path: /etc/nginx/conf.d/htpasswd
+    name: pma_admin
+    password: "{{ lookup('password', '/root/02-pma_password chars=ascii_letters,digits,hexdigits length=15') }}"
+    mode: "0644"
+  notify: Restart nginx
+  when: _phpmyadmin_nginx_status.stat.exists
+
+- name: Add http auth for pma
+  community.general.htpasswd:
+    path: /etc/httpd/.htpasswd
+    name: pma_admin
+    password: "{{ lookup('password', '/root/02-pma_password chars=ascii_letters,digits,hexdigits length=15') }}"
+    mode: "0644"
+  notify: Restart httpd
+  when: not _phpmyadmin_nginx_status.stat.exists and _phpmyadmin_httpd_status.stat.exists
+
+- name: Insert pmd_admin user name into password file
+  ansible.builtin.blockinfile:
+    dest: /root/02-pma_password
+    insertbefore: BOF
+    block: |
+
+      Веб-интерфейс для работы с базой данных:
+      http://{{ ansible_default_ipv4.address }}/pma/
+      Данные для http авторизации:
+      Логин: pma_admin

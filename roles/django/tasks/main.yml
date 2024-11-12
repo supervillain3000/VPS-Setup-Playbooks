@@ -1,6 +1,72 @@
 ---
-- import_tasks: debian.yml
-  when: ansible_facts['os_family']|lower == 'debian'
-- import_tasks: redhat.yml
+- name: Import task if RedHat-based OS OS
+  ansible.builtin.import_tasks: redhat.yml
   when: ansible_facts['os_family']|lower == 'redhat'
 
+- name: Import task if Debian-based OS
+  ansible.builtin.import_tasks: debian.yml
+  when: ansible_facts['os_family']|lower == 'debian'
+
+- name: Add the user Django
+  ansible.builtin.user:
+    name: django
+    home: /var/www/django
+    shell: /sbin/nologin
+    group: nginx
+
+- name: Install venv and django
+  ansible.builtin.pip:
+    name:
+      - django
+      - path
+    virtualenv: /var/www/django/{{ django_domain }}
+    virtualenv_command: '/usr/bin/python3 -m venv'
+  become: true
+  become_user: django
+
+- name: Set permissions for virtual environment
+  ansible.builtin.file:
+    path: /var/www/django/{{ django_domain }}
+    state: directory
+    owner: django
+    group: nginx
+    mode: '0775'
+
+- name: Creates Project directory
+  ansible.builtin.file:
+    path: /var/www/django/{{ django_domain }}/project/
+    state: directory
+    owner: django
+    group: nginx
+    mode: "0755"
+
+- name: Install Django
+  ansible.builtin.command: >
+    /var/www/django/{{ django_domain }}/bin/django-admin startproject project /var/www/django/{{ django_domain }}/project/
+  become: true
+  become_user: django
+  changed_when:: false
+
+- name: Edit django STATIC_ROOT
+  ansible.builtin.lineinfile:
+    path: /var/www/django/{{ django_domain }}/project/project/settings.py
+    line: STATIC_ROOT = str(str(BASE_DIR) + 'static/')
+
+- name: Edit django ALLOWED_HOSTS
+  ansible.builtin.lineinfile:
+    regexp: 'ALLOWED_HOSTS'
+    path: /var/www/django/{{ django_domain }}/project/project/settings.py
+    line: ALLOWED_HOSTS = ['{{ django_domain }}', '{{ ansible_default_ipv4.address }}', '{{ ansible_default_ipv6.address }}']
+
+- name: Django collectstatic
+  ansible.builtin.command: >
+    /var/www/django/{{ django_domain }}/bin/python /var/www/django/{{ django_domain }}/project/manage.py collectstatic
+  become: true
+  become_user: django
+  changed_when: false
+
+- name: Restart and enable uwsgi
+  ansible.builtin.service:
+    name: uwsgi
+    state: restarted
+    enabled: true

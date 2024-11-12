@@ -1,36 +1,36 @@
 ---
 - name: Install required packages
-  apt:
+  ansible.builtin.apt:
     name:
       - python3-psycopg2
     state: present
 
 - name: Ensure /etc/apt/keyrings directory exists
-  file:
+  ansible.builtin.file:
     path: "{{ postgresql_apt_keys_dir }}"
     state: directory
     mode: "0755"
 
 - name: Install pgdg package signing key
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ postgresql_pgdg_key_url }}"
     dest: "{{ postgresql_pgdg_key_dest }}"
     mode: "0644"
 
 - name: Install pgdg repository
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: "{{ postgresql_pgdg_repo }}"
     update_cache: true
 
 - name: Install postgresql
-  apt:
+  ansible.builtin.apt:
     name: postgresql-{{ postgresql_version }}
-    update_cache: yes
+    update_cache: true
   notify:
     - Enable Postgresql
 
 - name: Ensure PostgreSQL is listening on *
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: /etc/postgresql/{{ postgresql_version }}/main/postgresql.conf
     regexp: '^listen_addresses\s*='
     line: "listen_addresses='*'"
@@ -38,76 +38,81 @@
   notify: Restart Postgresql
 
 - name: Add new configuration to "pg_hba.conf"
-  blockinfile:
+  ansible.builtin.blockinfile:
     dest: /etc/postgresql/{{ postgresql_version }}/main/pg_hba.conf
     block: |
       host    all             all             0.0.0.0/0                md5
       host    all             all             ::/0                     md5
   notify: Restart Postgresql
 
-- name: Change peer identification to trust
-  shell: /bin/sed -i '/^local/s/peer/trust/' /etc/postgresql/{{ postgresql_version }}/main/pg_hba.conf
+- name: Update pg_hba.conf to use trust authentication
+  ansible.builtin.replace:
+    path: "/etc/postgresql/{{ postgresql_version }}/main/pg_hba.conf"
+    regexp: 'ident'
+    replace: 'trust'
+    backup: true
   notify: Restart Postgresql
 
 - name: Create a Superuser PostgreSQL database user
   become: true
   become_user: postgres
-  postgresql_user:
-    name: 'postgres'
-    password: "{{ lookup('password', '/root/04-postgres_admin_password chars=ascii_letters,digits,hexdigits length=15') }}"
+  community.postgresql.postgresql_user:
+    name: "postgres"
+    password: "{{ postgresql_admin_password }}"
     role_attr_flags: CREATEDB,SUPERUSER,CREATEROLE
-    encrypted: yes
+    encrypted: true
     state: present
 
-- name: insert postgres superuser name into user password file
-  blockinfile:
+- name: Insert postgres superuser name into user password file
+  ansible.builtin.blockinfile:
     dest: /root/04-postgres_admin_password
     insertbefore: BOF
     block: |
-      Админ-пользователь postgres:
-      Логин: postgres
+      Login: postgres
+      Password: {{ postgresql_admin_password }}
 
 - name: "Create app database"
-  postgresql_db:
+  community.postgresql.postgresql_db:
     state: present
-    name: "{{ short_vhost }}"
+    name: "{{ postgresql_domain_short }}"
   become: true
   become_user: postgres
 
 - name: "Create db user"
-  postgresql_user:
+  community.postgresql.postgresql_user:
     state: present
-    name: "{{ short_vhost }}"
-    password: "{{ lookup('password', '/root/03-postgres_password chars=ascii_letters,digits,hexdigits length=15') }}"
+    name: "{{ postgresql_domain_short }}"
+    password: "{{ postgresql_user_password }}"
   become: true
   become_user: postgres
 
-- name: insert postgres user name into user password file
-  blockinfile:
+- name: Insert postgres user name into user password file
+  ansible.builtin.blockinfile:
     dest: /root/03-postgres_password
     insertbefore: BOF
     block: |
       Данные для доступа к базе данных:
-      Имя БД: {{ short_vhost }}
-      Пользователь: {{ short_vhost }}
+      Имя БД: {{ postgresql_domain_short }}
+      Login: {{ postgresql_domain_short }}
+      Password: {{ postgresql_user_password }}
 
 - name: "Grant db user access to app db"
-  postgresql_privs:
+  community.postgresql.postgresql_privs:
     type: database
-    database: "{{ short_vhost }}"
-    roles: "{{ short_vhost }}"
-    grant_option: no
+    database: "{{ postgresql_domain_short }}"
+    roles: "{{ postgresql_domain_short }}"
+    grant_option: false
     privs: all
   become: true
   become_user: postgres
 
 - name: "Allow md5 connection for the db user"
-  postgresql_pg_hba:
+  community.postgresql.postgresql_pg_hba:
     dest: "/etc/postgresql/{{ postgresql_version }}/main/pg_hba.conf"
     contype: host
     databases: all
     method: md5
-    users: "{{ short_vhost }}"
+    users: "{{ postgresql_domain_short }}"
     create: true
   become: true
   become_user: postgres

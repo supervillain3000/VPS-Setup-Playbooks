@@ -1,0 +1,10 @@
+---
+- name: Install LEMP stack
+  roles:
+    - base
+    - nginx
+    - php-fpm
+    - mariadb
+    - phpmyadmin
+    - sftp
+    - fail2ban

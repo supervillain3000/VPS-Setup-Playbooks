@@ -1,0 +1,9 @@
+---
+- name: Install NodeJS with NGINX web-server and mongodb
+  roles:
+    - base
+    - nginx
+    - nodejs
+    - mongodb
+    - sftp
+    - fail2ban

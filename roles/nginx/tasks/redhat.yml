@@ -1,0 +1,65 @@
+---
+- name: Install nginx
+  ansible.builtin.dnf:
+    name: nginx
+    state: present
+
+- name: Ensure nginx service is started and enabled
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: true
+
+- name: Change nginx.conf file
+  ansible.builtin.copy:
+    dest: /etc/nginx/nginx.conf
+    src: nginx_centos.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart nginx
+
+- name: Add nginx conf.d configs
+  ansible.builtin.copy:
+    dest: /etc/nginx/conf.d/{{ item }}.conf
+    src: conf.d/{{ item }}.conf
+    owner: root
+    group: root
+    mode: '0644'
+  loop:
+    - 00-conn
+    - 01-gzip
+    - 02-proxy
+    - 03-timeout
+    - 04-ssl
+    - 05-open_file
+  notify: Restart nginx
+
+- name: Create /etc/nginx/vhosts/
+  ansible.builtin.file:
+    state: directory
+    path: /etc/nginx/vhosts/
+    mode: "0755"
+
+- name: Add nginx vhosts configs
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: "0644"
+  loop:
+    - src: 'vhost_centos.conf.j2'
+      dest: '/etc/nginx/vhosts/{{ vhost }}.conf'
+    - src: 'ipvhost.conf.j2'
+      dest: '/etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf'
+  notify: Restart nginx
+
+- name: Enable http(s) on firewall-cmd
+  ansible.posix.firewalld:
+    service: "{{ item }}"
+    state: enabled
+    permanent: true
+    immediate: true
+    zone: public
+  loop:
+    - http
+    - https

@@ -1,93 +1,31 @@
 ---
 - name: Install python modules
-  yum:
-    name: "{{ django_python_modules_redhat }}"
+  ansible.builtin.dnf:
+    name:
+      - gcc
+      - python3-devel
+      - uwsgi
+      - uwsgi-plugin-python3
+      - python3-setuptools
     state: present
-
-- name: Add the user Django
-  user:
-    name: django
-    password: "{{ lookup('password', '/tmp/pagsnagt chars=ascii_letters,digits,hexdigits length=15') }}"
-    home: /var/www/django
-    shell: /sbin/nologin
-    group: nginx
-
-- name: Install python3-setuptools
-  yum:
-    name: python3-setuptools  
-    state: present
-
-- name: Install venv and django
-  pip:
-    name: "{{ item }}"
-    virtualenv: /var/www/django/{{ vhost }}
-    virtualenv_command: '/usr/bin/python3 -m venv'
-  become: true
-  become_user: django
-  loop:
-    - django
-    - path
-  register: venv_install
-
-- name: Set permissions for virtual environment
-  file:
-    path: /var/www/django/{{ vhost }}
-    state: directory
-    owner: django
-    group: nginx
-    mode: '0775'  
-  when: venv_install.changed
-
-- name: Creates Project directory
-  file:
-    path: /var/www/django/{{ vhost }}/project/
-    state: directory
-    owner: django
-    group: nginx
-  when: venv_install.changed
-
-- name: Install Django
-  shell: "/var/www/django/{{ vhost }}/bin/django-admin startproject project /var/www/django/{{ vhost }}/project/"
-  become: true
-  become_user: django
-  when: venv_install.changed
-
-- name: Edit django STATIC_ROOT
-  lineinfile:
-    path: /var/www/django/{{ vhost }}/project/project/settings.py
-    line: STATIC_ROOT = str(str(BASE_DIR) + 'static/')
-  when: venv_install.changed
-
-- name: Edit django ALLOWED_HOSTS
-  lineinfile:
-    regexp: 'ALLOWED_HOSTS'
-    path: /var/www/django/{{ vhost }}/project/project/settings.py
-    line: ALLOWED_HOSTS = ['{{ vhost }}']
-  when: venv_install.changed
-
-- name: Django collectstatic
-  shell: /var/www/django/{{ vhost }}/bin/python /var/www/django/{{ vhost }}/project/manage.py collectstatic
-  become: true
-  become_user: django
-  when: venv_install.changed
 
 - name: Add uwsgi config
-  template:
+  ansible.builtin.template:
     src: "uwsgi.ini.j2"
-    dest: "/etc/uwsgi.d/{{ vhost }}.ini"
-    mode: 0644
+    dest: "/etc/uwsgi.d/{{ django_domain }}.ini"
+    mode: "0644"
     owner: django
     group: nginx
-    
+
 - name: Restart and enable uwsgi
-  systemd:
+  ansible.builtin.systemd:
     name: uwsgi
     state: restarted
-    enabled: yes
+    enabled: true
 
-- name: Add nginx vhost config
-  template:
-    src: "vhost.conf.j2"
-    dest: "/etc/nginx/conf.d/{{ vhost }}.conf"
-    mode: 0644
-  notify: restart nginx
+- name: Add nginx django_domain config
+  ansible.builtin.template:
+    src: "django_domain.conf.j2"
+    dest: "/etc/nginx/conf.d/{{ django_domain }}.conf"
+    mode: "0644"
+  notify: Restart nginx

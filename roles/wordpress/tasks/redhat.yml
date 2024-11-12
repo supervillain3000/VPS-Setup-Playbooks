@@ -1,0 +1,15 @@
+---
+- name: Set up wp-config
+  ansible.builtin.template:
+    src: "wp-config.php.j2"
+    dest: "/var/www/{{ vhost }}/wp-config.php"
+    group: apache2
+    owner: apache2
+    mode: "0644"
+
+- name: Set permissions for directories
+  ansible.builtin.file:
+    dest: /var/www/{{ vhost }}/
+    owner: apache2
+    group: apache2
+    recurse: true

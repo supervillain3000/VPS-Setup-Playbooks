@@ -1,0 +1,4 @@
+---
+wordpress_cli_url: "https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar"
+wordpress_cli_completion_url: "https://raw.githubusercontent.com/wp-cli/wp-cli/v2.11.0/utils/wp-completion.bash"
+wordpress_database_name: "{{ short_vhost }}"

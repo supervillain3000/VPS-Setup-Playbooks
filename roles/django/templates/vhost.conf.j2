@@ -1,10 +1,10 @@
 upstream django {
-        server unix:///var/www/django/{{ vhost }}/nginx.sock;
+        server unix:///var/www/django/{{ django_domain }}/nginx.sock;
 }
 
 server {
-        server_name {{ vhost }} www.{{ vhost }};
-        return 301 $scheme://{{ vhost }}$request_uri;
+        server_name {{ django_domain }} www.{{ django_domain }};
+        return 301 $scheme://{{ django_domain }}$request_uri;
 }
 
 server {
@@ -18,7 +18,7 @@ server {
                 root /var/www/le/;
         }
 
-        server_name {{ vhost }} www.{{ vhost }} ;
+        server_name {{ django_domain }} www.{{ django_domain }} ;
 
         charset     utf-8;
 
@@ -32,7 +32,7 @@ server {
         #}
 
         location /static {
-                alias /var/www/django/{{ vhost }}/project/static;
+                alias /var/www/django/{{ django_domain }}/project/static;
                 expires max;
         }
 

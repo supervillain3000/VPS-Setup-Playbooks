@@ -1,0 +1,39 @@
+---
+- name: Ensure dependencies are installed.
+  ansible.builtint.dnf:
+    name:
+      - dnf-plugins-core
+
+- name: Add Docker GPG key.
+  ansible.builtin.rpm_key:
+    key: "{{ docker_dnf_gpg_key }}"
+    state: present
+
+- name: Add Docker repository.
+  ansible.builtin.get_url:
+    url: "https://download.docker.com/linux/rhel/docker-ce.repo"
+    dest: '/etc/yum.repos.d/docker-ce.repo'
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Ensure the crb repository is enabled
+  community.general.dnf_config_manager:
+    name: docker-ce
+    state: enabled
+
+- name: Install docker
+  ansible.builtint.dnf:
+    name:
+      - docker-ce 
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+      - container-selinux
+
+- name: Ensure docker daemon is started and enabled
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: true

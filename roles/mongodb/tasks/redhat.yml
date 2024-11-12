@@ -1,82 +1,29 @@
 ---
-- name: Set MongoDB repository base URL
-  set_fact:
-    mongodb_repo_baseurl: >
-      https://repo.mongodb.org/yum/redhat/{{ ansible_distribution_major_version }}/mongodb-org/7.0/x86_64/
-
 - name: Add MongoDB repository
-  copy:
+  ansible.builtin.copy:
     content: |
-      [mongodb-org-7.0]
+      [mongodb-org-{{ mongodb_version }}]
       name=MongoDB Repository
-      baseurl={{ mongodb_repo_baseurl }}
+      baseurl={{ mongodb_rpm_repo_url }}
       gpgcheck=1
       enabled=1
-      gpgkey=https://pgp.mongodb.com/server-7.0.asc
-    dest: /etc/yum.repos.d/mongodb-org-7.0.repo
+      gpgkey=https://pgp.mongodb.com/server-{{ mongodb_version }}.asc
+    dest: /etc/yum.repos.d/mongodb-org-{{ mongodb_version }}.repo
 
 - name: Install MongoDB
-  yum:
+  ansible.builtin.dnf:
     name: mongodb-org
     state: present
+    update_cache: true
   notify:
     - start mongodb
 
 - name: Install pip3
-  yum: 
+  ansible.builtin.dnf:
     name: python3-pip
     state: present
 
-- name: Make sure mongod is started and enabled
-  service:
-    name: mongod
-    state: started
-    enabled: yes
-
 - name: Ensure pymongo is installed and up-to-date
-  pip:
+  ansible.builtin.pip:
     name: pymongo
-    state: latest
-    extra_args: '--user'
-
-- name: Set nproc to mongod user to 5000
-  lineinfile: 
-    dest: /etc/security/limits.conf 
-    line: "mongod soft nproc 5000"
-
-- name: Create MongoDB root user
-  mongodb_user:
-    login_port: "27017"
-    database: "admin"
-    name: "admin"
-    password: "{{ lookup('password', '/root/04-mongo_admin_password chars=ascii_letters,digits,hexdigits length=15') }}"
-    roles: "root"
-
-- name: Create MongoDB site user
-  mongodb_user:
-    login_user: "admin"
-    login_password: "{{ lookup('file', '/root/04-mongo_admin_password') }}"
-    login_port: "27017"
     state: present
-    database: "{{ short_vhost }}"
-    name: "{{ short_vhost }}"
-    password:  "{{ lookup('password', '/root/03-mongo_password chars=ascii_letters,digits,hexdigits length=15') }}"
-    roles:
-      - { db: "{{ short_vhost }}", role: "readWrite" }
-
-- name: insert MongoDB superuser name into user password file
-  blockinfile:
-    dest: /root/04-mongo_admin_password
-    insertbefore: BOF
-    block: |
-      Админ-пользователь MongoDB:
-      Логин: admin
-
-- name: insert mongo user name into user password file
-  blockinfile:
-    dest: /root/03-mongo_password
-    insertbefore: BOF
-    block: |
-      Данные для доступа к базе данных:
-      Имя БД: {{ short_vhost }}
-      Пользователь: {{ short_vhost }}

@@ -1,15 +1,13 @@
+---
 - name: Run update-crypto-policies command to enable SHA1
-  command: update-crypto-policies --set DEFAULT:SHA1
-  when: ansible_distribution_major_version | int >= 9
-
-- name: Import Nodesource RPM key.
-  rpm_key:
-    key: https://rpm.nodesource.com/gpgkey/ns-operations-public.key
-    fingerprint: 242B813831AF09562B6C46F76B88DA4E3AF28A14
-    state: present
+  ansible.builtin.command: >
+    update-crypto-policies --set DEFAULT:SHA1
+  when: ansible_distribution_major_version >= 9
+  register: crypto_policy_result
+  changed_when: "'SHA1' not in crypto_policy_result.stdout"
 
 - name: Add Nodesource repositories for Node.js.
-  yum_repository:
+  ansible.builtin.yum_repository:
     file: nodesource-nodejs
     name: nodesource-nodejs
     description: Node.js Packages for Linux RPM based distros - x86_64
@@ -20,22 +18,9 @@
     gpgcheck: true
     gpgkey: https://rpm.nodesource.com/gpgkey/ns-operations-public.key
     state: present
-  when: ansible_distribution_major_version | int >= 7
-  register: node_repo
 
-- name: Update package cache if repo was added.
-  yum:
-    update_cache: true
-  when: node_repo is changed
-
-- name: Ensure Node.js AppStream module is disabled (CentOS 8+).
-  command: yum module disable -y nodejs
-  register: module_disable
-  changed_when: "'Nothing to do.' not in module_disable.stdout"
-  when: ansible_distribution_major_version | int >= 8
-
-- name: Ensure Node.js and npm are installed.
-  yum:
+- name: Install nodejs and npm
+  ansible.builtin.dnf:
     name: "nodejs-{{ nodejs_version | regex_replace('x', '') }}*"
-    state: present
-    enablerepo: nodesource
+    enablerepo: nodesource-nodejs
+    update_cache: true

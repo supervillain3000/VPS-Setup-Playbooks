@@ -1,0 +1,23 @@
+- name: Restart ufw
+  ansible.builtin.service:
+    name: ufw
+    state: restarted
+
+- name: Restart sshd
+  ansible.builtin.service:
+    name: sshd
+    state: restarted
+
+- name: Reload firewalld
+  ansible.builtin.service:
+    name: firewalld
+    state: reloaded
+
+- name: Restart journald
+  ansible.builtin.systemd:
+    name: systemd-journald
+    state: restarted
+
+- name: Reload sysctl
+  ansible.builtin.command: sysctl -p
+  changed_when: false
