@@ -1,9 +1,8 @@
 ---
 - name: Update and upgrade all packages
   ansible.builtin.apt:
-    upgrade: dist
-    update_cache: yes
-    cache_valid_time: 3600
+    upgrade: safe
+    update_cache: true
 
 - name: Install debian base packages
   ansible.builtin.apt:
@@ -15,8 +14,10 @@
     direction: "{{ item.direction }}"
     policy: "{{ item.policy }}"
   with_items:
-    - { direction: 'incoming', policy: 'deny' }
-    - { direction: 'outgoing', policy: 'allow' }
+    - direction: 'incoming'
+      policy: 'deny'
+    - direction: 'outgoing'
+      policy: 'allow'
   notify:
     - Restart ufw
 
@@ -33,7 +34,7 @@
     enabled: true
 
 - name: Tune bash history for Debian
-  blockinfile:
+  ansible.builtin.blockinfile:
     dest: /etc/profile.d/history.sh
     create: true
     owner: root
@@ -49,13 +50,13 @@
   when: ansible_facts['distribution'] != "Ubuntu"
 
 - name: Remove histtime.sh
-  file:
+  ansible.builtin.file:
     path: /etc/profile.d/histtime.sh
     state: absent
   when: ansible_facts['distribution'] == "Ubuntu"
 
 - name: Tune bash history for Ubuntu
-  blockinfile:
+  ansible.builtin.blockinfile:
     dest: /etc/profile.d/histtime.sh
     create: true
     owner: root
@@ -68,7 +69,7 @@
   when: ansible_facts['distribution'] == "Ubuntu"
 
 - name: Enable SSH PAM
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/ssh/sshd_config
     regexp: '^#UsePAM'
     line: UsePAM yes
@@ -86,7 +87,7 @@
     enabled: true
 
 - name: Set kernel parameters
-  ansible.builtin.sysctl:
+  ansible.posix.sysctl:
     name: "vm.swappiness"
     value: "10"
     state: present
