@@ -11,7 +11,7 @@
     key: "{{ postgresql_rpm_key }}"
 
 - name: Install PostgreSQL
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name:
       - postgresql
       - postgresql-server

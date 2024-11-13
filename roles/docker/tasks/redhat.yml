@@ -1,6 +1,6 @@
 ---
 - name: Ensure dependencies are installed.
-  ansible.builtint.dnf:
+  ansible.builtin.dnf:
     name:
       - dnf-plugins-core
 
@@ -23,7 +23,7 @@
     state: enabled
 
 - name: Install docker
-  ansible.builtint.dnf:
+  ansible.builtin.dnf:
     name:
       - docker-ce
       - docker-ce-cli
