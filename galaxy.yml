@@ -15,3 +15,9 @@ license:
   - GPL-2.0-or-later
 
 repository: https://github.com/supervillain3000/VPS-Setup-Playbooks.git
+
+tags:
+  - linux
+  - application
+  - cloud
+  - database
