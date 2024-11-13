@@ -1,0 +1,7 @@
+---
+- name: Install Docker
+  hosts: "localhost"
+  roles:
+    - base
+    - docker
+    - fail2ban

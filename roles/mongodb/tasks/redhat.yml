@@ -9,6 +9,7 @@
       enabled=1
       gpgkey=https://pgp.mongodb.com/server-{{ mongodb_version }}.asc
     dest: /etc/yum.repos.d/mongodb-org-{{ mongodb_version }}.repo
+    mode: "0644"
 
 - name: Install MongoDB
   ansible.builtin.dnf:
@@ -16,7 +17,7 @@
     state: present
     update_cache: true
   notify:
-    - start mongodb
+    - Start mongodb
 
 - name: Install pip3
   ansible.builtin.dnf:

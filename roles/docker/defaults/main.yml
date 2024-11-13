@@ -1,3 +1,4 @@
+---
 docker_apt_gpg_key: "https://download.docker.com/linux/{{ ansible_facts.distribution | lower }}/gpg"
 docker_apt_repo: >
   deb [arch={{ ansible_architecture | lower }} signed-by=/etc/apt/keyrings/docker.asc]

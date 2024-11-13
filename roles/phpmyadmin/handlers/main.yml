@@ -1,3 +1,4 @@
+---
 - name: Restart php-fpm centos
   ansible.builtin.service:
     name: php{{ _phpmyadmin_php_version }}-php-fpm

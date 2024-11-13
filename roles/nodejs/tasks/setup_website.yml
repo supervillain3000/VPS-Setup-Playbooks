@@ -1,6 +1,6 @@
 ---
 - name: Install angular-cli
-  comminity.general.npm:
+  community.general.npm:
     name: "{{ item }}"
     global: true
     state: "present"
@@ -10,12 +10,11 @@
     NPM_CONFIG_UNSAFE_PERM: "false"
   with_items: "{{ nodejs_npm_global_packages }}"
 
-- name: Setup the git repo
+- name: Clone the Git repo if not already present
   ansible.builtin.git:
     repo: https://github.com/scotch-io/node-todo.git
+    version: master
     dest: /var/www/{{ nodejs_domain }}
-    accept_hostkey: true
-    force: true
 
 - name: Update packages based on package.json to their latest version
   community.general.npm:
