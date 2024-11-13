@@ -1,10 +1,12 @@
 ---
 - name: Install WordPress with LAMP stack and NGINX as reverse proxy
+  hosts: "localhost"
   roles:
     - base
     - nginx
-    - apache2
-    - mysql
+    - httpd
+    - php
+    - mariadb
     - wordpress
     - phpmyadmin
     - sftp

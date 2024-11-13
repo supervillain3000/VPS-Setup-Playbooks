@@ -1,5 +1,6 @@
 ---
 - name: Install LAMP stack with NGINX reverse proxy
+  hosts: "localhost"
   roles:
     - base
     - nginx

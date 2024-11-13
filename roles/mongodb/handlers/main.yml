@@ -1,6 +1,6 @@
-- name: start mongodb
-  systemd:
+---
+- name: Start mongodb
+  ansible.builtin.service:
     name: mongod
     state: started
-    enabled: yes
-
+    enabled: true

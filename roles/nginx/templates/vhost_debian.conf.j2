@@ -1,6 +1,6 @@
 
 server {
-        server_name {{ vhost }} www.{{ vhost }};
+        server_name {{ nginx_domain }} www.{{ nginx_domain }};
 
         listen {{ ansible_default_ipv4.address }}:80;
         {%- if ansible_default_ipv6.address is defined %}
@@ -11,16 +11,16 @@ server {
 
         disable_symlinks if_not_owner from=$root_path;
 
-        access_log /var/log/nginx/{{ vhost }}.access.log;
-        error_log /var/log/nginx/{{ vhost }}.error.log notice;
+        access_log /var/log/nginx/{{ nginx_domain }}.access.log;
+        error_log /var/log/nginx/{{ nginx_domain }}.error.log notice;
 
-        set $root_path /var/www/{{ vhost }};
+        set $root_path /var/www/{{ nginx_domain }};
         root $root_path;
 
         ## handler ##
 
         location ~* \.(ac3|avi|bmp|bz2|css|cue|dat|doc|docx|dts|eot|exe|flv|gif|gz|htm|html|ico|img|iso|jpeg|jpg|js|mkv|mp3|mp4|mpeg|mpg|ogg|pdf|png|ppt|pptx|qt|rar|rm|svg|swf|tar|tgz|ttf|txt|wav|woff|woff2|xls|xlsx|zip)$ {
-                root /var/www/{{ vhost }}/;
+                root /var/www/{{ nginx_domain }}/;
                 expires max;
         }
 }

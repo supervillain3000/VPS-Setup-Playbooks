@@ -43,9 +43,9 @@
 - name: Install Django
   ansible.builtin.command: >
     /var/www/django/{{ django_domain }}/bin/django-admin startproject project /var/www/django/{{ django_domain }}/project/
+  changed_when: false
   become: true
   become_user: django
-  changed_when:: false
 
 - name: Edit django STATIC_ROOT
   ansible.builtin.lineinfile:

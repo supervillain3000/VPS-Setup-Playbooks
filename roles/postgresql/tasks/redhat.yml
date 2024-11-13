@@ -11,7 +11,7 @@
     key: "{{ postgresql_rpm_key }}"
 
 - name: Install PostgreSQL
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name:
       - postgresql
       - postgresql-server
@@ -58,7 +58,7 @@
 - name: Create a Superuser PostgreSQL database user
   become: true
   become_user: postgres
-  community.posgresql.postgresql_user:
+  community.postgresql.postgresql_user:
     name: 'postgres'
     password: "{{ lookup('password', '/root/04-postgres_admin_password chars=ascii_letters,digits,hexdigits length=15') }}"
     role_attr_flags: CREATEDB,SUPERUSER,CREATEROLE
@@ -74,14 +74,14 @@
       Логин: postgres
 
 - name: Create app database
-  community.posgresql.postgresql_db:
+  community.postgresql.postgresql_db:
     state: present
     name: "{{ postgresql_domain_short }}"
   become: true
   become_user: postgres
 
 - name: Create db user
-  community.posgresql.postgresql_user:
+  community.postgresql.postgresql_user:
     state: present
     name: "{{ postgresql_domain_short }}"
     password: "{{ lookup('password', '/root/03-postgres_password chars=ascii_letters,digits,hexdigits length=15') }}"
@@ -98,7 +98,7 @@
       Пользователь: {{ postgresql_domain_short }}
 
 - name: Grant db user access to app db
-  community.posgresql.postgresql_privs:
+  community.postgresql.postgresql_privs:
     type: database
     database: "{{ postgresql_domain_short }}"
     roles: "{{ postgresql_domain_short }}"
@@ -108,7 +108,7 @@
   become_user: postgres
 
 - name: Allow md5 connection for the db user
-  community.posgresql.postgresql_pg_hba:
+  community.postgresql.postgresql_pg_hba:
     dest: "/var/lib/pgsql/data/pg_hba.conf"
     contype: host
     databases: all

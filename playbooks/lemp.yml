@@ -1,9 +1,12 @@
 ---
 - name: Install LEMP stack
+  hosts: "localhost"
+  vars:
+    php_enable_php_fpm: true
   roles:
     - base
     - nginx
-    - php-fpm
+    - php
     - mariadb
     - phpmyadmin
     - sftp

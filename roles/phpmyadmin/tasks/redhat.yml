@@ -85,7 +85,7 @@
   when: _phpmyadmin_nginx_status.stat.exists and not _phpmyadmin_httpd_status.stat.exists
 
 - name: Copy modphp nginx handler config
-  ansible.builtint.blockinfile:
+  ansible.builtin.blockinfile:
     marker: ''
     insertbefore: '^\t## pma'
     block: |
