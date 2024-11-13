@@ -1,5 +1,15 @@
 ---
-- name: Install nginx and trivia
+- name: Enable http(s) on ufw
+  community.general.ufw:
+    state: enabled
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+  loop:
+    - http
+    - https
+
+- name: Install nginx
   ansible.builtin.apt:
     name: nginx
     state: present
@@ -52,14 +62,3 @@
     - src: 'ipvhost.conf.j2'
       dest: '/etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf'
   notify: restart nginx
-
-- name: Enable ssh and http(s) on ufw
-  community.general.ufw:
-    state: enabled
-    rule: allow
-    port: "{{ item }}"
-    proto: tcp
-  loop:
-    - ssh
-    - http
-    - https
