@@ -10,7 +10,7 @@
   register: _certbot_httpd_status
 
 - name: Install with dependencies on CentOS
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name:
       - certbot
       - yum-utils
