@@ -1,0 +1,173 @@
+---
+- name: Check if there is nginx
+  ansible.builtin.stat:
+    path: /etc/nginx
+  register: _certbot_nginx_status
+
+- name: Check if there is httpd
+  ansible.builtin.stat:
+    path: /etc/httpd
+  register: _certbot_httpd_status
+
+- name: Install with dependencies on CentOS
+  ansible.builtin.yum:
+    name:
+      - certbot
+      - yum-utils
+    state: present
+
+- name: Issue certificate for server vhost
+  ansible.builtin.shell: |
+    set -o pipefail
+    certbot certonly -w /var/www/"{{ certbot_domain }}" \
+    -d "{{ certbot_domain }}",www."{{ certbot_domain }}" \
+    --webroot --agree-tos -m admin@"{{ certbot_domain }}" 2>&1 | tee /root/cert_install.log
+  register: _certbot_cert_issue_result
+  changed_when: _certbot_cert_issue_result.stdout.find("Successfully")
+
+- name: Remove http listen block from webserver config
+  ansible.builtin.lineinfile:
+    path: /etc/nginx/vhosts/{{ certbot_domain }}.conf
+    state: absent
+    regexp: ":80;$"
+  when: _certbot_cert_issue_result.stdout.find("Successfully") != -1 and _certbot_nginx_status.stat.exists
+
+- name: Add cert and http listen to webserver config
+  ansible.builtin.blockinfile:
+    path: /etc/nginx/vhosts/{{ certbot_domain }}.conf
+    marker: "# {mark} http2 ssl section"
+    insertafter: "server_name"
+    block: |
+      listen {{ ansible_default_ipv4.address }}:443 ssl http2;
+      {% if ansible_default_ipv6.address is defined %}
+      listen [{{ ansible_default_ipv6.address }}]:443 ssl http2;
+      {% endif %}
+
+      ssl_certificate /etc/letsencrypt/live/{{ certbot_domain }}/fullchain.pem;
+      ssl_certificate_key /etc/letsencrypt/live/{{ certbot_domain }}/privkey.pem;
+  when: _certbot_cert_issue_result.stdout.find("Successfully") != -1 and _certbot_nginx_status.stat.exists
+  notify: Restart nginx
+
+- name: Add http to https redirect block to webserver config
+  ansible.builtin.blockinfile:
+    path: /etc/nginx/vhosts/{{ certbot_domain }}.conf
+    marker: "# {mark} Redirect to https"
+    insertafter: EOF
+    block: |
+      server {
+      server_name {{ certbot_domain }} www.{{ certbot_domain }};
+      listen {{ ansible_default_ipv4.address }}:80;
+      {% if ansible_default_ipv6.address is defined %}
+      listen [{{ ansible_default_ipv6.address }}]:80;
+      {% endif %}
+
+      return 301 https://$host$request_uri;
+      }
+  when: _certbot_cert_issue_result.stdout.find("Successfully") != -1 and _certbot_nginx_status.stat.exists
+  notify: Restart nginx
+
+- name: Change proxy pass schema in nginx vhost conf
+  ansible.builtin.replace:
+    path: /etc/nginx/vhosts/{{ certbot_domain }}.conf
+    regexp: 'proxy_pass http://127.0.0.1:8080;'
+    replace: 'proxy_pass https://127.0.0.1:8081;'
+  when: _certbot_cert_issue_result.stdout.find("Successfully") != -1 and _certbot_httpd_status.stat.exists and _certbot_nginx_status.stat.exists
+  notify: Restart nginx
+
+- name: Add https config block for apache
+  ansible.builtin.blockinfile:
+    path: /etc/httpd/conf.d/{{ certbot_domain }}.conf
+    marker: "# {mark} https block"
+    insertafter: EOF
+    block: |
+      <IfModule mod_ssl.c>
+      <VirtualHost 127.0.0.1:8081 >
+        ServerName "{{ certbot_domain }}"
+        ServerAlias "www.{{ certbot_domain }}"
+        ServerAdmin "admin@{{ certbot_domain }}"
+        UseCanonicalName Off
+
+        SSLEngine on
+        SSLVerifyClient none
+        SSLCertificateFile "/etc/letsencrypt/live/{{ certbot_domain }}/fullchain.pem"
+        SSLCertificateKeyFile "/etc/letsencrypt/live/{{ certbot_domain }}/privkey.pem"
+
+        DocumentRoot "/var/www/{{ certbot_domain }}"
+        ErrorLog "/var/log/httpd/{{ certbot_domain }}_error.log"
+
+        DirectoryIndex "index.html" "index.php" "index.xhtml" "index.htm" "index.shtml"
+
+        <Directory /var/www/{{ certbot_domain }}/>
+          Options -Indexes +FollowSymLinks
+          AllowOverride All
+        </Directory>
+
+      </VirtualHost>
+      </IfModule>
+  when: _certbot_cert_issue_result.stdout.find("Successfully") != -1 and _certbot_httpd_status.stat.exists and _certbot_nginx_status.stat.exists
+  notify:
+    - Restart httpd
+    - Restart nginx
+
+- name: Add https config block for apache
+  ansible.builtin.blockinfile:
+    path: /etc/httpd/conf.d/{{ certbot_domain }}.conf
+    marker: "# {mark} https block"
+    insertafter: EOF
+    block: |
+      <IfModule mod_ssl.c>
+      <VirtualHost  {{ ansible_default_ipv4.address }}:443>
+        ServerName "{{ certbot_domain }}"
+        ServerAlias "www.{{ certbot_domain }}"
+        ServerAdmin "admin@{{ certbot_domain }}"
+        UseCanonicalName Off
+
+        SSLEngine on
+        SSLVerifyClient none
+        SSLCertificateFile "/etc/letsencrypt/live/{{ certbot_domain }}/fullchain.pem"
+        SSLCertificateKeyFile "/etc/letsencrypt/live/{{ certbot_domain }}/privkey.pem"
+
+        DocumentRoot "/var/www/{{ certbot_domain }}"
+        ErrorLog "/var/log/httpd/{{ certbot_domain }}_error.log"
+
+        DirectoryIndex "index.html" "index.php" "index.xhtml" "index.htm" "index.shtml"
+
+        <Directory /var/www/{{ certbot_domain }}/>
+          Options -Indexes +FollowSymLinks
+          AllowOverride All
+        </Directory>
+
+      </VirtualHost>
+      </IfModule>
+  when: _certbot_cert_issue_result.stdout.find("Successfully") != -1 and _certbot_httpd_status.stat.exists and not _certbot_nginx_status.stat.exists
+  notify: Restart httpd
+
+- name: Add 8081 port to apache
+  ansible.builtin.lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    insertafter: '^Listen'
+    line: 'Listen 127.0.0.1:8081'
+  notify: restart httpd
+  when: _certbot_cert_issue_result.stdout.find("Successfully") != -1 and _certbot_httpd_status.stat.exists and _certbot_nginx_status.stat.exists
+
+- name: Add 443 port to apache
+  ansible.builtin.lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    insertafter: '^Listen'
+    line: 'Listen {{ ansible_default_ipv4.address }}:443'
+  when: _certbot_cert_issue_result.stdout.find("Successfully") != -1 and _certbot_httpd_status.stat.exists and not _certbot_nginx_status.stat.exists
+  notify: Restart httpd
+
+- name: Add cron task for certbot renewal
+  ansible.builtin.lineinfile:
+    insertafter: EOF
+    path: /etc/crontab
+    line: "0 0,12 * * * root /usr/bin/certbot renew && /usr/bin/systemctl reload nginx"
+  when: _certbot_cert_issue_result.stdout.find("Successfully") != -1 and _certbot_nginx_status.stat.exists
+
+- name: Add cron task for certbot renewal
+  ansible.builtin.lineinfile:
+    insertafter: EOF
+    path: /etc/crontab
+    line: "0 0,12 * * * root /usr/bin/certbot renew && /usr/bin/systemctl restart httpd"
+  when: _certbot_cert_issue_result.stdout.find("Successfully") != -1 and _certbot_httpd_status.stat.exists and not _certbot_nginx_status.stat.exists
