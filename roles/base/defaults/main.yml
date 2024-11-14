@@ -10,6 +10,7 @@ base_debian_package_list:
   - atop
   - htop
   - ufw
+  - python3-pip
 
 base_redhat_package_list:
   - yum-utils
@@ -19,3 +20,4 @@ base_redhat_package_list:
   - htop
   - atop
   - wget
+  - python3-pip

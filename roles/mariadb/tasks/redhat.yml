@@ -3,16 +3,27 @@
   ansible.builtin.dnf:
     name: mariadb-server
 
+- name: Ensure MariaDB started and enabled
+  ansible.builtin.service:
+    name: mariadb
+    state: started
+    enabled: true
+
+- name: Ensure mysqlclient is installed
+  ansible.builtin.pip:
+    name: PyMySQL
+    state: present
+
 - name: Change mariadb bind-address
   ansible.builtin.lineinfile:
-    path: /etc/my.cnf.d/server.cnf
+    path: /etc/my.cnf.d/mariadb-server.cnf
     regexp: '^#bind-address'
     line: 'bind-address = 127.0.0.1'
   notify: Restart mariadb
 
 - name: Add log-error
   ansible.builtin.blockinfile:
-    path: /etc/my.cnf.d/server.cnf
+    path: /etc/my.cnf.d/mariadb-server.cnf
     insertafter: '[mysqld]'
     block: |
       log-error = /var/log/mariadb/mariadb.log

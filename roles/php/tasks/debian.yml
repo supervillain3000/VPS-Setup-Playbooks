@@ -23,7 +23,7 @@
 
 - name: Ensure PHP packages are installed.
   ansible.builtin.apt:
-    name: "{{ php_packages }}"
+    name: "{{ php_debian_packages }}"
     state: present
     install_recommends: true
     update_cache: true

@@ -53,7 +53,7 @@
 
 - name: Ensure PHP packages are installed.
   ansible.builtin.dnf:
-    name: "{{ php_packages + php_packages_extra }}"
+    name: "{{ php_redhat_packages }}"
     state: present
     enablerepo: "true"
   notify: Restart webserver
@@ -74,6 +74,20 @@
     group: apache
     mode: "0644"
 
+- name: Tune php.ini
+  community.general.ini_file:
+    path: /etc/opt/remi/php{{ php_version }}/php.ini
+    section: PHP
+    option: "{{ item.options }}"
+    value: "{{ item.value }}"
+    mode: "0644"
+  loop:
+    - { options: 'post_max_size', value: '64M' }
+    - { options: 'upload_max_filesize', value: '64M' }
+    - { options: 'short_open_tag', value: 'On' }
+    - { options: 'cgi.fix_pathinfo', value: '0' }
+    - { options: 'date.timezone', value: 'Asia/Almaty' }
+
 - name: Configure php-fpm
   when: php_enable_php_fpm and _php_nginx_check.stat.exists
   block:
@@ -89,21 +103,6 @@
         dest: /etc/opt/remi/php{{ php_version }}/php-fpm.d/{{ vhost }}.conf
         src: vhost_pool_centos.j2
         mode: "0644"
-      notify: Restart php-fpm
-
-    - name: Tune php.ini
-      community.general.ini_file:
-        path: /etc/opt/remi/php{{ php_version }}/php.ini
-        section: PHP
-        option: "{{ item.options }}"
-        value: "{{ item.value }}"
-        mode: "0644"
-      loop:
-        - { options: 'post_max_size', value: '64M' }
-        - { options: 'upload_max_filesize', value: '64M' }
-        - { options: 'short_open_tag', value: 'On' }
-        - { options: 'cgi.fix_pathinfo', value: '0' }
-        - { options: 'date.timezone', value: 'Asia/Almaty' }
       notify: Restart php-fpm
 
     - name: Make remi php binary work using php command
