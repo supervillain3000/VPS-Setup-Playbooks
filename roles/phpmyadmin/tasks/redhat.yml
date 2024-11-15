@@ -7,14 +7,25 @@
 - name: Download phpmyadmin latest
   ansible.builtin.get_url:
     url: https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.zip
-    dest: /usr/share/phpMyAdmin-latest-all-languages.zip
+    dest: /tmp/phpMyAdmin-latest-all-languages.zip
     mode: "0644"
 
 - name: Unarchive a file that is already on the remote machine
   ansible.builtin.unarchive:
-    src: /usr/share/phpMyAdmin-latest-all-languages.zip
-    dest: /usr/share/phpmyadmin/
+    src: /tmp/phpMyAdmin-latest-all-languages.zip
+    dest: /tmp/
     remote_src: true
+
+- name: Delete archive
+  ansible.builtin.file:
+    path: /tmp/phpMyAdmin-latest-all-languages.zip
+    state: absent
+
+- name: Move all files to /usr/share/phpmyadmin
+  ansible.builtin.shell: mv /tmp/phpMyAdmin-*-* /usr/share/phpmyadmin
+  args:
+    creates: /usr/share/phpmyadmin/config.sample.inc.php
+  changed_when: false
 
 - name: Copy file with owner and permissions
   ansible.builtin.copy:
@@ -127,7 +138,7 @@
     src: pma_centos_apache.conf.j2
     dest: /etc/httpd/conf.d/{{ ansible_default_ipv4.address }}.conf
     mode: "0644"
-  when: _phpmyadmin_httpd_status.stat exists and _phpmyadmin_nginx_status.stat.exists
+  when: _phpmyadmin_httpd_status.stat.exists and _phpmyadmin_nginx_status.stat.exists
   notify: Restart httpd
 
 - name: Copy httpd vhost config frontend apache

@@ -7,7 +7,7 @@
 
 - name: Check if there is apache
   ansible.builtin.stat:
-    path: /etc/apache2
+    path: /etc/httpd
   register: _phpmyadmin_apache2_status
 
 - name: Check if there is nginx

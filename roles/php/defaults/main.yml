@@ -1,8 +1,8 @@
 ---
 php_default_version: "8.2"
-php_default_version_short: "82"
+php_default_version_short: '{{ php_default_version }} | replace(".", "")'
 
-php_packages:
+php_debian_packages:
   - php{{ php_default_version }}-common
   - php{{ php_default_version }}-cli
   - php{{ php_default_version }}-dev
@@ -23,6 +23,28 @@ php_packages:
   - php{{ php_default_version }}-soap
   - php{{ php_default_version }}-imagick
   - php{{ php_default_version }}-pdo
+  - libapache2-mod-php{{ php_default_version }}
+
+php_redhat_packages:
+  - php{{ php_default_version_short }}-php-common
+  - php{{ php_default_version_short }}-php-cli
+  - php{{ php_default_version_short }}-php-devel
+  - pcre-devel
+  - php{{ php_default_version_short }}-php-gd
+  - php{{ php_default_version_short }}-php-curl
+  - php{{ php_default_version_short }}-php-imap
+  - php{{ php_default_version_short }}-php-opcache
+  - php{{ php_default_version_short }}-php-xml
+  - php{{ php_default_version_short }}-php-mbstring
+  - php{{ php_default_version_short }}-php-apcu
+  - php{{ php_default_version_short }}-php-sqlite3
+  - php{{ php_default_version_short }}-php-dom
+  - php{{ php_default_version_short }}-php-intl
+  - php{{ php_default_version_short }}-php-mysql
+  - php{{ php_default_version_short }}-php-zip
+  - php{{ php_default_version_short }}-php-soap
+  - php{{ php_default_version_short }}-php-imagick
+  - php{{ php_default_version_short }}-php-pdo
 
 php_apt_repo_gpg_key: "https://mirror.ps.kz/sury/packages.sury.org/php/apt.gpg"
 
