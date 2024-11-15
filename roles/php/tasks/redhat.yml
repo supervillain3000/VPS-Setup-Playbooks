@@ -55,7 +55,6 @@
   ansible.builtin.dnf:
     name: "{{ php_redhat_packages }}"
     state: present
-    enablerepo: "true"
   notify: Restart webserver
 
 - name: Create /var/www/ vhost subdir
@@ -76,7 +75,7 @@
 
 - name: Tune php.ini
   community.general.ini_file:
-    path: /etc/opt/remi/php{{ php_version }}/php.ini
+    path: /etc/opt/remi/php{{ php_default_version_short }}/php.ini
     section: PHP
     option: "{{ item.options }}"
     value: "{{ item.value }}"
