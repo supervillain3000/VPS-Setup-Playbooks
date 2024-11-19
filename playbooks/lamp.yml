@@ -1,5 +1,6 @@
 ---
 - name: Install LAMP stack
+  become: true
   hosts: "localhost"
   roles:
     - base

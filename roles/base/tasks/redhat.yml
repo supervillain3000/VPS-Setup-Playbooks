@@ -82,15 +82,11 @@
     reload: true
 
 - name: Ensure the powertools repository is enabled
-  community.general.dnf_config_manager:
-    name: powertools
-    state: enabled
+  ansible.builtin.command: dnf config-manager --set-enabled powertools
   when:
     - ansible_facts['distribution_major_version'] < "9"
 
 - name: Ensure the crb repository is enabled
-  community.general.dnf_config_manager:
-    name: crb
-    state: enabled
+  ansible.builtin.command: dnf config-manager --set-enabled crb
   when:
     - ansible_facts['distribution_major_version'] >= "9"
