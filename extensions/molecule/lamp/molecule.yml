@@ -1,0 +1,31 @@
+---
+driver:
+  name: default
+
+dependency:
+  name: galaxy
+  options:
+    role-file: ../../../requirements.yml
+
+platforms:
+  - name: rockylinux9
+    image: quay.io/rockylinux/rockylinux:9
+
+  - name: rockylinux8
+    image: quay.io/rockylinux/rockylinux:8
+
+  - name: almalinux9
+    image: quay.io/almalinux/almalinux:9
+
+  - name: almalinux8
+    image: quay.io/rockylinux/almalinux:8
+
+  - name: ubuntu24
+    image: ubuntu:noble
+
+  - name: ubuntu22
+    image: ubuntu:jammy
+
+  - name: ubuntu20
+    image: ubuntu:focal
+
