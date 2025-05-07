@@ -3,21 +3,19 @@ base_debian_package_list:
   - lsb-release
   - apt-transport-https
   - ca-certificates
-  - sudo
   - vim
   - wget
   - curl
-  - atop
-  - htop
   - ufw
   - python3-pip
+  - git
 
 base_redhat_package_list:
+  - epel-release
+  - git 
   - yum-utils
   - firewalld
-  - curl
   - vim
-  - htop
-  - atop
   - wget
   - python3-pip
+  - iptables-persistent

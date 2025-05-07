@@ -14,11 +14,8 @@
     name: firewalld
     state: reloaded
 
-- name: Restart journald
-  ansible.builtin.systemd:
-    name: systemd-journald
+- name: Restart fail2ban
+  ansible.builtin.service:
+    name: fail2ban
     state: restarted
-
-- name: Reload sysctl
-  ansible.builtin.command: sysctl -p
-  changed_when: false
+    enabled: true
