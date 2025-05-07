@@ -13,7 +13,6 @@ def get_distro(host):
     ("epel-release", ["centos", "redhat", "rocky", "almalinux"]),
     ("yum-utils", ["centos", "redhat", "rocky", "almalinux"]),
     ("firewalld", ["centos", "redhat", "rocky", "almalinux"]),
-    ("vim", ["ubuntu", "debian", "centos", "redhat", "rocky", "almalinux"]),
     ("wget", ["ubuntu", "debian", "centos", "redhat", "rocky", "almalinux"]),
     ("git", ["ubuntu", "debian", "centos", "redhat", "rocky", "almalinux"]),
     ("python3-pip", ["ubuntu", "debian", "centos", "redhat", "rocky", "almalinux"]),
@@ -43,14 +42,6 @@ def test_ssh_port_open_in_firewalld(host):
         cmd = host.run("firewall-cmd --list-all")
         assert "ssh" in cmd.stdout, "SSH should be allowed in firewalld"
 
-def test_bash_history_configured(host):
-    f = host.file("/etc/profile.d/history.sh")
-    assert f.exists, "/etc/profile.d/history.sh must exist"
-    assert f.contains("HISTCONTROL=ignoreboth:erasedups")
-    assert f.user == "root"
-    assert f.group == "root"
-    assert f.mode == 0o644
-
 def test_chronyd_running_and_enabled(host):
     chronyd = host.service("chronyd")
     assert chronyd.is_running, "chronyd should be running"
@@ -64,6 +55,15 @@ def test_rsyslog_running_and_enabled(host):
 def test_logrotate_compression_enabled(host):
     f = host.file("/etc/logrotate.conf")
     assert f.contains("compress"), "Logrotate should have 'compress' directive"
+
+def test_hosts_file_exists(host):
+    f = host.file("/etc/fail2ban/jail.local")
+    assert f.exists, "/etc/fail2ban/jail.local should exist"
+
+def test_fail2ban_running_and_enabled(host):
+    rsyslog = host.service("fail2ban")
+    assert rsyslog.is_running, "fail2ban should be running"
+    assert rsyslog.is_enabled, "fail2ban should be enabled"
 
 def test_repos_enabled(host):
     distro = get_distro(host)

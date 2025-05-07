@@ -9,6 +9,8 @@ base_debian_package_list:
   - ufw
   - python3-pip
   - git
+  - iptables-persistent
+  - fail2ban
 
 base_redhat_package_list:
   - epel-release
@@ -18,4 +20,4 @@ base_redhat_package_list:
   - vim
   - wget
   - python3-pip
-  - iptables-persistent
+  - fail2ban
