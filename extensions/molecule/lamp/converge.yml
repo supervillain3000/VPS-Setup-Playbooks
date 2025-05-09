@@ -1,5 +1,0 @@
----
-- name: Converge
-  become: true
-  ansible.builtin.import_playbook: pscloud.vps.lamp
-

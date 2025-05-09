@@ -13,9 +13,3 @@
   ansible.builtin.service:
     name: firewalld
     state: reloaded
-
-- name: Restart fail2ban
-  ansible.builtin.service:
-    name: fail2ban
-    state: restarted
-    enabled: true

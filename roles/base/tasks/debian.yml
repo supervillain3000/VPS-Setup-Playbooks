@@ -4,9 +4,14 @@
     upgrade: safe
     update_cache: true
 
+- name: Install base packages
+  ansible.builtin.apt:
+    name: "{{ base_packages_list }}"
+    state: present
+
 - name: Install debian base packages
   ansible.builtin.apt:
-    name: "{{ base_debian_package_list }}"
+    name: "{{ base_debian_packages_list }}"
     state: present
 
 - name: Configure ufw defaults
@@ -33,22 +38,11 @@
     state: started
     enabled: true
 
-- name: Install NTP
-  ansible.builtin.apt:
-    name: chrony
-    state: present
-
 - name: Ensure chrony is running and enabled
   ansible.builtin.service:
     name: chrony
     state: started
     enabled: true
-
-- name: Ensure rsyslog is installed
-  ansible.builtin.apt:
-    name: "rsyslog"
-    state: present
-    update_cache: true
 
 - name: Enable and start rsyslog service
   ansible.builtin.service:
@@ -67,4 +61,9 @@
     src: jail.local
     dest: /etc/fail2ban/jail.local
     mode: "0644"
-  notify: Restart fail2ban
+
+- name: Enable and start fail2ban
+  ansible.builtin.service:
+    name: fail2ban
+    state: started
+    enabled: true

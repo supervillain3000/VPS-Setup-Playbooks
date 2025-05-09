@@ -61,9 +61,9 @@ def test_hosts_file_exists(host):
     assert f.exists, "/etc/fail2ban/jail.local should exist"
 
 def test_fail2ban_running_and_enabled(host):
-    rsyslog = host.service("fail2ban")
-    assert rsyslog.is_running, "fail2ban should be running"
-    assert rsyslog.is_enabled, "fail2ban should be enabled"
+    fail2ban = host.service("fail2ban")
+    assert fail2ban.is_running, "fail2ban should be running"
+    assert fail2ban.is_enabled, "fail2ban should be enabled"
 
 def test_repos_enabled(host):
     distro = get_distro(host)

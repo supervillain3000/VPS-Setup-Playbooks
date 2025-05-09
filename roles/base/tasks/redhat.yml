@@ -1,7 +1,18 @@
 ---
+- name: Install epel-release
+  ansible.builtin.dnf:
+    name: epel-release
+    state: present
+
+- name: Install base packages
+  ansible.builtin.dnf:
+    name: "{{ base_packages_list }}"
+    state: present
+    update_cache: true
+
 - name: Install centos base packages
   ansible.builtin.dnf:
-    name: "{{ base_redhat_package_list }}"
+    name: "{{ base_redhat_packages_list }}"
     state: present
     update_cache: true
 
@@ -18,21 +29,11 @@
     immediate: true
     state: enabled
 
-- name: Install and configure chrony
-  ansible.builtin.dnf:
-    name: chrony
-    state: present
-
 - name: Ensure chronyd is started and enabled
   ansible.builtin.service:
     name: chronyd
     state: started
     enabled: true
-
-- name: Ensure rsyslog is installed
-  ansible.builtin.dnf:
-    name: "rsyslog"
-    state: present
 
 - name: Enable service rsyslog
   ansible.builtin.service:
@@ -68,4 +69,9 @@
     src: jail.local
     dest: /etc/fail2ban/jail.local
     mode: "0644"
-  notify: Restart fail2ban
+
+- name: Enable and start fail2ban
+  ansible.builtin.service:
+    name: fail2ban
+    state: started
+    enabled: true
