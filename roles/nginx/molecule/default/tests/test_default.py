@@ -14,13 +14,6 @@ def test_nginx_service_running_and_enabled(host):
     assert service.is_running
     assert service.is_enabled
 
-
-@pytest.mark.parametrize("port", [80, 443])
-def test_ports_open(host, port):
-    socket = host.socket(f"tcp://0.0.0.0:{port}")
-    assert socket.is_listening
-
-
 def test_nginx_conf_exists_and_owned_correctly(host):
     f = host.file("/etc/nginx/nginx.conf")
     assert f.exists

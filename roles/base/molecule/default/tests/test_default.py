@@ -28,7 +28,7 @@ def test_packages(host, name, distros):
 
 # Only run firewalld-related tests on RHEL-family distros
 @pytest.mark.skipif(
-    get_distro.__code__ is None,  # Dummy workaround since host isn't available at collection time
+    get_distro.__code__ is None,
     reason="firewalld only runs on RHEL-based systems"
 )
 def test_firewalld_running_and_enabled(host):
