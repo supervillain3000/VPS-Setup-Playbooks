@@ -4,7 +4,7 @@ driver:
 platforms:
   - name: almalinux-8
     image: almalinux:8
-    dockerfile: ../common/Dockerfile.j2
+    dockerfile: ../../../../extentions/molecule/common/Dockerfile.j2
     privileged: true
     cgroupns_mode: host
     volumes:
@@ -12,7 +12,7 @@ platforms:
     command: /usr/sbin/init
   - name: almalinux-9
     image: almalinux:9
-    dockerfile: ../common/Dockerfile.j2
+    dockerfile: ../../../../extentions/molecule/common/Dockerfile.j2
     privileged: true
     cgroupns_mode: host
     volumes:
@@ -20,7 +20,7 @@ platforms:
     command: /usr/sbin/init
   - name: rockylinux-8
     image: rockylinux:8
-    dockerfile: ../common/Dockerfile.j2
+    dockerfile: ../../../../extentions/molecule/common/Dockerfile.j2
     privileged: true
     cgroupns_mode: host
     volumes:
@@ -28,7 +28,7 @@ platforms:
     command: /usr/sbin/init
   - name: rockylinux-9
     image: rockylinux:9.0
-    dockerfile: ../common/Dockerfile.j2
+    dockerfile: ../../../../extentions/molecule/common/Dockerfile.j2
     privileged: true
     cgroupns_mode: host
     volumes:
@@ -36,7 +36,7 @@ platforms:
     command: /usr/sbin/init
   - name: debian-bullseye
     image: debian:bullseye-slim
-    dockerfile: ../common/Dockerfile.j2
+    dockerfile: ../../../../extentions/molecule/common/Dockerfile.j2
     privileged: true
     cgroupns_mode: host
     volumes:
@@ -44,7 +44,7 @@ platforms:
     command: /sbin/init
   - name: debian-bookworm
     image: debian:bookworm-slim
-    dockerfile: ../common/Dockerfile.j2
+    dockerfile: ../../../../extentions/molecule/common/Dockerfile.j2
     privileged: true
     cgroupns_mode: host
     volumes:
@@ -52,7 +52,7 @@ platforms:
     command: /sbin/init
   - name: ubuntu-focal
     image: ubuntu:focal
-    dockerfile: ../common/Dockerfile.j2
+    dockerfile: ../../../../extentions/molecule/common/Dockerfile.j2
     privileged: true
     cgroupns_mode: host
     volumes:
@@ -60,7 +60,7 @@ platforms:
     command: /sbin/init
   - name: ubuntu-jammy
     image: ubuntu:jammy
-    dockerfile: ../common/Dockerfile.j2
+    dockerfile: ../../../../extentions/molecule/common/Dockerfile.j2
     privileged: true
     cgroupns_mode: host
     volumes:
@@ -68,7 +68,7 @@ platforms:
     command: /sbin/init
   - name: ubuntu-noble
     image: ubuntu:noble
-    dockerfile: ../common/Dockerfile.j2
+    dockerfile: ../../../../extentions/molecule/common/Dockerfile.j2
     privileged: true
     cgroupns_mode: host
     volumes:

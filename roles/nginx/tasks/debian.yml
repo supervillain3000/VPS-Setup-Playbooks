@@ -61,4 +61,4 @@
       dest: '/etc/nginx/vhosts/{{ vhost }}.conf'
     - src: 'ipvhost.conf.j2'
       dest: '/etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf'
-  notify: restart nginx
+  notify: Restart nginx
