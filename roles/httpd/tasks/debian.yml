@@ -9,16 +9,16 @@
     - http
     - https
 
+- name: Check if nginx is already installed
+  ansible.builtin.stat:
+    path: /etc/nginx
+  register: _httpd_nginx_check
+
 - name: Install apache2
   ansible.builtin.apt:
     name: apache2
     state: present
     update_cache: true
-
-- name: Check if nginx is already installed
-  ansible.builtin.stat:
-    path: /etc/nginx
-  register: _httpd_nginx_check
 
 - name: Change listened port
   ansible.builtin.replace:
@@ -63,6 +63,7 @@
     content: "# disabled"
     dest: /etc/apache2/ports.conf
     mode: "0644"
+  notify: Restart apache2
 
 - name: Create /var/www vhost subdir
   ansible.builtin.file:
@@ -71,9 +72,4 @@
     owner: www-data
     group: www-data
     mode: "0755"
-
-- name: Ensure apache2 is enabled
-  ansible.builtin.service:
-    name: apache2
-    state: started
-    enabled: true
+  notify: Restart apache2

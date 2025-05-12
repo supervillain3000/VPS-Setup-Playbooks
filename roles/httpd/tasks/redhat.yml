@@ -51,15 +51,10 @@
     owner: apache
     group: apache
     mode: "0755"
+  notify: Restart httpd
 
 - name: Install mod_ssl for httpd
   ansible.builtin.dnf:
     name: mod_ssl
     state: present
   notify: Restart httpd
-
-- name: Ensure httpd is enabled
-  ansible.builtin.service:
-    name: httpd
-    state: started
-    enabled: true
