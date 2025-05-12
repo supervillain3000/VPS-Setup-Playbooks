@@ -1,8 +1,6 @@
-import os
 import requests
 import pytest
 
-# You can parametrize by OS type if needed
 @pytest.mark.parametrize("pkg_name", ["nginx"])
 def test_nginx_is_installed(host, pkg_name):
     pkg = host.package(pkg_name)
@@ -20,7 +18,6 @@ def test_nginx_conf_exists_and_owned_correctly(host):
     assert f.user == "root"
     assert f.group == "root"
     assert f.mode == 0o644
-
 
 @pytest.mark.parametrize("conf_name", [
     "00-conn.conf",
@@ -44,6 +41,10 @@ def test_vhosts_dir_exists(host):
     assert d.is_directory
     assert d.mode == 0o755
 
-def test_nginx_http_status():
-    response = requests.get("http://localhost")
-    assert response.status_code == 200
+def test_nginx_listening_on_port_80(host):
+    socket = host.socket("tcp://0.0.0.0:80")
+    assert socket.is_listening
+
+def test_nginx_http_response(host):
+    cmd = host.run("curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1")
+    assert cmd.stdout == "200"

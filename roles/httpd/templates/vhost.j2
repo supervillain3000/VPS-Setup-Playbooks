@@ -1,0 +1,22 @@
+<VirtualHost *:80>
+	ServerName "{{ (vhost | default(httpd_domain)) | trim }}"
+	ServerAlias "www.{{ (vhost | default(httpd_domain)) | trim }}"
+	ServerAdmin "admin@{{ (vhost | default(httpd_domain)) | trim }}"
+	UseCanonicalName Off
+        Alias /.well-known/acme-challenge/ "/var/www/{{ (vhost | default(httpd_domain)) | trim }}/.well-known/acme-challenge/"
+
+	DocumentRoot "/var/www/{{ (vhost | default(httpd_domain)) | trim }}/"
+	{% if ansible_os_family == "Debian" %}
+	ErrorLog "/var/log/apache2/{{ (vhost | default(httpd_domain)) | trim }}_error.log"
+	{% elif ansible_os_family == "RedHat" %}
+	ErrorLog "/var/log/httpd/{{ (vhost | default(httpd_domain)) | trim }}_error.log"
+	{% endif %}
+
+	DirectoryIndex "index.html" "index.php" "index.xhtml" "index.htm" "index.shtml"
+
+	<Directory /var/www/{{ (vhost | default(httpd_domain)) | trim }}/>
+		Options -Indexes +FollowSymLinks
+		AllowOverride All
+	</Directory>
+
+</VirtualHost>

@@ -1,2 +1,2 @@
 ---
-httpd_domain_name: "{{ vhost }}"
+httpd_domain: example.kz

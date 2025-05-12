@@ -23,14 +23,14 @@
 - name: Change listened port
   ansible.builtin.replace:
     path: /etc/apache2/apache2.conf
-    regexp: 'Include ports.conf'
-    replace: 'Listen 8080'
+    regexp: "Include ports.conf"
+    replace: "Listen 8080"
   notify: Restart apache2
   when: _httpd_nginx_check.stat.exists
 
 - name: Clear default config file
   ansible.builtin.copy:
-    content: '# disabled, use separate vhost configs'
+    content: "# disabled, use separate vhost configs"
     dest: /etc/apache2/sites-enabled/000-default.conf
     follow: true
     mode: "0644"
@@ -38,36 +38,36 @@
 
 - name: Add vhost config
   ansible.builtin.template:
-    src: vhost_debian.j2
-    dest: /etc/apache2/sites-available/{{ httpd_domain_name }}.conf
+    src: vhost.j2
+    dest: /etc/apache2/sites-available/{{ (vhost | default(httpd_domain)) | trim }}.conf
     mode: "0644"
   notify: Restart apache2
 
 - name: Ensure the default Apache port is 8080
   ansible.builtin.lineinfile:
-    path: /etc/apache2/sites-available/{{ httpd_domain_name }}.conf
-    regexp: '^<VirtualHost'
-    line: '<VirtualHost 127.0.0.1:8080>'
+    path: /etc/apache2/sites-available/{{ (vhost | default(httpd_domain)) | trim }}.conf
+    regexp: "^<VirtualHost"
+    line: "<VirtualHost 127.0.0.1:8080>"
   notify: Restart apache2
   when: _httpd_nginx_check.stat.exists
 
 - name: Create vhost file symlink
   ansible.builtin.file:
     state: link
-    path: /etc/apache2/sites-enabled/{{ httpd_domain_name }}.conf
-    src: /etc/apache2/sites-available/{{ httpd_domain_name }}.conf
+    path: /etc/apache2/sites-enabled/{{ (vhost | default(httpd_domain)) | trim }}.conf
+    src: /etc/apache2/sites-available/{{ (vhost | default(httpd_domain)) | trim }}.conf
   notify: Restart apache2
 
 - name: Disable ports.conf file
   ansible.builtin.copy:
-    content: '# disabled'
+    content: "# disabled"
     dest: /etc/apache2/ports.conf
     mode: "0644"
 
 - name: Create /var/www vhost subdir
   ansible.builtin.file:
     state: directory
-    path: /var/www/{{ httpd_domain_name }}/
+    path: /var/www/{{ (vhost | default(httpd_domain)) | trim }}/
     owner: www-data
     group: www-data
     mode: "0755"
