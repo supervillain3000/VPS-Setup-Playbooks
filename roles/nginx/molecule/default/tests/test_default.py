@@ -1,4 +1,3 @@
-import requests
 import pytest
 
 @pytest.mark.parametrize("pkg_name", ["nginx"])
