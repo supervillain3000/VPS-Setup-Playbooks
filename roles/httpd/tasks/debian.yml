@@ -20,55 +20,40 @@
     state: present
     update_cache: true
 
-- name: Change listened port
-  ansible.builtin.replace:
-    path: /etc/apache2/apache2.conf
-    regexp: "Include ports.conf"
-    replace: "Listen 8080"
-  notify: Restart apache2
+- name: Change Apache listening port to 8080 if NGINX is present
+  ansible.builtin.lineinfile:
+    path: /etc/apache2/ports.conf
+    regexp: '^Listen '
+    line: 'Listen 8080'
   when: _httpd_nginx_check.stat.exists
-
-- name: Clear default config file
-  ansible.builtin.copy:
-    content: "# disabled, use separate vhost configs"
-    dest: /etc/apache2/sites-enabled/000-default.conf
-    follow: true
-    mode: "0644"
   notify: Restart apache2
 
 - name: Add vhost config
   ansible.builtin.template:
     src: vhost.j2
-    dest: /etc/apache2/sites-available/{{ (vhost | default(httpd_domain)) | trim }}.conf
+    dest: "/etc/apache2/sites-available/{{ _vhost_name }}.conf"
     mode: "0644"
   notify: Restart apache2
 
-- name: Ensure the default Apache port is 8080
+- name: Ensure Apache vhost uses correct address and port
   ansible.builtin.lineinfile:
-    path: /etc/apache2/sites-available/{{ (vhost | default(httpd_domain)) | trim }}.conf
+    path: "/etc/apache2/sites-available/{{ _vhost_name }}.conf"
     regexp: "^<VirtualHost"
-    line: "<VirtualHost 127.0.0.1:8080>"
+    line: >-
+      <VirtualHost {% if _httpd_nginx_check.stat.exists %}127.0.0.1:8080{% else %}*:80{% endif %}>
   notify: Restart apache2
-  when: _httpd_nginx_check.stat.exists
 
-- name: Create vhost file symlink
+- name: Create vhost symlink
   ansible.builtin.file:
     state: link
-    path: /etc/apache2/sites-enabled/{{ (vhost | default(httpd_domain)) | trim }}.conf
-    src: /etc/apache2/sites-available/{{ (vhost | default(httpd_domain)) | trim }}.conf
-  notify: Restart apache2
-
-- name: Disable ports.conf file
-  ansible.builtin.copy:
-    content: "# disabled"
-    dest: /etc/apache2/ports.conf
-    mode: "0644"
+    path: "/etc/apache2/sites-enabled/{{ _vhost_name }}.conf"
+    src: "/etc/apache2/sites-available/{{ _vhost_name }}.conf"
   notify: Restart apache2
 
 - name: Create /var/www vhost subdir
   ansible.builtin.file:
     state: directory
-    path: /var/www/{{ (vhost | default(httpd_domain)) | trim }}/
+    path: "/var/www/{{ _vhost_name }}/"
     owner: www-data
     group: www-data
     mode: "0755"

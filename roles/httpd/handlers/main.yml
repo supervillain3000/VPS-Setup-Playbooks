@@ -3,6 +3,7 @@
   ansible.builtin.service:
     name: httpd
     state: restarted
+    enabled: true
 
 - name: Restart apache2
   ansible.builtin.service:
