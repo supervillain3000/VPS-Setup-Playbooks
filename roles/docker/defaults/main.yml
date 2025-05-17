@@ -4,6 +4,7 @@ docker_apt_repo: >
   deb [arch={{ ansible_architecture | lower }} signed-by=/etc/apt/keyrings/docker.asc]
   https://download.docker.com/linux/{{ ansible_facts['distribution'] | lower }}
   {{ ansible_facts['lsb']['codename'] }} stable
+docker_arch: "{{ 'amd64' if ansible_architecture == 'x86_64' else ansible_architecture }}"
 
 docker_dnf_gpg_key: "https://download.docker.com/linux/rhel/gpg"
 docker_dnf_repo: "https://download.docker.com/linux/rhel/docker-ce.repo"

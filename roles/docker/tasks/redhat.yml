@@ -11,15 +11,15 @@
 
 - name: Add Docker repository.
   ansible.builtin.get_url:
-    url: "https://download.docker.com/linux/rhel/docker-ce.repo"
+    url: "https://download.docker.com/linux/centos/docker-ce.repo"
     dest: '/etc/yum.repos.d/docker-ce.repo'
     owner: root
     group: root
     mode: "0644"
 
-- name: Ensure the crb repository is enabled
+- name: Ensure the docker repository is enabled
   community.general.dnf_config_manager:
-    name: docker-ce
+    name: docker-ce-stable
     state: enabled
 
 - name: Install docker
@@ -37,3 +37,9 @@
     name: docker
     state: started
     enabled: true
+
+- name: Add users to docker group
+  ansible.builtin.user:
+    name: "{{ ansible_distribution | lower }}"
+    groups: docker
+    append: yes
