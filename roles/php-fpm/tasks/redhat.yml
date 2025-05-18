@@ -1,0 +1,129 @@
+---
+- name: Add remi repository
+  ansible.builtin.dnf:
+    disable_gpg_check: true
+    name: http://mirror.neolabs.kz/remi/enterprise/remi-release-{{ ansible_distribution_major_version }}.rpm
+    state: present
+
+- name: Install php-fpm
+  ansible.builtin.dnf:
+    name: php{{ php_default_version_short }}-php-fpm
+    enablerepo: remi-php{{ php_default_version_short }}
+    update_cache: yes
+    state: latest
+
+- name: Ensure the powertools repository is enabled
+  community.general.dnf_config_manager:
+    name: powertools
+    state: enabled
+  when:
+  - ansible_facts['distribution_major_version'] < "9"
+
+- name: Ensure the crb repository is enabled
+  community.general.dnf_config_manager:
+    name: crb
+    state: enabled
+  when:
+  - ansible_facts['distribution_major_version'] >= "9"
+
+- name: install libedit-devel
+  ansible.builtin.dnf:
+    name: libedit-devel
+    enablerepo: powertools
+    state: present
+  when: ansible_facts['distribution_major_version'] == "8"
+
+- name: install php modules for php 8
+  ansible.builtin.dnf:
+    name: "{{ php_redhat_packages}}"
+    state: latest
+    enablerepo: remi-php{{ php_default_version_short }}
+  notify: restart centos php-fpm
+
+- name: clear default pool file
+  ansible.builtin.copy:
+    content: '; disabled, use separate vhost pools'
+    dest: /etc/opt/remi/php{{ php_default_version_short }}/php-fpm.d/www.conf
+  notify: restart centos php-fpm
+
+- name: create pool for a virtual host
+  ansible.builtin.template:
+    dest: /etc/opt/remi/php{{ php_default_version_short }}/php-fpm.d/{{ vhost }}.conf
+    src: vhost_pool_el.j2
+  notify: restart centos php-fpm
+
+- name: change upload size vars in php.ini
+  community.general.ini_file:
+    path: /etc/opt/remi/php{{ php_default_version_short }}/php.ini
+    section: PHP
+    option: "{{ item.options }}"
+    value: "{{ item.value }}"
+  loop:
+    - { options: 'post_max_size', value: '64M' }
+    - { options: 'upload_max_filesize', value: '64M' }
+    - { options: 'short_open_tag', value: 'On' }
+    - { options: 'cgi.fix_pathinfo', value: '0' }
+    - { options: 'date.timezone', value: 'Asia/Almaty' }
+  notify: restart centos php-fpm
+
+- name: Check if binary exists
+  ansible.builtin.stat:
+    path: "/usr/bin/php{{ item.target }}"
+  loop:
+    - { source: 'php', target: '' }
+    - { source: 'php-cgi', target: '-cgi' }
+    - { source: 'phar.phar', target: '-phar' }
+  loop_control:
+    label: "/usr/bin/php{{ item.target }}"
+  register: binary_stats
+
+- name: Create binary symlink
+  ansible.builtin.file:
+    state: link
+    src: "/opt/remi/php{{ php_default_version_short }}/root/bin/{{ item.item.source }}"
+    dest: "/usr/bin/php{{ item.item.target }}"
+  loop: "{{ binary_stats.results }}"
+  when: not item.stat.exists
+
+- name: Create /var/www/ vhost subdir
+  ansible.builtin.file:
+    state: directory
+    path: /var/www/{{ vhost }}/
+    owner: apache
+    group: apache
+    mode: 0755
+
+- name: copy index file into virtualhost root
+  ansible.builtin.copy:
+    src: index.php
+    dest: /var/www/{{ vhost }}/index.php
+    owner: apache
+    group: apache
+    mode: 0644
+
+- name: add fpm handler block for nginx
+  ansible.builtin.blockinfile:
+    marker: ' '
+    path: /etc/nginx/vhosts/{{ vhost }}.conf
+    insertafter: '## handler ##'
+    block: |
+      location ~ \.php$ {
+              fastcgi_index index.php;
+              fastcgi_param PHP_ADMIN_VALUE "sendmail_path = /usr/sbin/sendmail -t -i -f webmaster@{{ vhost }}";
+              fastcgi_pass unix:/var/run/{{ vhost }}.sock;
+              fastcgi_split_path_info ^((?U).+\.ph(?:p\d*|tml))(/?.+)$;
+              try_files $uri =404;
+              fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+              include fastcgi_params;
+
+              fastcgi_read_timeout 300;
+              fastcgi_busy_buffers_size 16k;
+              fastcgi_buffers 32 16k;
+      }
+  notify: Restart nginx
+
+- name: ensure fpm is started
+  ansible.builtin.service:
+    name: php{{ php_default_version_short }}-php-fpm
+    state: started
+    enabled: yes

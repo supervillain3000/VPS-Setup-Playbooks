@@ -5,6 +5,6 @@
     vhost: example.kz
     short_vhost: example
   tasks:
-    - name: PHP Role
+    - name: PHP-FPM Role
       ansible.builtin.include_role:
-        name: php
+        name: php-fpm
