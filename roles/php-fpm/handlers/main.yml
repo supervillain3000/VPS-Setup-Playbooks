@@ -1,11 +1,11 @@
 ---
-- name: restart debian php-fpm
+- name: Restart debian php-fpm
   service:
     name: php{{ php_default_version }}-fpm
     state: restarted
     enabled: true
 
-- name: restart centos php-fpm
+- name: Restart centos php-fpm
   service:
     name: php{{ php_default_version_short }}-php-fpm
     state: restarted

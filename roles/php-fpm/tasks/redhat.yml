@@ -5,6 +5,20 @@
     name: http://mirror.neolabs.kz/remi/enterprise/remi-release-{{ ansible_distribution_major_version }}.rpm
     state: present
 
+- name: Disable default AppStream PHP module (RHEL 9)
+  ansible.builtin.shell: |
+    dnf module list php | grep -q '^\[d\]' || dnf module disable php -y
+  when:
+    - ansible_distribution_major_version | int >= 9
+  changed_when: false
+
+- name: Enable Remi PHP
+  ansible.builtin.shell: |
+    dnf module list php | grep -q 'remi-{{ php_default_version }}.*\[e\]' || dnf module enable php:remi-{{ php_default_version }} -y
+  when:
+    - ansible_distribution_major_version | int >= 9
+  changed_when: false
+
 - name: Install php-fpm
   ansible.builtin.dnf:
     name: php{{ php_default_version_short }}-php-fpm
@@ -26,33 +40,33 @@
   when:
   - ansible_facts['distribution_major_version'] >= "9"
 
-- name: install libedit-devel
+- name: Install libedit-devel
   ansible.builtin.dnf:
     name: libedit-devel
     enablerepo: powertools
     state: present
   when: ansible_facts['distribution_major_version'] == "8"
 
-- name: install php modules for php 8
+- name: Install php modules for php 8
   ansible.builtin.dnf:
     name: "{{ php_redhat_packages}}"
     state: latest
     enablerepo: remi-php{{ php_default_version_short }}
-  notify: restart centos php-fpm
+  notify: Restart centos php-fpm
 
-- name: clear default pool file
+- name: Clear default pool file
   ansible.builtin.copy:
     content: '; disabled, use separate vhost pools'
     dest: /etc/opt/remi/php{{ php_default_version_short }}/php-fpm.d/www.conf
-  notify: restart centos php-fpm
+  notify: Restart centos php-fpm
 
-- name: create pool for a virtual host
+- name: Create pool for a virtual host
   ansible.builtin.template:
     dest: /etc/opt/remi/php{{ php_default_version_short }}/php-fpm.d/{{ vhost }}.conf
     src: vhost_pool_el.j2
-  notify: restart centos php-fpm
+  notify: Restart centos php-fpm
 
-- name: change upload size vars in php.ini
+- name: Change upload size vars in php.ini
   community.general.ini_file:
     path: /etc/opt/remi/php{{ php_default_version_short }}/php.ini
     section: PHP
@@ -64,26 +78,7 @@
     - { options: 'short_open_tag', value: 'On' }
     - { options: 'cgi.fix_pathinfo', value: '0' }
     - { options: 'date.timezone', value: 'Asia/Almaty' }
-  notify: restart centos php-fpm
-
-- name: Check if binary exists
-  ansible.builtin.stat:
-    path: "/usr/bin/php{{ item.target }}"
-  loop:
-    - { source: 'php', target: '' }
-    - { source: 'php-cgi', target: '-cgi' }
-    - { source: 'phar.phar', target: '-phar' }
-  loop_control:
-    label: "/usr/bin/php{{ item.target }}"
-  register: binary_stats
-
-- name: Create binary symlink
-  ansible.builtin.file:
-    state: link
-    src: "/opt/remi/php{{ php_default_version_short }}/root/bin/{{ item.item.source }}"
-    dest: "/usr/bin/php{{ item.item.target }}"
-  loop: "{{ binary_stats.results }}"
-  when: not item.stat.exists
+  notify: Restart centos php-fpm
 
 - name: Create /var/www/ vhost subdir
   ansible.builtin.file:
@@ -93,7 +88,7 @@
     group: apache
     mode: 0755
 
-- name: copy index file into virtualhost root
+- name: Copy index file into virtualhost root
   ansible.builtin.copy:
     src: index.php
     dest: /var/www/{{ vhost }}/index.php
@@ -101,29 +96,15 @@
     group: apache
     mode: 0644
 
-- name: add fpm handler block for nginx
-  ansible.builtin.blockinfile:
-    marker: ' '
-    path: /etc/nginx/vhosts/{{ vhost }}.conf
-    insertafter: '## handler ##'
-    block: |
-      location ~ \.php$ {
-              fastcgi_index index.php;
-              fastcgi_param PHP_ADMIN_VALUE "sendmail_path = /usr/sbin/sendmail -t -i -f webmaster@{{ vhost }}";
-              fastcgi_pass unix:/var/run/{{ vhost }}.sock;
-              fastcgi_split_path_info ^((?U).+\.ph(?:p\d*|tml))(/?.+)$;
-              try_files $uri =404;
-              fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-              include fastcgi_params;
+- name: Create /etc/nginx/vhosts/
+  ansible.builtin.file:
+    state: directory
+    path: /etc/nginx/vhosts/
+    mode: "0755"
 
-              fastcgi_read_timeout 300;
-              fastcgi_busy_buffers_size 16k;
-              fastcgi_buffers 32 16k;
-      }
+- name: Add nginx vhosts configs
+  ansible.builtin.template:
+    src: "vhost_el.conf.j2"
+    dest: "/etc/nginx/vhosts/{{ vhost | default(php_fpm_domain) | trim }}.conf"
+    mode: "0644"
   notify: Restart nginx
-
-- name: ensure fpm is started
-  ansible.builtin.service:
-    name: php{{ php_default_version_short }}-php-fpm
-    state: started
-    enabled: yes

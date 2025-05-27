@@ -30,19 +30,19 @@
   ansible.builtin.apt:
     name: "{{ php_debian_packages }}"
     state: latest
-  notify: restart debian php-fpm
+  notify: Restart debian php-fpm
 
 - name: Clear default pool file
   ansible.builtin.copy:
     content: '; disabled, use separate vhost pools'
     dest: /etc/php/{{ php_default_version }}/fpm/pool.d/www.conf
-  notify: restart debian php-fpm
+  notify: Restart debian php-fpm
 
 - name: Create pool for a virtual host
   ansible.builtin.template:
     dest: /etc/php/{{ php_default_version }}/fpm/pool.d/{{ vhost }}.conf
     src: vhost_pool_deb.j2
-  notify: restart debian php-fpm
+  notify: Restart debian php-fpm
 
 - name: Change upload size vars in php.ini
   community.general.ini_file:
@@ -56,7 +56,7 @@
     - { options: 'short_open_tag', value: 'On' }
     - { options: 'cgi.fix_pathinfo', value: '0' }
     - { options: 'date.timezone', value: 'Asia/Almaty' }
-  notify: restart debian php-fpm
+  notify: Restart debian php-fpm
 
 - name: Create /var/www/ vhost subdir
   ansible.builtin.file:
@@ -74,29 +74,15 @@
     group: www-data
     mode: 0644
 
-- name: Add fpm handler block for nginx
-  ansible.builtin.blockinfile:
-    marker: ' '
-    path: /etc/nginx/vhosts/{{ vhost }}.conf
-    insertafter: '## handler ##'
-    block: |
-      location ~ \.php$ {
-              fastcgi_index index.php;
-              fastcgi_param PHP_ADMIN_VALUE "sendmail_path = /usr/sbin/sendmail -t -i -f webmaster@{{ vhost }}";
-              fastcgi_pass unix:/var/run/php/{{ vhost }}.sock;
-              fastcgi_split_path_info ^((?U).+\.ph(?:p\d*|tml))(/?.+)$;
-              try_files $uri =404;
-              fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-              include fastcgi_params;
+- name: Create /etc/nginx/vhosts/
+  ansible.builtin.file:
+    state: directory
+    path: /etc/nginx/vhosts/
+    mode: "0755"
 
-              fastcgi_read_timeout 300;
-              fastcgi_busy_buffers_size 16k;
-              fastcgi_buffers 32 16k;
-      }
+- name: Add nginx vhosts configs
+  ansible.builtin.template:
+    src: "vhost_debian.conf.j2"
+    dest: "/etc/nginx/vhosts/{{ vhost | default(php_fpm_domain) | trim }}.conf"
+    mode: "0644"
   notify: Restart nginx
-
-- name: ensure fpm is started and enabled
-  ansible.builtin.service:
-    name: php{{ php_default_version }}-fpm
-    enabled: yes
-    state: started

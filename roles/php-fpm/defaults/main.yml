@@ -1,8 +1,7 @@
 ---
-# PHP Versioning
-php_default_version_short: 83           # Used in legacy module naming (e.g., php83-php-*)
-php_default_version: 8.3        # Used in modern module naming (e.g., php8.3-* style)
-
+php_fpm_domain: example.kz
+php_default_version_short: 83
+php_default_version: 8.3
 php_apt_repo_gpg_key: "https://mirror.ps.kz/sury/packages.sury.org/php/apt.gpg"
 php_sury_repo: >-
   deb https://packages.sury.org/php {{ ansible_facts['distribution_release'] }} main
