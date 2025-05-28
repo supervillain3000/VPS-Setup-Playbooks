@@ -1,14 +1,23 @@
 ---
-- name: Set php_fpm_daemon var
-  ansible.builtin.set_fact:
-    php_fpm_daemon: "php{{ php_default_version }}-php-fpm"
-  when: php_enable_php_fpm
-
 - name: Add remi repository
   ansible.builtin.dnf:
     disable_gpg_check: true
-    name: "{{ php_redhat_remi_repo }}"
+    name: http://mirror.neolabs.kz/remi/enterprise/remi-release-{{ ansible_distribution_major_version }}.rpm
     state: present
+
+- name: Disable default AppStream PHP module (RHEL 9)
+  ansible.builtin.shell: |
+    dnf module list php | grep -q '^\[d\]' || dnf module disable php -y
+  when:
+    - ansible_distribution_major_version | int >= 9
+  changed_when: false
+
+- name: Enable Remi PHP
+  ansible.builtin.shell: |
+    dnf module list php | grep -q 'remi-{{ php_default_version }}.*\[e\]' || dnf module enable php:remi-{{ php_default_version }} -y
+  when:
+    - ansible_distribution_major_version | int >= 9
+  changed_when: false
 
 - name: Ensure the powertools repository is enabled
   community.general.dnf_config_manager:
@@ -58,6 +67,17 @@
     enablerepo: remi-safe
   notify: Restart webserver
 
+- name: Make remi php binary work using php command
+  ansible.builtin.file:
+    state: link
+    src: /opt/remi/php{{ php_default_version_short }}/root/usr/bin/{{ item.source }}
+    dest: /usr/bin/php{{ item.target }}
+  loop:
+    - { source: 'php', target: ''}
+    - { source: 'php-cgi', target: '-cgi'}
+    - { source: 'phar.phar', target: '-phar'}
+  when: ansible_facts['distribution_major_version'] < "9"
+
 - name: Create /var/www/ vhost subdir
   ansible.builtin.file:
     state: directory
@@ -87,52 +107,3 @@
   - { options: 'short_open_tag', value: 'On' }
   - { options: 'cgi.fix_pathinfo', value: '0' }
   - { options: 'date.timezone', value: 'Asia/Almaty' }
-
-- name: Configure php-fpm
-  when: php_enable_php_fpm and _php_nginx_check.stat.exists
-  block:
-  - name: Clear default pool file
-    ansible.builtin.copy:
-      content: '; disabled, use separate vhost pools'
-      dest: /etc/opt/remi/php{{ php_version }}/php-fpm.d/www.conf
-      mode: "0644"
-    notify: Restart php-fpm
-
-  - name: Create pool for a virtual host
-    ansible.builtin.template:
-      dest: /etc/opt/remi/php{{ php_version }}/php-fpm.d/{{ vhost }}.conf
-      src: vhost_pool_centos.j2
-      mode: "0644"
-    notify: Restart php-fpm
-
-  - name: Make remi php binary work using php command
-    ansible.builtin.file:
-      state: link
-      src: /opt/remi/php{{ php_version }}/root/bin/{{ item.source }}
-      dest: /usr/bin/php{{ item.target }}
-    loop:
-    - { source: 'php', target: '' }
-    - { source: 'php-cgi', target: '-cgi' }
-    - { source: 'phar.phar', target: '-phar' }
-
-  - name: Add fpm handler block for nginx
-    ansible.builtin.blockinfile:
-      marker: ' '
-      path: /etc/nginx/vhosts/{{ vhost }}.conf
-      insertafter: '## handler ##'
-      block: |
-        location ~ \.php$ {
-                fastcgi_index index.php;
-                fastcgi_param PHP_ADMIN_VALUE "sendmail_path = /usr/sbin/sendmail -t -i -f webmaster@{{ vhost }}";
-                fastcgi_pass unix:/var/run/{{ vhost }}.sock;
-                fastcgi_split_path_info ^((?U).+\.ph(?:p\d*|tml))(/?.+)$;
-                try_files $uri =404;
-                fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-                include fastcgi_params;
-
-                fastcgi_read_timeout 300;
-                fastcgi_busy_buffers_size 16k;
-                fastcgi_buffers 32 16k;
-        }
-    notify:
-    - Restart webserver
