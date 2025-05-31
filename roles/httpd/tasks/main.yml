@@ -1,8 +1,4 @@
 ---
-- name: Set vhost name
-  ansible.builtin.set_fact:
-    _vhost_name: "{{ (vhost | default(httpd_domain)) | trim }}"
-
 - name: Import task if redhat base OS
   ansible.builtin.import_tasks: redhat.yml
   when: ansible_facts['os_family']|lower == 'redhat'

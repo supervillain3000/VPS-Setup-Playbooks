@@ -31,13 +31,13 @@
 - name: Add vhost config
   ansible.builtin.template:
     src: vhost.j2
-    dest: "/etc/apache2/sites-available/{{ _vhost_name }}.conf"
+    dest: "/etc/apache2/sites-available/{{ httpd_domain }}.conf"
     mode: "0644"
   notify: Restart apache2
 
 - name: Ensure Apache vhost uses correct address and port
   ansible.builtin.lineinfile:
-    path: "/etc/apache2/sites-available/{{ _vhost_name }}.conf"
+    path: "/etc/apache2/sites-available/{{ httpd_domain }}.conf"
     regexp: "^<VirtualHost"
     line: >-
       <VirtualHost {% if _httpd_nginx_check.stat.exists %}127.0.0.1:8080{% else %}*:80{% endif %}>
@@ -46,14 +46,14 @@
 - name: Create vhost symlink
   ansible.builtin.file:
     state: link
-    path: "/etc/apache2/sites-enabled/{{ _vhost_name }}.conf"
-    src: "/etc/apache2/sites-available/{{ _vhost_name }}.conf"
+    path: "/etc/apache2/sites-enabled/{{ httpd_domain }}.conf"
+    src: "/etc/apache2/sites-available/{{ httpd_domain }}.conf"
   notify: Restart apache2
 
 - name: Create /var/www vhost subdir
   ansible.builtin.file:
     state: directory
-    path: "/var/www/{{ _vhost_name }}/"
+    path: "/var/www/{{ httpd_domain }}/"
     owner: www-data
     group: www-data
     mode: "0755"

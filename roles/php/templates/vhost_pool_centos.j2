@@ -1,6 +1,6 @@
-[{{ vhost }}]
+[{{ php_vhost }}]
 
-listen = /var/run/{{ vhost }}.sock
+listen = /var/run/{{ php_vhost }}.sock
 
 listen.allowed_clients = 127.0.0.1
 
@@ -18,7 +18,7 @@ pm.min_spare_servers = 5
 pm.max_spare_servers = 7
 pm.max_requests = 300
 
-slowlog = /var/log/php-fpm/{{ vhost }}-slow.log
+slowlog = /var/log/php-fpm/{{ php_vhost }}-slow.log
 
 catch_workers_output = yes
 
@@ -29,9 +29,9 @@ security.limit_extensions = .php .php3 .php4 .php5
 ;env[TMP] = /tmp
 ;env[TMPDIR] = /tmp
 ;env[TEMP] = /tmp
-;php_admin_value[sendmail_path] = /usr/sbin/sendmail -t -i -f admin@{{ vhost }}
+;php_admin_value[sendmail_path] = /usr/sbin/sendmail -t -i -f admin@{{ php_vhost }}
 ;php_flag[display_errors] = off
-php_admin_value[error_log] = /var/log/php-fpm/{{ vhost }}-error.log
+php_admin_value[error_log] = /var/log/php-fpm/{{ php_vhost }}-error.log
 php_admin_flag[log_errors] = on
 ;php_admin_value[memory_limit] = 128M
 php_value[session.save_handler] = files

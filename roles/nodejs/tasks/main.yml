@@ -52,6 +52,3 @@
     NODE_PATH: "{{ nodejs_npm_config_prefix }}/lib/node_modules"
     NPM_CONFIG_UNSAFE_PERM: "false"
   with_items: "{{ nodejs_npm_global_packages }}"
-
-- name: Include website setup task
-  ansible.builtin.import_tasks: setup_website.yml

@@ -1,4 +1,5 @@
 ---
+php_vhost: example.kz
 php_default_version: "8.3"
 php_default_version_short: '83'
 

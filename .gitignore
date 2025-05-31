@@ -1,2 +1,3 @@
 __pycache__/
 upd_roles.sh
+.ansible/

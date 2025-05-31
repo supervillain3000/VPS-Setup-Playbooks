@@ -5,6 +5,7 @@
       - mariadb-server
       - python3-mysqldb
     state: present
+    update_cache: true
 
 - name: Ensure MariaDB started and enabled
   ansible.builtin.service:
@@ -21,7 +22,7 @@
 
 - name: Change default auth plugin to mysql_native_password
   ansible.builtin.lineinfile:
-    path: /etc/mysql/mysql.conf.d/mysqld.cnf
+    path: /etc/mysql/mariadb.conf.d/50-server.cnf
     insertafter: '^# datadir'
     line: 'default-authentication-plugin = mysql_native_password'
   notify: Restart mariadb
@@ -45,7 +46,6 @@
     dest: /root/03-mysql_password
     insertbefore: BOF
     block: |
-
       Данные для доступа к базе данных:
       Имя БД: {{ mariadb_database_name }}
       Пользователь: {{ mariadb_database_name }}
@@ -63,7 +63,6 @@
     dest: /root/03-mysql-admin_password
     insertbefore: BOF
     block: |
-
       Админ-пользователь mysql:
       Логин: admin
 
@@ -104,5 +103,4 @@
     dest: /root/04-mysql_root_password
     insertbefore: BOF
     block: |
-
       Пароль от mysql root-пользователя:

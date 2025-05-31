@@ -40,7 +40,7 @@
 
 - name: Create pool for a virtual host
   ansible.builtin.template:
-    dest: /etc/php/{{ php_default_version }}/fpm/pool.d/{{ vhost }}.conf
+    dest: /etc/php/{{ php_default_version }}/fpm/pool.d/{{ php_fpm_domain }}.conf
     src: vhost_pool_deb.j2
   notify: Restart debian php-fpm
 
@@ -61,7 +61,7 @@
 - name: Create /var/www/ vhost subdir
   ansible.builtin.file:
     state: directory
-    path: /var/www/{{ vhost }}/
+    path: /var/www/{{ php_fpm_domain }}/
     owner: www-data
     group: www-data
     mode: 0755
@@ -69,7 +69,7 @@
 - name: Copy index file into virtualhost root
   ansible.builtin.copy:
     src: index.php
-    dest: /var/www/{{ vhost }}/index.php
+    dest: /var/www/{{ php_fpm_domain }}/index.php
     owner: www-data
     group: www-data
     mode: 0644
@@ -83,6 +83,6 @@
 - name: Add nginx vhosts configs
   ansible.builtin.template:
     src: "vhost_debian.conf.j2"
-    dest: "/etc/nginx/vhosts/{{ vhost | default(php_fpm_domain) | trim }}.conf"
+    dest: "/etc/nginx/vhosts/{{ php_fpm_domain }}.conf"
     mode: "0644"
   notify: Restart nginx

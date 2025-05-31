@@ -91,7 +91,7 @@
 - name: Create /var/www vhost subdir
   ansible.builtin.file:
     state: directory
-    path: /var/www/{{ vhost }}
+    path: /var/www/{{ php_vhost }}
     owner: www-data
     group: www-data
     mode: "0755"
@@ -99,7 +99,7 @@
 - name: Copy index file into virtualhost root
   ansible.builtin.copy:
     src: index.php
-    dest: /var/www/{{ vhost }}/index.php
+    dest: /var/www/{{ php_vhost }}/index.php
     owner: www-data
     group: www-data
     mode: "0644"

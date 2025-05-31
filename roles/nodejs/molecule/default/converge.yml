@@ -1,7 +1,9 @@
 ---
 - name: Converge
   hosts: all
+  vars:
+    vhost: example.kz
   tasks:
-    - name: Base Role
+    - name: NodeJS Role
       ansible.builtin.include_role:
-        name: base
+        name: nodejs
