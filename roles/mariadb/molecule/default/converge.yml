@@ -1,0 +1,9 @@
+---
+- name: Converge
+  hosts: all
+  vars:
+    short_vhost: example
+  tasks:
+    - name: MariaDB Role
+      ansible.builtin.include_role:
+        name: mariadb

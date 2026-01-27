@@ -1,2 +1,2 @@
 ---
-mariadb_database_name: "{{ short_vhost }}"
+mariadb_database_name: example

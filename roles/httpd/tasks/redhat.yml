@@ -31,14 +31,14 @@
 
 - name: Add vhost config
   ansible.builtin.template:
-    src: vhost_el.j2
-    dest: /etc/httpd/conf.d/{{ httpd_domain_name }}.conf
+    src: vhost.j2
+    dest: /etc/httpd/conf.d/{{ httpd_domain }}.conf
     mode: "0644"
   notify: Restart httpd
 
 - name: Ensure the default Apache site port is 8080
   ansible.builtin.lineinfile:
-    path: /etc/httpd/conf.d/{{ httpd_domain_name }}.conf
+    path: /etc/httpd/conf.d/{{ httpd_domain }}.conf
     regexp: '^<VirtualHost'
     line: '<VirtualHost 127.0.0.1:8080>'
   notify: Restart httpd
@@ -47,19 +47,14 @@
 - name: Create /var/www vhost subdir
   ansible.builtin.file:
     state: directory
-    path: /var/www/{{ httpd_domain_name }}/
+    path: /var/www/{{ httpd_domain }}/
     owner: apache
     group: apache
     mode: "0755"
+  notify: Restart httpd
 
 - name: Install mod_ssl for httpd
   ansible.builtin.dnf:
     name: mod_ssl
     state: present
   notify: Restart httpd
-
-- name: Ensure httpd is enabled
-  ansible.builtin.service:
-    name: httpd
-    state: started
-    enabled: true

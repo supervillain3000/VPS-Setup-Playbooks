@@ -1,8 +1,8 @@
 ---
-- name: Set php_fpm_daemon var
-  ansible.builtin.set_fact:
-    __php_fpm_daemon: "php{{ php_default_version }}-fpm"
-  when: php_enable_php_fpm
+- name: Install dependencies
+  ansible.builtin.apt:
+    name: gnupg
+    state: present
 
 - name: Add apt-key for ondrej php repo
   ansible.builtin.apt_key:
@@ -60,13 +60,6 @@
   notify: Restart webserver
   when: _php_apache2_check.stat.exists
 
-- name: Enable mpm_prefork
-  community.general.apache2_module:
-    state: present
-    name: mpm_prefork
-  notify: Restart webserver
-  when: _php_apache2_check.stat.exists
-
 - name: Enable apache2 mod_rewrite
   community.general.apache2_module:
     state: present
@@ -74,17 +67,10 @@
   notify: Restart webserver
   when: _php_apache2_check.stat.exists
 
-- name: Tune mpm_prefork
-  ansible.builtin.blockinfile:
-    marker: ''
-    path: /etc/apache2/apache2.conf
-    insertafter: '^.*KeepAliveTimeout'
-    block: |
-      MaxClients 256
-      StartServers 3
-      MinSpareServers 3
-      MaxSpareServers 16
-      MaxRequestsPerChild 4096
+- name: Enable mpm_prefork
+  community.general.apache2_module:
+    state: present
+    name: mpm_prefork
   notify: Restart webserver
   when: _php_apache2_check.stat.exists
 
@@ -105,7 +91,7 @@
 - name: Create /var/www vhost subdir
   ansible.builtin.file:
     state: directory
-    path: /var/www/{{ vhost }}
+    path: /var/www/{{ php_vhost }}
     owner: www-data
     group: www-data
     mode: "0755"
@@ -113,50 +99,7 @@
 - name: Copy index file into virtualhost root
   ansible.builtin.copy:
     src: index.php
-    dest: /var/www/{{ vhost }}/index.php
+    dest: /var/www/{{ php_vhost }}/index.php
     owner: www-data
     group: www-data
     mode: "0644"
-
-- name: Configure php-fpm
-  when: php_enable_php_fpm and _php_nginx_check.stat.exists
-  block:
-    - name: Install php-fpm
-      ansible.builtin.apt:
-        name: php{{ php_default_version }}-fpm
-        state: present
-      notify: Restart php-fpm
-
-    - name: Clear default pool file
-      ansible.builtin.copy:
-        content: '; disabled, use separate vhost pools'
-        dest: /etc/php/{{ php_default_version }}/fpm/pool.d/www.conf
-        mode: "0644"
-      notify: Restart php-fpm
-
-    - name: Create pool for a virtual host
-      ansible.builtin.template:
-        dest: /etc/php/{{ php_default_version }}/fpm/pool.d/{{ vhost }}.conf
-        src: vhost_pool_debian.j2
-        mode: "0644"
-      notify: Restart php-fpm
-
-    - name: Add fpm handler block for nginx
-      ansible.builtin.blockinfile:
-        marker: ' '
-        path: /etc/nginx/vhosts/{{ vhost }}.conf
-        insertafter: '## handler ##'
-        block: |
-          location ~ \.php$ {
-                  fastcgi_index index.php;
-                  fastcgi_param PHP_ADMIN_VALUE "sendmail_path = /usr/sbin/sendmail -t -i -f webmaster@{{ vhost }}";
-                  fastcgi_pass unix:/var/run/php/{{ vhost }}.sock;
-                  fastcgi_split_path_info ^((?U).+\.ph(?:p\d*|tml))(/?.+)$;
-                  try_files $uri =404;
-                  fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-                  include fastcgi_params;
-                  fastcgi_read_timeout 300;
-                  fastcgi_busy_buffers_size 16k;
-                  fastcgi_buffers 32 16k;
-          }
-      notify: Restart webserver

@@ -2,12 +2,18 @@
 - name: Install MariaDB
   ansible.builtin.dnf:
     name: mariadb-server
+    state: present
 
 - name: Ensure MariaDB started and enabled
   ansible.builtin.service:
     name: mariadb
     state: started
     enabled: true
+
+- name: Ensure pip is installed
+  ansible.builtin.dnf:
+    name: python3-pip
+    state: present
 
 - name: Ensure mysqlclient is installed
   ansible.builtin.pip:

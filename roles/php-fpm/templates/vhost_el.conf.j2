@@ -1,0 +1,36 @@
+server {
+        server_name {{ php_fpm_domain }} www.{{ php_fpm_domain }};
+
+        listen 80;
+        {%- if ansible_default_ipv6.address is defined %}
+        listen [::]:80;
+        {%- endif %}
+
+        index index.php index.html;
+
+        disable_symlinks if_not_owner from=$root_path;
+
+        access_log /var/log/nginx/{{ php_fpm_domain }}.access.log;
+        error_log /var/log/nginx/{{ php_fpm_domain }}.error.log notice;
+
+        set $root_path /var/www/{{ php_fpm_domain }};
+        root $root_path;
+
+        location ~* \.(ac3|avi|bmp|bz2|css|cue|dat|doc|docx|dts|eot|exe|flv|gif|gz|htm|html|ico|img|iso|jpeg|jpg|js|mkv|mp3|mp4|mpeg|mpg|ogg|pdf|png|ppt|pptx|qt|rar|rm|svg|swf|tar|tgz|ttf|txt|wav|woff|woff2|xls|xlsx|zip)$ {
+                root /var/www/{{ php_fpm_domain }}/;
+                expires max;
+        }
+
+        location ~ \.php$ {
+            fastcgi_index index.php;
+            fastcgi_param PHP_ADMIN_VALUE "sendmail_path = /usr/sbin/sendmail -t -i -f webmaster@{{ vhost }}";
+            fastcgi_pass unix:/var/run/{{ vhost }}.sock;
+            fastcgi_split_path_info ^((?U).+\.ph(?:p\d*|tml))(/?.+)$;
+            try_files $uri =404;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            include fastcgi_params;
+            fastcgi_read_timeout 300;
+            fastcgi_busy_buffers_size 16k;
+            fastcgi_buffers 32 16k;
+        }
+}

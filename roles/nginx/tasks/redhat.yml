@@ -54,12 +54,7 @@
 
 - name: Add nginx vhosts configs
   ansible.builtin.template:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
+    src: "ipvhost.conf.j2"
+    dest: "/etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf"
     mode: "0644"
-  loop:
-    - src: 'vhost_centos.conf.j2'
-      dest: '/etc/nginx/vhosts/{{ vhost }}.conf'
-    - src: 'ipvhost.conf.j2'
-      dest: '/etc/nginx/vhosts/{{ ansible_default_ipv4.address }}.conf'
   notify: Restart nginx

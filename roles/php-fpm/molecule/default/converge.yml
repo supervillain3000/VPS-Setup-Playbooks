@@ -1,0 +1,10 @@
+---
+- name: Converge
+  hosts: all
+  vars:
+    vhost: example.kz
+    short_vhost: example
+  tasks:
+    - name: PHP-FPM Role
+      ansible.builtin.include_role:
+        name: php-fpm

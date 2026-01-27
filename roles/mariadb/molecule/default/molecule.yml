@@ -1,0 +1,75 @@
+---
+driver:
+  name: docker
+
+platforms:
+  - &default_platform
+    name: almalinux-8
+    image: almalinux:8
+    command: /usr/sbin/init
+    dockerfile: ../../../../extentions/molecule/common/Dockerfile.j2
+    privileged: true
+    cgroupns_mode: host
+    user: root
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    tmpfs:
+      - /root:rw
+    pre_build_image: false
+
+  - <<: *default_platform 
+    name: almalinux-9
+    image: almalinux:9
+
+  - <<: *default_platform 
+    name: rockylinux-8
+    image: rockylinux:8
+
+  - <<: *default_platform 
+    name: rockylinux-9
+    image: rockylinux:9.0
+
+  - <<: *default_platform 
+    name: debian-bullseye
+    image: debian:bullseye-slim
+    command: /sbin/init
+
+  - <<: *default_platform 
+    name: debian-bookworm
+    image: debian:bookworm-slim
+    command: /sbin/init
+
+  - <<: *default_platform 
+    name: ubuntu-focal
+    image: ubuntu:focal
+    command: /sbin/init
+
+  - <<: *default_platform 
+    name: ubuntu-jammy
+    image: ubuntu:jammy
+    command: /sbin/init
+
+  - <<: *default_platform 
+    name: ubuntu-noble
+    image: ubuntu:noble
+    command: /sbin/init
+
+provisioner:
+  name: ansible
+  log: true
+  config_options:
+    defaults:
+      interpreter_python: auto_silent
+  playbooks:
+    converge: converge.yml
+  inventory:
+    host_vars:
+      almalinux-8:
+        ansible_python_interpreter: /usr/libexec/platform-python
+      rockylinux-8:
+        ansible_python_interpreter: /usr/libexec/platform-python
+  env:
+    ANSIBLE_LOCAL_TEMP: /tmp/ansible
+    ANSIBLE_REMOTE_TEMP: /tmp/ansible
+verifier:
+  name: testinfra

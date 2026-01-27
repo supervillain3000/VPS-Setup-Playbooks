@@ -6,6 +6,7 @@
       - python3-debian
       - gnupg2
     state: present
+    update_cache: true
 
 - name: Download NodeSource's signing key.
   ansible.builtin.get_url:

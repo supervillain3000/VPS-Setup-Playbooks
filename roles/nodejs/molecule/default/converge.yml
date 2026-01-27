@@ -1,0 +1,9 @@
+---
+- name: Converge
+  hosts: all
+  vars:
+    vhost: example.kz
+  tasks:
+    - name: NodeJS Role
+      ansible.builtin.include_role:
+        name: nodejs

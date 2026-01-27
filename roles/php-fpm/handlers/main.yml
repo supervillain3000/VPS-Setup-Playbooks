@@ -1,0 +1,17 @@
+---
+- name: Restart debian php-fpm
+  service:
+    name: php{{ php_default_version }}-fpm
+    state: restarted
+    enabled: true
+
+- name: Restart centos php-fpm
+  service:
+    name: php{{ php_default_version_short }}-php-fpm
+    state: restarted
+    enabled: true
+
+- name: Restart nginx
+  ansible.builtin.service:
+    name: nginx
+    state: restarted

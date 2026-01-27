@@ -1,0 +1,110 @@
+---
+- name: Add remi repository
+  ansible.builtin.dnf:
+    disable_gpg_check: true
+    name: http://mirror.neolabs.kz/remi/enterprise/remi-release-{{ ansible_distribution_major_version }}.rpm
+    state: present
+
+- name: Disable default AppStream PHP module (RHEL 9)
+  ansible.builtin.shell: |
+    dnf module list php | grep -q '^\[d\]' || dnf module disable php -y
+  when:
+    - ansible_distribution_major_version | int >= 9
+  changed_when: false
+
+- name: Enable Remi PHP
+  ansible.builtin.shell: |
+    dnf module list php | grep -q 'remi-{{ php_default_version }}.*\[e\]' || dnf module enable php:remi-{{ php_default_version }} -y
+  when:
+    - ansible_distribution_major_version | int >= 9
+  changed_when: false
+
+- name: Install php-fpm
+  ansible.builtin.dnf:
+    name: php{{ php_default_version_short }}-php-fpm
+    enablerepo: remi-php{{ php_default_version_short }}
+    update_cache: yes
+    state: latest
+
+- name: Ensure the powertools repository is enabled
+  community.general.dnf_config_manager:
+    name: powertools
+    state: enabled
+  when:
+  - ansible_facts['distribution_major_version'] < "9"
+
+- name: Ensure the crb repository is enabled
+  community.general.dnf_config_manager:
+    name: crb
+    state: enabled
+  when:
+  - ansible_facts['distribution_major_version'] >= "9"
+
+- name: Install libedit-devel
+  ansible.builtin.dnf:
+    name: libedit-devel
+    enablerepo: powertools
+    state: present
+  when: ansible_facts['distribution_major_version'] == "8"
+
+- name: Install php modules for php 8
+  ansible.builtin.dnf:
+    name: "{{ php_redhat_packages}}"
+    state: latest
+    enablerepo: remi-php{{ php_default_version_short }}
+  notify: Restart centos php-fpm
+
+- name: Clear default pool file
+  ansible.builtin.copy:
+    content: '; disabled, use separate vhost pools'
+    dest: /etc/opt/remi/php{{ php_default_version_short }}/php-fpm.d/www.conf
+  notify: Restart centos php-fpm
+
+- name: Create pool for a virtual host
+  ansible.builtin.template:
+    dest: /etc/opt/remi/php{{ php_default_version_short }}/php-fpm.d/{{ php_fpm_domain }}.conf
+    src: vhost_pool_el.j2
+  notify: Restart centos php-fpm
+
+- name: Change upload size vars in php.ini
+  community.general.ini_file:
+    path: /etc/opt/remi/php{{ php_default_version_short }}/php.ini
+    section: PHP
+    option: "{{ item.options }}"
+    value: "{{ item.value }}"
+  loop:
+    - { options: 'post_max_size', value: '64M' }
+    - { options: 'upload_max_filesize', value: '64M' }
+    - { options: 'short_open_tag', value: 'On' }
+    - { options: 'cgi.fix_pathinfo', value: '0' }
+    - { options: 'date.timezone', value: 'Asia/Almaty' }
+  notify: Restart centos php-fpm
+
+- name: Create /var/www/ vhost subdir
+  ansible.builtin.file:
+    state: directory
+    path: /var/www/{{ php_fpm_domain }}/
+    owner: apache
+    group: apache
+    mode: 0755
+
+- name: Copy index file into virtualhost root
+  ansible.builtin.copy:
+    src: index.php
+    dest: /var/www/{{ php_fpm_domain }}/index.php
+    owner: apache
+    group: apache
+    mode: 0644
+
+- name: Create /etc/nginx/vhosts/
+  ansible.builtin.file:
+    state: directory
+    path: /etc/nginx/vhosts/
+    mode: "0755"
+
+- name: Add nginx vhosts configs
+  ansible.builtin.template:
+    src: "vhost_el.conf.j2"
+    dest: "/etc/nginx/vhosts/{{ php_fpm_domain }}.conf"
+    mode: "0644"
+  notify: Restart nginx

@@ -1,0 +1,10 @@
+---
+- name: Converge
+  hosts: all
+  vars:
+    vhost: example.kz
+    short_vhost: example
+  tasks:
+    - name: Nginx Role
+      ansible.builtin.include_role:
+        name: nginx

@@ -1,11 +1,4 @@
 ---
-- name: Run update-crypto-policies command to enable SHA1
-  ansible.builtin.command: >
-    update-crypto-policies --set DEFAULT:SHA1
-  when: ansible_distribution_major_version >= 9
-  register: crypto_policy_result
-  changed_when: "'SHA1' not in crypto_policy_result.stdout"
-
 - name: Add Nodesource repositories for Node.js.
   ansible.builtin.yum_repository:
     file: nodesource-nodejs

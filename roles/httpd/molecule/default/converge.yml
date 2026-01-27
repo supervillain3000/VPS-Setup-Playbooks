@@ -1,0 +1,9 @@
+---
+- name: Converge
+  hosts: all
+  vars:
+    vhost: example.kz
+  tasks:
+    - name: Apache Role
+      ansible.builtin.include_role:
+        name: httpd
