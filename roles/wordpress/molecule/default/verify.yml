@@ -1,11 +1,21 @@
 ---
 - name: Verify
   hosts: all
+  vars:
+    vhost: example.kz
   tasks:
-    - name: Check if chronyd is installed
-      ansible.builtin.package:
-        name: chronyd
-        state: present
-      check_mode: true
-      register: install
-      failed_when: (install is changed) or (install is failed)
+    - name: Check WordPress Config Exists
+      ansible.builtin.stat:
+        path: /var/www/{{ vhost }}/wp-config.php
+      register: wordpress_config
+
+    - name: Fail When WordPress Config Is Missing
+      ansible.builtin.fail:
+        msg: "/var/www/{{ vhost }}/wp-config.php was not created"
+      when: not wordpress_config.stat.exists
+
+    - name: Check WP CLI Is Available
+      ansible.builtin.command: wp --info
+      register: wp_cli_info
+      changed_when: false
+      failed_when: wp_cli_info.rc != 0

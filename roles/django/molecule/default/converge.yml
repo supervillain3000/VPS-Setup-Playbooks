@@ -1,7 +1,13 @@
 ---
 - name: Converge
   hosts: all
+  vars:
+    vhost: example.kz
   tasks:
-    - name: Base Role
+    - name: Nginx Role
       ansible.builtin.include_role:
-        name: base
+        name: nginx
+
+    - name: Django Role
+      ansible.builtin.include_role:
+        name: django

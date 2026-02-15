@@ -1,0 +1,23 @@
+---
+- name: Verify
+  hosts: all
+  vars:
+    vhost: example.kz
+  tasks:
+    - name: Check Nginx Package Is Installed
+      ansible.builtin.package:
+        name: nginx
+        state: present
+      check_mode: true
+      register: nginx_install
+      failed_when: (nginx_install is changed) or (nginx_install is failed)
+
+    - name: Check Nginx Vhost Config Exists
+      ansible.builtin.stat:
+        path: /etc/nginx/vhosts/{{ vhost }}.conf
+      register: nginx_vhost
+
+    - name: Fail When Nginx Vhost Config Is Missing
+      ansible.builtin.fail:
+        msg: "/etc/nginx/vhosts/{{ vhost }}.conf was not created"
+      when: not nginx_vhost.stat.exists

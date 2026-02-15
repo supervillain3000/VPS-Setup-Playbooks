@@ -1,0 +1,24 @@
+---
+- name: Converge
+  hosts: all
+  vars:
+    vhost: example.kz
+    certbot_domain: example.kz
+  pre_tasks:
+    - name: Ensure webroot exists for certbot webroot flow
+      ansible.builtin.file:
+        path: /var/www/{{ certbot_domain }}
+        state: directory
+        mode: "0755"
+
+    - name: Stub certbot binary for offline Molecule testing
+      ansible.builtin.copy:
+        dest: /usr/local/bin/certbot
+        mode: "0755"
+        content: |
+          #!/bin/sh
+          echo "Congratulations! Your certificate and chain have been saved."
+  tasks:
+    - name: Certbot Role
+      ansible.builtin.include_role:
+        name: certbot

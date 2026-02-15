@@ -1,2 +1,4 @@
 ---
 httpd_domain: example.kz
+httpd_manage_firewall: true
+httpd_skip_firewall_in_containers: true

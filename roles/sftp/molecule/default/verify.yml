@@ -1,11 +1,22 @@
 ---
 - name: Verify
   hosts: all
+  vars:
+    short_vhost: example
+    sftp_site_username: example
   tasks:
-    - name: Check if chronyd is installed
-      ansible.builtin.package:
-        name: chronyd
-        state: present
-      check_mode: true
-      register: install
-      failed_when: (install is changed) or (install is failed)
+    - name: Check SFTP User Exists
+      ansible.builtin.command: "id -u {{ sftp_site_username }}"
+      register: sftp_user_check
+      changed_when: false
+      failed_when: sftp_user_check.rc != 0
+
+    - name: Check SFTP Credentials File Exists
+      ansible.builtin.stat:
+        path: /root/01-sftp_password
+      register: sftp_password_file
+
+    - name: Fail When SFTP Credentials File Is Missing
+      ansible.builtin.fail:
+        msg: "/root/01-sftp_password was not created"
+      when: not sftp_password_file.stat.exists

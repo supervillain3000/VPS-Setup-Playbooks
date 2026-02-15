@@ -72,4 +72,4 @@ provisioner:
     ANSIBLE_LOCAL_TEMP: /tmp/ansible
     ANSIBLE_REMOTE_TEMP: /tmp/ansible
 verifier:
-  name: testinfra
+  name: ansible

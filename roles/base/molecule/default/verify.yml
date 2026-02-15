@@ -2,10 +2,18 @@
 - name: Verify
   hosts: all
   tasks:
-    - name: Check if chronyd is installed
+    - name: Check Chrony Package Is Installed
       ansible.builtin.package:
-        name: chronyd
+        name: chrony
         state: present
       check_mode: true
-      register: install
-      failed_when: (install is changed) or (install is failed)
+      register: chrony_install
+      failed_when: (chrony_install is changed) or (chrony_install is failed)
+
+    - name: Check Rsyslog Package Is Installed
+      ansible.builtin.package:
+        name: rsyslog
+        state: present
+      check_mode: true
+      register: rsyslog_install
+      failed_when: (rsyslog_install is changed) or (rsyslog_install is failed)

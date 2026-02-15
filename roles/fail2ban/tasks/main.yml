@@ -1,0 +1,52 @@
+---
+- name: Install Fail2ban And Dependencies On Debian/Ubuntu
+  ansible.builtin.apt:
+    name: "{{ fail2ban_debian_packages }}"
+    state: present
+  when: ansible_facts['os_family'] | lower == 'debian'
+
+- name: Install Fail2ban And Dependencies On RedHat
+  ansible.builtin.dnf:
+    name: "{{ fail2ban_redhat_packages }}"
+    state: present
+  when: ansible_facts['os_family'] | lower == 'redhat'
+
+- name: Create Jail.local With Default SSH Rules
+  ansible.builtin.blockinfile:
+    create: true
+    insertafter: EOF
+    path: /etc/fail2ban/jail.local
+    marker: ''
+    block: |
+      [DEFAULT]
+      ignoreip = 127.0.0.1/8
+      bantime  = 1800
+      findtime  = 600
+      maxretry = 5
+
+      [sshd]
+      enabled = true
+  notify: Restart fail2ban
+
+- name: Add Postfix And Dovecot Jails For Mailserver Role
+  ansible.builtin.blockinfile:
+    create: true
+    insertafter: EOF
+    path: /etc/fail2ban/jail.local
+    marker: ''
+    block: |
+      [dovecot]
+      enabled = true
+      action = iptables-multiport[name="email", port="imap,imap3,imaps,pop3,pop3s,smtp,smtps,submission"]
+
+      [postfix-sasl]
+      enabled = true
+      action = iptables-multiport[name="email", port="imap,imap3,imaps,pop3,pop3s,smtp,smtps,submission"]
+  notify: Restart fail2ban
+  tags: mailserver
+
+- name: Ensure Fail2ban Service Is Enabled And Started
+  ansible.builtin.service:
+    name: fail2ban
+    enabled: true
+    state: started

@@ -1,2 +1,7 @@
 ---
 sftp_site_username: "{{ short_vhost }}"
+sftp_home_dir: /var/www
+sftp_manage_firewall: true
+sftp_skip_firewall_in_containers: true
+sftp_debian_group: www-data
+sftp_fallback_group: root

@@ -1,0 +1,7 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: Fail2ban Role
+      ansible.builtin.include_role:
+        name: fail2ban

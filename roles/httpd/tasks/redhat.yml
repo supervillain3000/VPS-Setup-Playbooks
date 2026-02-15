@@ -1,8 +1,20 @@
 ---
-- name: Install httpd
+- name: Install Httpd And Firewall Packages
   ansible.builtin.dnf:
-    name: httpd
+    name:
+      - httpd
+      - mod_ssl
+      - firewalld
     state: present
+
+- name: Ensure Firewalld Is Enabled And Started
+  ansible.builtin.service:
+    name: firewalld
+    state: started
+    enabled: true
+  when:
+    - httpd_manage_firewall
+    - not (httpd_skip_firewall_in_containers and ansible_virtualization_type in ['docker', 'containerd', 'podman', 'lxc'])
 
 - name: Enable http(s) on firewall-cmd
   ansible.posix.firewalld:
@@ -14,6 +26,9 @@
   loop:
     - http
     - https
+  when:
+    - httpd_manage_firewall
+    - not (httpd_skip_firewall_in_containers and ansible_virtualization_type in ['docker', 'containerd', 'podman', 'lxc'])
 
 - name: Check if nginx is already installed
   ansible.builtin.stat:
@@ -51,10 +66,4 @@
     owner: apache
     group: apache
     mode: "0755"
-  notify: Restart httpd
-
-- name: Install mod_ssl for httpd
-  ansible.builtin.dnf:
-    name: mod_ssl
-    state: present
   notify: Restart httpd

@@ -1,11 +1,24 @@
 ---
 - name: Verify
   hosts: all
+  vars:
+    vhost: example.kz
+    django_domain: example.kz
   tasks:
-    - name: Check if chronyd is installed
+    - name: Check Django Admin Exists In Virtualenv
+      ansible.builtin.stat:
+        path: /var/www/django/{{ django_domain }}/bin/django-admin
+      register: django_admin_bin
+
+    - name: Fail When Django Admin Is Missing
+      ansible.builtin.fail:
+        msg: "Django virtualenv was not created"
+      when: not django_admin_bin.stat.exists
+
+    - name: Check UWSGI Package Is Installed
       ansible.builtin.package:
-        name: chronyd
+        name: uwsgi
         state: present
       check_mode: true
-      register: install
-      failed_when: (install is changed) or (install is failed)
+      register: uwsgi_install
+      failed_when: (uwsgi_install is changed) or (uwsgi_install is failed)

@@ -7,7 +7,7 @@
 - AlmaLinux 8, 9
 
 #### Playbooks:
-[base](./roles/base/README.md), [fail2ban](./roles/fail2ban/README.md) and [sftp](./roles/sftp/README.md) roles are included in every playbook.
+`base`, `fail2ban`, and `sftp` roles are expected to be part of baseline VM setup.
 
 - certbot: Installs SSL certificate from Let's Encrypt.
 - django: Installs Django with Postgresql and Nginx web-server.
@@ -17,20 +17,26 @@
 - mean: Installs MEAN stack: MongoDB, Express.js, Angular, NodeJS
 - wordpress: Installs LAMP stack with NGINX as a reverse proxy and deploys latest WordPress engine.
 
-#### Roles: 
+#### Roles:
 
-- [base](./roles/base/README.md)
-- [certbot](./roles/certbot/README.md)
-- [django](./roles/django/README.md)
-- [docker](./roles/docker/README.md)
-- [fail2ban](./roles/fail2ban/README.md)
-- [httpd](./roles/httpd/README.md)
-- [mariadb](./roles/mariadb/README.md)
-- [mongodb](./roles/mongodb/README.md)
-- [nginx](./roles/nginx/README.md)
-- [nodejs](./roles/nodejs/README.md)
-- [php](./roles/php/README.md)
-- [phpmyadmin](./roles/phpmyadmin/README.md)
-- [postgresql](./roles/postgresql/README.md)
-- [sftp](./roles/sftp/README.md)
-- [wordpress](./roles/wordpress/README.md)
+- base
+- certbot
+- django
+- docker
+- fail2ban
+- httpd
+- mariadb
+- mongodb
+- nginx
+- nodejs
+- php
+- php-fpm
+- phpmyadmin
+- postgresql
+- sftp
+- wordpress
+
+## Development and testing
+- Contribution workflow, Molecule usage, and role/playbook guidelines are in [`CONTRIBUTING.md`](./CONTRIBUTING.md).
+- Run Molecule for all roles with scenarios:
+  - `./extentions/molecule/test-all-roles.sh`
