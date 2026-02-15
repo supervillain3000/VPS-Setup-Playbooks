@@ -1,41 +1,66 @@
 ---
-- name: Enable SSH service in firewalld
+- name: Check If There Is Apache
+  ansible.builtin.stat:
+    path: /etc/httpd
+  register: _sftp_httpd_status
+
+- name: Check If There Is Nginx
+  ansible.builtin.stat:
+    path: /etc/nginx
+  register: _sftp_nginx_status
+
+- name: Set Default Sftp Group
+  ansible.builtin.set_fact:
+    sftp_site_group: "{{ sftp_fallback_group }}"
+
+- name: Use Nginx Group For Sftp User When Available
+  ansible.builtin.set_fact:
+    sftp_site_group: nginx
+  when: _sftp_nginx_status.stat.exists
+
+- name: Use Apache Group For Sftp User When Available
+  ansible.builtin.set_fact:
+    sftp_site_group: apache
+  when: not _sftp_nginx_status.stat.exists and _sftp_httpd_status.stat.exists
+
+- name: Install Firewalld Package
+  ansible.builtin.dnf:
+    name: firewalld
+    state: present
+  when:
+    - sftp_manage_firewall
+    - not (sftp_skip_firewall_in_containers and ansible_virtualization_type in ['docker', 'containerd', 'podman', 'lxc'])
+
+- name: Ensure Firewalld Is Enabled And Started
+  ansible.builtin.service:
+    name: firewalld
+    state: started
+    enabled: true
+  when:
+    - sftp_manage_firewall
+    - not (sftp_skip_firewall_in_containers and ansible_virtualization_type in ['docker', 'containerd', 'podman', 'lxc'])
+
+- name: Enable Ssh Service In Firewalld
   ansible.posix.firewalld:
     service: ssh
     permanent: true
     state: enabled
+    immediate: true
+    zone: public
+  when:
+    - sftp_manage_firewall
+    - not (sftp_skip_firewall_in_containers and ansible_virtualization_type in ['docker', 'containerd', 'podman', 'lxc'])
 
-- name: Check if there is apache
-  ansible.builtin.stat:
-    path: /etc/httpd
-  register: _phpmyadmin_apache2_status
-
-- name: Check if there is nginx
-  ansible.builtin.stat:
-    path: /etc/nginx
-  register: _phpmyadmin_nginx_status
-
-- name: Create site user for nginx
+- name: Create Site User
   ansible.builtin.user:
     name: "{{ sftp_site_username }}"
     password: "{{ lookup('password', '/root/01-sftp_password chars=ascii_letters,digits,hexdigits length=15') | password_hash('sha512') }}"
     shell: /sbin/nologin
-    home: /var/www
+    home: "{{ sftp_home_dir }}"
     groups:
-      - nginx
-  when: _phpmyadmin_nginx_status.stat.exists
+      - "{{ sftp_site_group }}"
 
-- name: Create site user for httpd
-  ansible.builtin.user:
-    name: "{{ sftp_site_username }}"
-    password: "{{ lookup('password', '/root/01-sftp_password chars=ascii_letters,digits,hexdigits length=15') | password_hash('sha512') }}"
-    shell: /sbin/nologin
-    home: /var/www
-    groups:
-      - apache
-  when: not _phpmyadmin_nginx_status.stat.exists and _phpmyadmin_apache2_status.stat.exists
-
-- name: Insert site user name into user password file
+- name: Insert Site User Name Into User Password File
   ansible.builtin.blockinfile:
     dest: /root/01-sftp_password
     insertbefore: BOF
@@ -45,10 +70,10 @@
       ip-адрес: {{ ansible_default_ipv4.address }}
       Тип подключений: SFTP
       Порт: 22
-      Папка сайта: /var/www/{{ vhost }}
+      Папка сайта: {{ sftp_home_dir }}/{{ vhost }}
       Пользователь: {{ sftp_site_username }}
 
-- name: Add user to sshd config
+- name: Add User To Sshd Config
   ansible.builtin.blockinfile:
     marker: ''
     path: /etc/ssh/sshd_config
@@ -62,4 +87,11 @@
       AllowAgentForwarding no
       AllowTcpForwarding no
       X11Forwarding no
+  notify: Restart sshd
+
+- name: Change Sftp Subsystem
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^Subsystem'
+    line: 'Subsystem       sftp    internal-sftp'
   notify: Restart sshd

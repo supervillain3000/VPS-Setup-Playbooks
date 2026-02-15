@@ -2,10 +2,20 @@
 - name: Verify
   hosts: all
   tasks:
-    - name: Check if chronyd is installed
+    - name: Check MongoDB Package Is Installed
       ansible.builtin.package:
-        name: chronyd
+        name: mongodb-org
         state: present
       check_mode: true
-      register: install
-      failed_when: (install is changed) or (install is failed)
+      register: mongodb_install
+      failed_when: (mongodb_install is changed) or (mongodb_install is failed)
+
+    - name: Check MongoDB Admin Password File Exists
+      ansible.builtin.stat:
+        path: /root/04-mongo_admin_password
+      register: mongodb_admin_password_file
+
+    - name: Fail When MongoDB Admin Password File Is Missing
+      ansible.builtin.fail:
+        msg: "/root/04-mongo_admin_password was not created"
+      when: not mongodb_admin_password_file.stat.exists

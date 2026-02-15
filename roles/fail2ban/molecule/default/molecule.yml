@@ -14,39 +14,39 @@ platforms:
       - /sys/fs/cgroup:/sys/fs/cgroup:rw
     pre_build_image: false
 
-  - <<: *default_platform 
+  - <<: *default_platform
     name: almalinux-9
     image: almalinux:9
 
-  - <<: *default_platform 
+  - <<: *default_platform
     name: rockylinux-8
     image: rockylinux:8
 
-  - <<: *default_platform 
+  - <<: *default_platform
     name: rockylinux-9
     image: rockylinux:9.0
 
-  - <<: *default_platform 
+  - <<: *default_platform
     name: debian-bullseye
     image: debian:bullseye-slim
     command: /sbin/init
 
-  - <<: *default_platform 
+  - <<: *default_platform
     name: debian-bookworm
     image: debian:bookworm-slim
     command: /sbin/init
 
-  - <<: *default_platform 
+  - <<: *default_platform
     name: ubuntu-focal
     image: ubuntu:focal
     command: /sbin/init
 
-  - <<: *default_platform 
+  - <<: *default_platform
     name: ubuntu-jammy
     image: ubuntu:jammy
     command: /sbin/init
 
-  - <<: *default_platform 
+  - <<: *default_platform
     name: ubuntu-noble
     image: ubuntu:noble
     command: /sbin/init

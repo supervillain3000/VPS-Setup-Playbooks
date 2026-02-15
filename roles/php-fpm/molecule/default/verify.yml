@@ -1,0 +1,23 @@
+---
+- name: Verify
+  hosts: all
+  vars:
+    _php_fpm_service_name: "{{ 'php8.3-fpm' if ansible_facts['os_family'] | lower == 'debian' else 'php83-php-fpm' }}"
+  tasks:
+    - name: Check PHP-FPM Package Is Installed
+      ansible.builtin.package:
+        name: "{{ _php_fpm_service_name }}"
+        state: present
+      check_mode: true
+      register: php_fpm_install
+      failed_when: (php_fpm_install is changed) or (php_fpm_install is failed)
+
+    - name: Check PHP-FPM Vhost Exists
+      ansible.builtin.stat:
+        path: /etc/nginx/vhosts/example.kz.conf
+      register: php_fpm_vhost
+
+    - name: Fail When PHP-FPM Vhost Is Missing
+      ansible.builtin.fail:
+        msg: "/etc/nginx/vhosts/example.kz.conf was not created"
+      when: not php_fpm_vhost.stat.exists

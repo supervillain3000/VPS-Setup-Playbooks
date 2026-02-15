@@ -2,10 +2,18 @@
 - name: Verify
   hosts: all
   tasks:
-    - name: Check if chronyd is installed
-      ansible.builtin.package:
-        name: chronyd
-        state: present
-      check_mode: true
-      register: install
-      failed_when: (install is changed) or (install is failed)
+    - name: Check PHP Binary Is Available
+      ansible.builtin.command: php -v
+      register: php_version
+      changed_when: false
+      failed_when: php_version.rc != 0
+
+    - name: Check PHP Index File Exists
+      ansible.builtin.stat:
+        path: /var/www/example.kz/index.php
+      register: php_index_file
+
+    - name: Fail When PHP Index File Is Missing
+      ansible.builtin.fail:
+        msg: "PHP role did not create test index.php"
+      when: not php_index_file.stat.exists

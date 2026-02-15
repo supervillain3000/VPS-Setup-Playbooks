@@ -2,10 +2,20 @@
 - name: Verify
   hosts: all
   tasks:
-    - name: Check if chronyd is installed
+    - name: Check MariaDB Package Is Installed
       ansible.builtin.package:
-        name: chronyd
+        name: mariadb-server
         state: present
       check_mode: true
-      register: install
-      failed_when: (install is changed) or (install is failed)
+      register: mariadb_install
+      failed_when: (mariadb_install is changed) or (mariadb_install is failed)
+
+    - name: Check Root MySQL Config Exists
+      ansible.builtin.stat:
+        path: /root/.my.cnf
+      register: mariadb_root_cnf
+
+    - name: Fail When Root MySQL Config Is Missing
+      ansible.builtin.fail:
+        msg: "/root/.my.cnf was not created"
+      when: not mariadb_root_cnf.stat.exists

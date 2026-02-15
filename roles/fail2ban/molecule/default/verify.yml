@@ -1,0 +1,19 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Check Fail2ban Package Is Installed
+      ansible.builtin.package:
+        name: fail2ban
+        state: present
+      check_mode: true
+      register: fail2ban_install
+      failed_when: (fail2ban_install is changed) or (fail2ban_install is failed)
+
+    - name: Check Fail2ban Service Is Running
+      ansible.builtin.service_facts:
+
+    - name: Assert Fail2ban Service Exists
+      ansible.builtin.assert:
+        that:
+          - "'fail2ban.service' in ansible_facts.services"

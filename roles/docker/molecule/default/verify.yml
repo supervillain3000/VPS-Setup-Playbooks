@@ -1,0 +1,21 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Check Docker Package Is Installed
+      ansible.builtin.package:
+        name: docker-ce
+        state: present
+      check_mode: true
+      register: docker_install
+      failed_when: (docker_install is changed) or (docker_install is failed)
+
+    - name: Check Docker Socket Exists
+      ansible.builtin.stat:
+        path: /var/run/docker.sock
+      register: docker_socket
+
+    - name: Fail When Docker Socket Is Missing
+      ansible.builtin.fail:
+        msg: "/var/run/docker.sock was not created"
+      when: not docker_socket.stat.exists

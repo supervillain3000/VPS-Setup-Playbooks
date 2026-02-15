@@ -66,4 +66,4 @@ provisioner:
       rockylinux-8:
         ansible_python_interpreter: /usr/libexec/platform-python
 verifier:
-  name: testinfra
+  name: ansible

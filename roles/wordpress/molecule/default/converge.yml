@@ -1,7 +1,22 @@
 ---
 - name: Converge
   hosts: all
+  vars:
+    vhost: example.kz
+    short_vhost: example
   tasks:
-    - name: Base Role
+    - name: Httpd Role
       ansible.builtin.include_role:
-        name: base
+        name: httpd
+
+    - name: PHP Role
+      ansible.builtin.include_role:
+        name: php
+
+    - name: MariaDB Role
+      ansible.builtin.include_role:
+        name: mariadb
+
+    - name: WordPress Role
+      ansible.builtin.include_role:
+        name: wordpress

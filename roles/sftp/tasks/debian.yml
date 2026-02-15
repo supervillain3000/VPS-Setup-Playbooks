@@ -1,20 +1,32 @@
 ---
-- name: Enable ssh on ufw
+- name: Install Ufw Package
+  ansible.builtin.apt:
+    name: ufw
+    state: present
+    update_cache: true
+  when:
+    - sftp_manage_firewall
+    - not (sftp_skip_firewall_in_containers and ansible_virtualization_type in ['docker', 'containerd', 'podman', 'lxc'])
+
+- name: Enable Ssh On Ufw
   community.general.ufw:
     rule: allow
     port: ssh
     proto: tcp
+  when:
+    - sftp_manage_firewall
+    - not (sftp_skip_firewall_in_containers and ansible_virtualization_type in ['docker', 'containerd', 'podman', 'lxc'])
 
-- name: Create site user
+- name: Create Site User
   ansible.builtin.user:
     name: "{{ sftp_site_username }}"
     groups:
-      - www-data
+      - "{{ sftp_debian_group }}"
     password: "{{ lookup('password', '/root/01-sftp_password chars=ascii_letters,digits,hexdigits length=15') | password_hash('sha512') }}"
     shell: /usr/sbin/nologin
-    home: /var/www/
+    home: "{{ sftp_home_dir }}"
 
-- name: Insert site user name into user password file
+- name: Insert Site User Name Into User Password File
   ansible.builtin.blockinfile:
     dest: /root/01-sftp_password
     insertbefore: BOF
@@ -23,10 +35,10 @@
       ip-адрес: {{ ansible_default_ipv4.address }}
       Тип подключений: SFTP
       Порт: 22
-      Папка сайта: /var/www/{{ vhost }}
+      Папка сайта: {{ sftp_home_dir }}/{{ vhost }}
       Пользователь: {{ sftp_site_username }}
 
-- name: Add sshd user part
+- name: Add Sshd User Part
   ansible.builtin.blockinfile:
     marker: ''
     path: /etc/ssh/sshd_config
@@ -41,7 +53,7 @@
       X11Forwarding no
   notify: Restart sshd
 
-- name: Change ftp-subsystem
+- name: Change Sftp Subsystem
   ansible.builtin.lineinfile:
     path: /etc/ssh/sshd_config
     regexp: '^Subsystem'

@@ -2,10 +2,14 @@
 - name: Verify
   hosts: all
   tasks:
-    - name: Check if chronyd is installed
-      ansible.builtin.package:
-        name: chronyd
-        state: present
-      check_mode: true
-      register: install
-      failed_when: (install is changed) or (install is failed)
+    - name: Check NodeJS Binary Is Available
+      ansible.builtin.command: node --version
+      register: node_version
+      changed_when: false
+      failed_when: node_version.rc != 0
+
+    - name: Check NPM Binary Is Available
+      ansible.builtin.command: npm --version
+      register: npm_version
+      changed_when: false
+      failed_when: npm_version.rc != 0

@@ -1,11 +1,21 @@
 ---
 - name: Verify
   hosts: all
+  vars:
+    _httpd_service_name: "{{ 'apache2' if ansible_facts['os_family'] | lower == 'debian' else 'httpd' }}"
   tasks:
-    - name: Check if chronyd is installed
+    - name: Check Httpd Package Is Installed
       ansible.builtin.package:
-        name: chronyd
+        name: "{{ _httpd_service_name }}"
         state: present
       check_mode: true
-      register: install
-      failed_when: (install is changed) or (install is failed)
+      register: httpd_install
+      failed_when: (httpd_install is changed) or (httpd_install is failed)
+
+    - name: Gather Service Facts
+      ansible.builtin.service_facts:
+
+    - name: Assert Webserver Service Exists
+      ansible.builtin.assert:
+        that:
+          - "'{{ _httpd_service_name }}.service' in ansible_facts.services"

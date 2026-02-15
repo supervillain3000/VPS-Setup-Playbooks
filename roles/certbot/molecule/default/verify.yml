@@ -1,0 +1,21 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Check certbot package is installed
+      ansible.builtin.package:
+        name: certbot
+        state: present
+      check_mode: true
+      register: certbot_install
+      failed_when: (certbot_install is changed) or (certbot_install is failed)
+
+    - name: Check certbot installation log file is created
+      ansible.builtin.stat:
+        path: /root/cert_install.log
+      register: certbot_install_log
+
+    - name: Fail when certbot log is missing
+      ansible.builtin.fail:
+        msg: "/root/cert_install.log was not created"
+      when: not certbot_install_log.stat.exists
