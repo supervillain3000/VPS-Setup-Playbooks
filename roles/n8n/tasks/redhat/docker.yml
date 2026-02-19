@@ -1,0 +1,21 @@
+---
+- name: Add Docker CE repository
+  ansible.builtin.get_url:
+    url: "{{ docker_repo_url }}"
+    dest: "{{ docker_repo_file }}"
+    mode: "0644"
+  become: true  
+
+- name: Install Docker packages 
+  ansible.builtin.package:
+    name: "{{ docker_pkgs }}"
+    state: present
+  become: true
+
+- name: Enable and start Docker
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: yes
+  become: true
+

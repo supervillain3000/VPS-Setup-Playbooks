@@ -1,0 +1,6 @@
+---
+- name: Install base packages
+  ansible.builtin.package:
+    name: "{{ n8n_pkgs_base }}"
+    state: present
+  become: true

@@ -1,0 +1,23 @@
+---
+n8n_pkgs_base:
+  - ca-certificates
+  - curl
+  - gnupg2
+
+nginx_pkg: nginx
+
+firewall_pkg: firewalld
+
+docker_repo_helper_pkg: dnf-plugins-core
+
+docker_repo_file: /etc/yum.repos.d/docker-ce.repo
+docker_repo_url: https://download.docker.com/linux/centos/docker-ce.repo
+
+docker_pkgs:
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+  - docker-compose-plugin
+
+web_user: nginx
+web_group: nginx

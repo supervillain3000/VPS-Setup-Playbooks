@@ -1,0 +1,52 @@
+---
+- name: Install nginx (RedHat)
+  ansible.builtin.package:
+    name: "{{ nginx_pkg }}"
+    state: present
+  become: true
+
+- name: Enable and start nginx
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: yes
+  become: true
+
+- name: Ensure vhosts dir exists
+  ansible.builtin.file:
+    path: /etc/nginx/vhosts
+    state: directory
+    mode: "0755"
+  become: true
+
+- name: Ensure nginx includes /etc/nginx/vhosts/*.conf
+  ansible.builtin.lineinfile:
+    path: /etc/nginx/nginx.conf
+    insertafter: 'http\s*\{'
+    line: '    include /etc/nginx/vhosts/*.conf;'
+    state: present
+  notify: reload nginx
+  become: true
+
+- name: Deploy nginx vhost for n8n
+  ansible.builtin.template:
+    src: nginx_n8n.conf.j2
+    dest: "/etc/nginx/vhosts/{{ vhost }}.conf"
+    mode: "0644"
+  notify: reload nginx
+  become: true
+
+- name: Create ACME webroot for this vhost
+  ansible.builtin.file:
+    path: "/var/www/{{ vhost }}/.well-known/acme-challenge"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+
+- name: Validate nginx config
+  ansible.builtin.command: nginx -t
+  changed_when: false
+  become: true
+

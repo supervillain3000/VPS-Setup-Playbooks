@@ -1,0 +1,54 @@
+---
+- name: Create n8n directory
+  ansible.builtin.file:
+    path: "{{ n8n_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Generate DB password
+  ansible.builtin.set_fact:
+    n8n_db_password_effective: "{{ lookup('password', '/dev/null length=32 chars=ascii_letters,digits') }}"
+  when: n8n_db_password | default('') | length == 0
+
+- name: Use provided DB password
+  ansible.builtin.set_fact:
+    n8n_db_password_effective: "{{ n8n_db_password }}"
+  when: n8n_db_password | default('') | length > 0
+
+- name: Generate encryption key 
+  ansible.builtin.set_fact:
+    n8n_encryption_key_effective: "{{ lookup('password', '/dev/null length=48 chars=ascii_letters,digits') }}"
+  when: n8n_encryption_key | default('') | length == 0
+
+- name: Use provided encryption key
+  ansible.builtin.set_fact:
+    n8n_encryption_key_effective: "{{ n8n_encryption_key }}"
+  when: n8n_encryption_key | default('') | length > 0
+
+- name: Write n8n .env
+  ansible.builtin.template:
+    src: n8n.env.j2
+    dest: "{{ n8n_dir }}/.env"
+    mode: "0600"
+
+- name: Write docker-compose.yml
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ n8n_dir }}/docker-compose.yml"
+    mode: "0644"
+
+- name: Start n8n stack
+  ansible.builtin.shell: docker compose up -d
+  args:
+    chdir: "{{ n8n_dir }}"
+
+- name: Write passwords to /root for PS recipes collector
+  ansible.builtin.copy:
+    dest: "/root/{{ item.name }}"
+    content: "{{ item.value }}\n"
+    owner: root
+    group: root
+    mode: "0600"
+  loop:
+    - { name: "01-n8n_db_password", value: "{{ n8n_db_password_effective }}" }
+    - { name: "02-n8n_encryption_key", value: "{{ n8n_encryption_key_effective }}" }
