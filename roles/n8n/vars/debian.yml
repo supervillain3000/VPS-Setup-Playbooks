@@ -1,0 +1,20 @@
+---
+n8n_pkgs_base:
+  - ca-certificates
+  - curl
+  - gnupg
+  - lsb-release
+  - apt-transport-https
+
+nginx_pkg: nginx
+ufw_pkg: ufw
+
+docker_repo_codename: noble
+docker_pkgs:
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+  - docker-compose-plugin
+
+web_user: www-data
+web_group: www-data

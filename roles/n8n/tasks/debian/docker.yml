@@ -1,0 +1,29 @@
+---
+- name: Add Docker GPG key
+  ansible.builtin.shell: |
+    set -e
+    install -m 0755 -d /etc/apt/keyrings
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
+      | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+    chmod a+r /etc/apt/keyrings/docker.gpg
+  args:
+    creates: /etc/apt/keyrings/docker.gpg
+
+- name: Add Docker repository
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu {{ docker_repo_codename }} stable"
+    state: present
+    filename: docker
+
+- name: Install Docker Engine + compose plugin
+  ansible.builtin.apt:
+    name: "{{ docker_pkgs }}"
+    state: present
+    update_cache: yes
+
+- name: Enable and start Docker
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: yes
+

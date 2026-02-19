@@ -1,0 +1,38 @@
+---
+- name: Load vars (Debian)
+  ansible.builtin.include_vars: "{{ role_path }}/vars/debian.yml"
+  when: ansible_facts.os_family == "Debian"
+
+- name: Load vars (RedHat)
+  ansible.builtin.include_vars: "{{ role_path }}/vars/redhat.yml"
+  when: ansible_facts.os_family == "RedHat"
+
+- import_tasks: debian/install.yml
+  when: ansible_facts.os_family == "Debian"
+
+- import_tasks: debian/docker.yml
+  when: ansible_facts.os_family == "Debian"
+
+- import_tasks: redhat/install.yml
+  when: ansible_facts.os_family == "RedHat"
+
+- import_tasks: redhat/docker.yml
+  when: ansible_facts.os_family == "RedHat"
+
+- import_tasks: compose.yml
+
+- import_tasks: debian/nginx.yml
+  when: ansible_facts.os_family == "Debian"
+
+- import_tasks: debian/firewall.yml
+  when: ansible_facts.os_family == "Debian"
+
+- import_tasks: redhat/nginx.yml
+  when: ansible_facts.os_family == "RedHat"
+
+- import_tasks: redhat/firewall.yml
+  when: ansible_facts.os_family == "RedHat"
+
+- import_tasks: redhat/selinux.yml
+  when: ansible_facts.os_family == "RedHat"
+
