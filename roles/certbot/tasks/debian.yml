@@ -33,7 +33,7 @@
     path: /etc/nginx/vhosts/{{ certbot_domain }}.conf
     state: absent
     regexp: ":80;$"
-  when: cert_issue_result.stdout.find("Congratulations") != -1 and _certbot_ngnx_status.stat.exists
+  when: cert_issue_result.rc == 0 and _certbot_ngnx_status.stat.exists
 
 - name: Add cert and http listen to webserver config
   ansible.builtin.blockinfile:
@@ -48,7 +48,7 @@
 
       ssl_certificate /etc/letsencrypt/live/{{ certbot_domain }}/fullchain.pem;
       ssl_certificate_key /etc/letsencrypt/live/{{ certbot_domain }}/privkey.pem;
-  when: cert_issue_result.stdout.find("Congratulations") != -1 and _certbot_ngnx_status.stat.exists
+  when: cert_issue_result.rc == 0 and _certbot_ngnx_status.stat.exists
   notify: Restart nginx
 
 - name: Add http to https redirect block to webserver config
@@ -66,7 +66,7 @@
 
       return 301 https://$host$request_uri;
       }
-  when: cert_issue_result.stdout.find("Congratulations") != -1 and _certbot_ngnx_status.stat.exists
+  when: cert_issue_result.rc == 0 and _certbot_ngnx_status.stat.exists
   notify: Restart nginx
 
 - name: Change proxy pass schema in nginx vhost conf
@@ -74,7 +74,7 @@
     path: /etc/nginx/vhosts/{{ certbot_domain }}.conf
     regexp: 'proxy_pass http://127.0.0.1:8080;'
     replace: 'proxy_pass https://127.0.0.1:8081;'
-  when: cert_issue_result.stdout.find("Congratulations") != -1 and _certbot_apache2_status.stat.exists and _certbot_ngnx_status.stat.exists
+  when: cert_issue_result.rc == 0 and _certbot_apache2_status.stat.exists and _certbot_ngnx_status.stat.exists
   notify: Restart nginx
 
 - name: Add https config block for apache
@@ -107,7 +107,7 @@
 
       </VirtualHost>
       </IfModule>
-  when: cert_issue_result.stdout.find("Congratulations") != -1 and _certbot_apache2_status.stat.exists and _certbot_ngnx_status.stat.exists
+  when: cert_issue_result.rc == 0 and _certbot_apache2_status.stat.exists and _certbot_ngnx_status.stat.exists
   notify:
     - Restart nginx
     - Restart apache2
@@ -142,7 +142,7 @@
 
       </VirtualHost>
       </IfModule>
-  when: cert_issue_result.stdout.find("Congratulations") != -1 and _certbot_apache2_status.stat.exists and not _certbot_ngnx_status.stat.exists
+  when: cert_issue_result.rc == 0 and _certbot_apache2_status.stat.exists and not _certbot_ngnx_status.stat.exists
   notify: Restart apache2
 
 - name: Add 8081 port to apache
@@ -150,7 +150,7 @@
     path: /etc/apache2/apache2.conf
     insertafter: '^Listen'
     line: 'Listen 127.0.0.1:8081'
-  when: cert_issue_result.stdout.find("Congratulations") != -1 and _certbot_apache2_status.stat.exists and _certbot_ngnx_status.stat.exists
+  when: cert_issue_result.rc == 0 and _certbot_apache2_status.stat.exists and _certbot_ngnx_status.stat.exists
   notify: Restart apache2
 
 - name: Add 443 port to apache
@@ -158,12 +158,12 @@
     path: /etc/apache2/apache2.conf
     insertafter: '^Listen'
     line: 'Listen {{ ansible_default_ipv4.address }}:443'
-  when: cert_issue_result.stdout.find("Congratulations") != -1 and _certbot_apache2_status.stat.exists and not _certbot_ngnx_status.stat.exists
+  when: cert_issue_result.rc == 0 and _certbot_apache2_status.stat.exists and not _certbot_ngnx_status.stat.exists
   notify: Restart apache2
 
 - name: Enable apache2 mod_ssl
   community.general.apache2_module:
     state: present
     name: ssl
-  when: cert_issue_result.stdout.find("Congratulations") != -1 and _certbot_apache2_status.stat.exists
+  when: cert_issue_result.rc == 0 and _certbot_apache2_status.stat.exists
   notify: Restart apache2
