@@ -23,6 +23,8 @@
       --agree-tos \
       -m admin@"{{ certbot_domain }}" \
     2>&1 | tee /root/cert_install.log
+  args:
+    executable: /bin/bash  
   register: cert_issue_result
   changed_when: "'Congratulations' in cert_issue_result.stdout"
 
