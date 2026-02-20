@@ -9,6 +9,7 @@
   ansible.builtin.shell: |
     ufw allow OpenSSH
     ufw allow 80/tcp
+    ufw allow 443/tcp
   changed_when: false
 
 - name: Enable ufw
