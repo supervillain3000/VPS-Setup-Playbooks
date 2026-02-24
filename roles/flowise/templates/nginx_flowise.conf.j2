@@ -10,7 +10,6 @@ server {
   {% endif %}
   server_name {{ vhost }} www.{{ vhost }};
 
-  # Let’s Encrypt (certbot --webroot) validation
   location ^~ /.well-known/acme-challenge/ {
     root /var/www/{{ vhost }};
     default_type "text/plain";
