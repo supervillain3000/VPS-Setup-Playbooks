@@ -1,0 +1,22 @@
+---
+- name: Load OS vars
+  ansible.builtin.include_vars: "{{ ansible_os_family | lower }}.yml"
+
+- name: OS install tasks
+  ansible.builtin.include_tasks: "{{ ansible_os_family | lower }}/install.yml"
+
+- name: Docker tasks
+  ansible.builtin.include_tasks: "{{ ansible_os_family | lower }}/docker.yml"
+
+- name: Compose tasks
+  ansible.builtin.include_tasks: compose.yml
+
+- name: Nginx tasks
+  ansible.builtin.include_tasks: "{{ ansible_os_family | lower }}/nginx.yml"
+
+- name: Firewall tasks
+  ansible.builtin.include_tasks: "{{ ansible_os_family | lower }}/firewall.yml"
+
+- name: SELinux tasks (RedHat only)
+  ansible.builtin.include_tasks: redhat/selinux.yml
+  when: ansible_os_family == "RedHat"

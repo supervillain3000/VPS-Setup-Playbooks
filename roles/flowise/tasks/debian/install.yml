@@ -1,0 +1,7 @@
+---
+- name: Install base packages
+  ansible.builtin.apt:
+    name: "{{ flowise_pkgs_base }}"
+    state: present
+    update_cache: yes
+  become: true

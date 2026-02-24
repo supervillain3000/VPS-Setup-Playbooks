@@ -1,0 +1,25 @@
+---
+- name: Ensure install dir
+  ansible.builtin.file:
+    path: "{{ flowise_install_dir }}"
+    state: directory
+    mode: "0755"
+  become: true
+
+- name: Render env file
+  ansible.builtin.template:
+    src: flowise.env.j2
+    dest: "{{ flowise_install_dir }}/.env"
+    mode: "0600"
+  become: true
+
+- name: Render docker-compose.yml
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ flowise_install_dir }}/docker-compose.yml"
+    mode: "0644"
+  become: true
+
+- name: Docker compose up
+  ansible.builtin.command: docker compose -f "{{ flowise_install_dir }}/docker-compose.yml" up -d
+  become: true

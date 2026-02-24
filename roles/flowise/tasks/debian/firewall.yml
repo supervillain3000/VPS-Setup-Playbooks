@@ -1,0 +1,20 @@
+---
+- name: Install ufw
+  ansible.builtin.apt:
+    name: "{{ ufw_pkg }}"
+    state: present
+    update_cache: yes
+  become: true
+
+- name: Allow SSH and HTTP
+  ansible.builtin.shell: |
+    ufw allow OpenSSH
+    ufw allow 80/tcp
+    ufw allow 443/tcp
+  changed_when: false
+  become: true  
+
+- name: Enable ufw
+  ansible.builtin.command: ufw --force enable
+  changed_when: false
+  become: true

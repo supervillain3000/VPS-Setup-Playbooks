@@ -1,0 +1,4 @@
+---
+flowise_install_dir: /opt/flowise
+flowise_port: 3000
+flowise_image: "flowiseai/flowise:latest"

@@ -1,0 +1,19 @@
+flowise_pkgs_base:
+  - ca-certificates
+  - curl
+  - gnupg
+  - lsb-release
+  - apt-transport-https
+
+nginx_pkg: nginx
+nginx_user: www-data
+ufw_pkg: ufw
+
+docker_repo_codename: "{{ ansible_lsb.codename | default('noble') }}"
+docker_pkgs:
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+  - docker-compose-plugin
+
+docker_arch: "{{ 'amd64' if ansible_architecture == 'x86_64' else ('arm64' if ansible_architecture == 'aarch64' else ansible_architecture) }}"
