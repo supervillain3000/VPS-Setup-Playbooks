@@ -1,0 +1,6 @@
+---
+- name: Install base packages
+  ansible.builtin.package:
+    name: "{{ flowise_pkgs_base }}"
+    state: present
+  become: true

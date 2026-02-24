@@ -4,12 +4,10 @@ map $http_upgrade $connection_upgrade {
 }
 
 server {
-  listen {{ ansible_default_ipv4.address }}:80;
-  {% if ansible_default_ipv6 is defined and ansible_default_ipv6.address is defined %}
-  listen [{{ ansible_default_ipv6.address }}]:80;
-  {% endif %}
+  listen 80;
   server_name {{ vhost }} www.{{ vhost }};
 
+  # Let’s Encrypt (certbot --webroot) validation
   location ^~ /.well-known/acme-challenge/ {
     root /var/www/{{ vhost }};
     default_type "text/plain";

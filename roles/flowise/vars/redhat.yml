@@ -1,0 +1,16 @@
+---
+flowise_pkgs_base:
+  - ca-certificates
+  - curl
+
+nginx_pkg: nginx
+nginx_user: nginx
+firewall_pkg: firewalld
+
+docker_repo_url: "https://download.docker.com/linux/centos/docker-ce.repo"
+docker_repo_file: "/etc/yum.repos.d/docker-ce.repo"
+docker_pkgs:
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+  - docker-compose-plugin
