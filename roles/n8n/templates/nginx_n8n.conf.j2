@@ -17,7 +17,7 @@ server {
   }
 
   location / {
-    proxy_pass http://127.0.0.1:{{ flowise_port }};
+    proxy_pass http://127.0.0.1:{{ n8n_port }};
 
     proxy_set_header Host $host;
     proxy_set_header X-Forwarded-Host $host;

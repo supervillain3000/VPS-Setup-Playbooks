@@ -6,5 +6,7 @@ vhost: ""
 n8n_db_password: ""
 n8n_encryption_key: ""
 
+n8n_port: 5678
+
 n8n_public_proto: "http"
 n8n_public_port: 80
