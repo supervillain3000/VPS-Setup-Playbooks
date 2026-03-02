@@ -8,3 +8,10 @@
     - ansible_facts.selinux.status is defined
     - ansible_facts.selinux.status == "enabled"
 
+- name: Label ACME webroot for nginx (SELinux)
+  ansible.builtin.command: chcon -R -t httpd_sys_content_t /var/www/{{ vhost }}
+  changed_when: false
+  become: true
+  when:
+    - ansible_selinux is defined
+    - ansible_selinux.status == "enabled"
